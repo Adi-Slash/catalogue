@@ -1,0 +1,1 @@
+Use the software requirements (docs\02 specification.md) and the TODO list (docs\04 todo.md) to complete Phase 1 of the project in the source directory. Mark items as done in the TODO list only after verifying that the acceptance criteria have been met.

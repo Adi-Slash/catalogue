@@ -1,0 +1,1 @@
+For the functionality implemented so far, write E2E tests using playwright.

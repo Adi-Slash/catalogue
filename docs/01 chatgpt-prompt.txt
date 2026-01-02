@@ -1,0 +1,15 @@
+I need to write a software specification, and I need your help with writing it.
+
+I want to build an asset cataloging application used for logging household items for insurance purposes. It must be in the form of a web application using TypeScript and Vite/React and must run on mobile devices as well as on a pc.
+
+Here are some features I think I will need:
+
+Take a photograph of the item and store some metadata against each item. Metadata stored must be make, model, serial number, description, value.
+List all items in the catalogue.
+Select an item and display it together with the photograph and metadata.
+A value that totals all assets must also be displayed.
+It must be possible to edit and delete an individual asset from the catalogue.
+
+The output should be formatted as Markdown.
+
+Ask follow-up questions if something is unclear BEFORE you start generating.

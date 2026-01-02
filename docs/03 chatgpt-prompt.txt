@@ -1,0 +1,1 @@
+Take the attached specification and create a TODO list with checkboxes to help implement one feature at a time. Order the features from easy to hard in phases. For each item in the list, also define acceptance criteria.  The output should be in Markdown format. 

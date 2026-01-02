@@ -1,0 +1,28 @@
+{
+  "assets": [
+    {
+      "id": "98e28f08-5797-439c-b8c1-14dbd8ad418c",
+      "householdId": "house-1",
+      "make": "a",
+      "model": "a",
+      "serialNumber": "",
+      "description": "",
+      "value": 10,
+      "imageUrl": "",
+      "createdAt": "2026-01-02T15:08:01.637Z",
+      "updatedAt": "2026-01-02T15:08:01.637Z"
+    },
+    {
+      "id": "5b468bf3-8cb1-429a-a660-391906cc5b7d",
+      "householdId": "house-1",
+      "make": "b",
+      "model": "b",
+      "serialNumber": "",
+      "description": "",
+      "value": 25,
+      "imageUrl": "",
+      "createdAt": "2026-01-02T15:08:46.828Z",
+      "updatedAt": "2026-01-02T15:08:46.828Z"
+    }
+  ]
+}
