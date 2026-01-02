@@ -1,1 +1,1 @@
-add git to this project
+Push the changes to this remote repository @https://github.com/Adi-Slash/catalogue.git
