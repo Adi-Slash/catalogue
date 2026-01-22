@@ -56,6 +56,7 @@ app.post('/assets', (req, res) => {
     model: body.model || '',
     serialNumber: body.serialNumber || '',
     description: body.description || '',
+    category: body.category || '',
     value: body.value,
     imageUrl: body.imageUrl || '',
     createdAt: now,

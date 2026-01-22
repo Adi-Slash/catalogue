@@ -5,6 +5,7 @@ export interface Asset {
   model: string
   serialNumber?: string
   description?: string
+  category?: string
   value: number
   imageUrl?: string
   createdAt: string

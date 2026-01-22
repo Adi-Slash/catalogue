@@ -1,0 +1,1 @@
+The category is not being saved when adding a new asset, it is being saved when editing an asset. Can you fix the bug and ensure that when an asset category is set when adding an asset that the same category is displayed when subsequently editing that asset.

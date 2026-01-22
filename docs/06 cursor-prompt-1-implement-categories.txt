@@ -1,0 +1,1 @@
+A new field needs to be added when adding and editing an asset. The new field is named category. Category is selectred from a dropdown list that contains "Electrical", "Jewlry", "Furniture", "Instrument", "Tools", "Fitness".

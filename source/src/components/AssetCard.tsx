@@ -21,6 +21,7 @@ export default function AssetCard({ asset, onDelete, onClick }: Props) {
         <div>
           <div style={{ fontWeight: 600 }}>{asset.make} {asset.model}</div>
           <div style={{ color: '#666' }}>{asset.serialNumber || ''}</div>
+          <div style={{ color: '#666', fontSize: 12 }}>{asset.category || ''}</div>
         </div>
         <div style={{ textAlign: 'right' }}>
           <div style={{ fontWeight: 700 }}>${asset.value.toFixed(2)}</div>

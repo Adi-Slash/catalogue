@@ -1,16 +1,30 @@
 {
   "assets": [
     {
-      "id": "74d748a9-f5dd-4fd4-bbd5-a44fbb22afca",
+      "id": "994b5ded-6a2c-40ce-b763-7c5fc2defe15",
       "householdId": "house-1",
-      "make": "test1a",
-      "model": "test2a",
-      "serialNumber": "test3a",
-      "description": "test4a",
-      "value": 200,
-      "imageUrl": "http://localhost:4000/uploads/fa9d0629-9ab5-403e-aabf-4e4403e10409.jpg",
-      "createdAt": "2026-01-22T09:28:20.438Z",
-      "updatedAt": "2026-01-22T09:28:33.759Z"
+      "make": "t",
+      "model": "t",
+      "serialNumber": "t",
+      "description": "t",
+      "category": "Furniture",
+      "value": 100,
+      "imageUrl": "http://localhost:4000/uploads/d585671a-da6c-4cba-868c-68c1c4f58aa4.jpg",
+      "createdAt": "2026-01-22T13:10:26.388Z",
+      "updatedAt": "2026-01-22T13:10:26.388Z"
+    },
+    {
+      "id": "c9eaf65a-0f11-435c-a632-0d6abf019ff1",
+      "householdId": "house-1",
+      "make": "a",
+      "model": "a",
+      "serialNumber": "aa",
+      "description": "a",
+      "category": "Instrument",
+      "value": 500,
+      "imageUrl": "http://localhost:4000/uploads/0f3b9c24-09c2-495d-a5ed-841248fe1503.jpg",
+      "createdAt": "2026-01-22T13:10:51.964Z",
+      "updatedAt": "2026-01-22T13:10:51.964Z"
     }
   ]
 }

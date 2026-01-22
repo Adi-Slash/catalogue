@@ -62,6 +62,7 @@ export default function AssetDetailPage() {
             <div><strong>Model:</strong> {asset.model}</div>
             <div><strong>Serial:</strong> {asset.serialNumber}</div>
             <div><strong>Description:</strong> {asset.description}</div>
+            <div><strong>Category:</strong> {asset.category}</div>
             <div><strong>Value:</strong> ${asset.value.toFixed(2)}</div>
             <div><strong>Created:</strong> {new Date(asset.createdAt).toLocaleString()}</div>
             <div><strong>Updated:</strong> {new Date(asset.updatedAt).toLocaleString()}</div>

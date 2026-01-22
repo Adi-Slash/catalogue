@@ -1,0 +1,1 @@
+alter the user interface so assets are grouped and listed by category using a tab strip. Each tab on the tab strip should represent a single category and the tab should be titled in relation to that category.

@@ -15,6 +15,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
   const [model, setModel] = useState('')
   const [serialNumber, setSerialNumber] = useState('')
   const [description, setDescription] = useState('')
+  const [category, setCategory] = useState('')
   const [value, setValue] = useState<number | ''>('')
   const [file, setFile] = useState<File | null>(null)
   const [imageUrl, setImageUrl] = useState('')
@@ -27,6 +28,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       setModel(initialAsset.model)
       setSerialNumber(initialAsset.serialNumber || '')
       setDescription(initialAsset.description || '')
+      setCategory(initialAsset.category || '')
       setValue(initialAsset.value)
       setImageUrl(initialAsset.imageUrl || '')
     }
@@ -54,6 +56,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       model,
       serialNumber: serialNumber || undefined,
       description: description || undefined,
+      category: category || undefined,
       value: Number(value),
       imageUrl: finalImageUrl,
     }
@@ -70,6 +73,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
         setModel('')
         setSerialNumber('')
         setDescription('')
+        setCategory('')
         setValue('')
         setFile(null)
         setImageUrl('')
@@ -103,6 +107,17 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       </div>
       <div>
         <textarea placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} rows={3} />
+      </div>
+      <div>
+        <select value={category} onChange={e => setCategory(e.target.value)}>
+          <option value="">Select Category</option>
+          <option value="Electrical">Electrical</option>
+          <option value="Jewelry">Jewelry</option>
+          <option value="Furniture">Furniture</option>
+          <option value="Instrument">Instrument</option>
+          <option value="Tools">Tools</option>
+          <option value="Fitness">Fitness</option>
+        </select>
       </div>
       <div>
         <input placeholder="Estimated value" type="number" value={value as any} onChange={e => setValue(e.target.value === '' ? '' : Number(e.target.value))} />
