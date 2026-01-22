@@ -5,6 +5,7 @@ import AssetForm from '../components/AssetForm'
 import type { Asset } from '../types/asset'
 
 const HOUSEHOLD = 'house-1'
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000'
 
 export default function AssetDetailPage() {
   const { id } = useParams()
@@ -48,6 +49,8 @@ export default function AssetDetailPage() {
   if (error) return <div style={{ color: 'red' }}>{error}</div>
   if (!asset) return <div>Not found</div>
 
+  const imageUrl = asset.imageUrl?.startsWith('http') ? asset.imageUrl : `${API_BASE}${asset.imageUrl}`
+
   return (
     <div style={{ maxWidth: 720, margin: '24px auto' }}>
       <h2>Asset Details</h2>
@@ -62,7 +65,7 @@ export default function AssetDetailPage() {
             <div><strong>Value:</strong> ${asset.value.toFixed(2)}</div>
             <div><strong>Created:</strong> {new Date(asset.createdAt).toLocaleString()}</div>
             <div><strong>Updated:</strong> {new Date(asset.updatedAt).toLocaleString()}</div>
-            {asset.imageUrl && <div><img src={asset.imageUrl} alt="asset" style={{ maxWidth: '100%', marginTop: 8 }} /></div>}
+            {asset.imageUrl && <div><img src={imageUrl} alt="asset" style={{ maxWidth: '100%', marginTop: 8 }} /></div>}
             <div style={{ marginTop: 16 }}>
               <button onClick={() => setEditing(true)} style={{ padding: '6px 12px', marginRight: 8 }}>Edit</button>
               <button onClick={handleDelete} style={{ padding: '6px 12px', background: '#e74c3c', color: 'white', border: 'none' }}>Delete</button>

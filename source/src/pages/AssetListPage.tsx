@@ -3,11 +3,12 @@ import { getAssets, createAsset, deleteAsset } from '../api/assets'
 import AssetCard from '../components/AssetCard'
 import AssetForm from '../components/AssetForm'
 import type { Asset, NewAsset } from '../types/asset'
-import { Link } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 
 const HOUSEHOLD = 'house-1'
 
 export default function AssetListPage() {
+  const navigate = useNavigate()
   const [assets, setAssets] = useState<Asset[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -33,8 +34,12 @@ export default function AssetListPage() {
   }
 
   async function handleDelete(id: string) {
-    await deleteAsset(id, HOUSEHOLD)
-    setAssets(prev => prev.filter(a => a.id !== id))
+    try {
+      await deleteAsset(id, HOUSEHOLD)
+      setAssets(prev => prev.filter(a => a.id !== id))
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete asset')
+    }
   }
 
   const totalValue = assets.reduce((sum, a) => sum + a.value, 0)
@@ -52,9 +57,7 @@ export default function AssetListPage() {
       {!loading && assets.length === 0 && <div>No assets yet</div>}
       <div>
         {assets.map(a => (
-          <Link key={a.id} to={`/assets/${a.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-            <AssetCard asset={a} onDelete={handleDelete} />
-          </Link>
+          <AssetCard key={a.id} asset={a} onDelete={handleDelete} onClick={() => navigate(`/assets/${a.id}`)} />
         ))}
       </div>
     </div>

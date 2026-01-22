@@ -1,3 +1,16 @@
 {
-  "assets": []
+  "assets": [
+    {
+      "id": "74d748a9-f5dd-4fd4-bbd5-a44fbb22afca",
+      "householdId": "house-1",
+      "make": "test1a",
+      "model": "test2a",
+      "serialNumber": "test3a",
+      "description": "test4a",
+      "value": 200,
+      "imageUrl": "http://localhost:4000/uploads/fa9d0629-9ab5-403e-aabf-4e4403e10409.jpg",
+      "createdAt": "2026-01-22T09:28:20.438Z",
+      "updatedAt": "2026-01-22T09:28:33.759Z"
+    }
+  ]
 }

@@ -59,18 +59,16 @@ test.describe('Asset Catalog', () => {
     await expect(page.getByText('Total Value: $150.00')).toBeVisible();
   });
 
-  test('should delete an asset', async ({ page }) => {
+  test('should delete an asset from the card', async ({ page }) => {
     // Create asset
     await page.fill('input[placeholder="Make"]', 'Sony');
     await page.fill('input[placeholder="Model"]', 'X1');
     await page.fill('input[placeholder="Estimated value"]', '100');
     await page.click('button:has-text("Add Asset")');
-    // Go to details
-    await page.click('text=Sony X1');
-    // Delete
+    // Delete from card
     page.on('dialog', dialog => dialog.accept());
     await page.click('button:has-text("Delete")');
-    // Should navigate back and show empty
+    // Should show empty
     await expect(page.getByText('No assets yet')).toBeVisible();
     await expect(page.getByText('Total Value: $0.00')).toBeVisible();
   });

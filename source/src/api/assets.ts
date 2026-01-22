@@ -52,5 +52,5 @@ export async function uploadImage(file: File, householdId: string): Promise<stri
     body: formData,
   })
   const data = await handleRes(res)
-  return data.imageUrl
+  return `${API_BASE}${data.imageUrl}`
 }

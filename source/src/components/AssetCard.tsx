@@ -3,14 +3,18 @@ import type { Asset as AssetType } from '../types/asset'
 type Props = {
   asset: AssetType
   onDelete?: (id: string) => void
+  onClick?: () => void
 }
 
-export default function AssetCard({ asset, onDelete }: Props) {
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000'
+
+export default function AssetCard({ asset, onDelete, onClick }: Props) {
+  const imageUrl = asset.imageUrl?.startsWith('http') ? asset.imageUrl : `${API_BASE}${asset.imageUrl}`
   return (
-    <div style={{ border: '1px solid #ddd', padding: 12, borderRadius: 6, marginBottom: 8 }}>
+    <div style={{ border: '1px solid #ddd', padding: 12, borderRadius: 6, marginBottom: 8, cursor: onClick ? 'pointer' : 'default' }} onClick={onClick}>
       {asset.imageUrl && (
         <div style={{ marginBottom: 8 }}>
-          <img src={asset.imageUrl} alt={`${asset.make} ${asset.model}`} style={{ maxWidth: '100%', maxHeight: 100, objectFit: 'cover' }} />
+          <img src={imageUrl} alt={`${asset.make} ${asset.model}`} style={{ maxWidth: '100%', maxHeight: 100, objectFit: 'cover' }} />
         </div>
       )}
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -24,7 +28,7 @@ export default function AssetCard({ asset, onDelete }: Props) {
         </div>
       </div>
       <div style={{ marginTop: 8 }}>
-        <button onClick={() => onDelete && onDelete(asset.id)} style={{ color: 'white', background: '#e74c3c', border: 'none', padding: '6px 10px', borderRadius: 4 }}>Delete</button>
+        <button onClick={(e) => { e.stopPropagation(); onDelete && onDelete(asset.id) }} style={{ color: 'white', background: '#e74c3c', border: 'none', padding: '6px 10px', borderRadius: 4 }}>Delete</button>
       </div>
     </div>
   )

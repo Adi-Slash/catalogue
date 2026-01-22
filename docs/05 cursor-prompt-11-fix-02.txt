@@ -1,0 +1,1 @@
+when i select to delete an asset using the button on the asset item I get this error - 404 Not Found. Please fix it and update all related tests.

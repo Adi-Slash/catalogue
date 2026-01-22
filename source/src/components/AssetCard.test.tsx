@@ -31,4 +31,22 @@ describe('AssetCard', () => {
     deleteButton.click()
     expect(mockOnDelete).toHaveBeenCalledWith('1')
   })
+
+  it('calls onClick when card is clicked', () => {
+    const mockOnClick = vi.fn()
+    render(<AssetCard asset={mockAsset} onClick={mockOnClick} />)
+    const card = screen.getByText('Sony X1').closest('div')
+    card?.click()
+    expect(mockOnClick).toHaveBeenCalled()
+  })
+
+  it('does not call onClick when delete button is clicked', () => {
+    const mockOnClick = vi.fn()
+    const mockOnDelete = vi.fn()
+    render(<AssetCard asset={mockAsset} onClick={mockOnClick} onDelete={mockOnDelete} />)
+    const deleteButton = screen.getByText('Delete')
+    deleteButton.click()
+    expect(mockOnDelete).toHaveBeenCalledWith('1')
+    expect(mockOnClick).not.toHaveBeenCalled()
+  })
 })

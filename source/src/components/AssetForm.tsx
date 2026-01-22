@@ -13,6 +13,8 @@ type Props = {
 export default function AssetForm({ householdId, onCreate, onUpdate, initialAsset }: Props) {
   const [make, setMake] = useState('')
   const [model, setModel] = useState('')
+  const [serialNumber, setSerialNumber] = useState('')
+  const [description, setDescription] = useState('')
   const [value, setValue] = useState<number | ''>('')
   const [file, setFile] = useState<File | null>(null)
   const [imageUrl, setImageUrl] = useState('')
@@ -23,6 +25,8 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
     if (initialAsset) {
       setMake(initialAsset.make)
       setModel(initialAsset.model)
+      setSerialNumber(initialAsset.serialNumber || '')
+      setDescription(initialAsset.description || '')
       setValue(initialAsset.value)
       setImageUrl(initialAsset.imageUrl || '')
     }
@@ -48,6 +52,8 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       householdId,
       make,
       model,
+      serialNumber: serialNumber || undefined,
+      description: description || undefined,
       value: Number(value),
       imageUrl: finalImageUrl,
     }
@@ -62,6 +68,8 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       if (!initialAsset) {
         setMake('')
         setModel('')
+        setSerialNumber('')
+        setDescription('')
         setValue('')
         setFile(null)
         setImageUrl('')
@@ -89,6 +97,12 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       </div>
       <div>
         <input placeholder="Model" value={model} onChange={e => setModel(e.target.value)} />
+      </div>
+      <div>
+        <input placeholder="Serial Number" value={serialNumber} onChange={e => setSerialNumber(e.target.value)} />
+      </div>
+      <div>
+        <textarea placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} rows={3} />
       </div>
       <div>
         <input placeholder="Estimated value" type="number" value={value as any} onChange={e => setValue(e.target.value === '' ? '' : Number(e.target.value))} />
