@@ -48,79 +48,118 @@ export default function AssetDetailPage() {
     navigate('/assets');
   }
 
-  if (loading) return <div>Loading…</div>;
-  if (error) return <div style={{ color: 'red' }}>{error}</div>;
-  if (!asset) return <div>Not found</div>;
+  if (loading)
+    return (
+      <div className="asset-detail-page">
+        <div className="loading">Loading asset details...</div>
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="asset-detail-page">
+        <div className="error-message">{error}</div>
+      </div>
+    );
+
+  if (!asset)
+    return (
+      <div className="asset-detail-page">
+        <div className="empty-state">
+          <h2>Asset Not Found</h2>
+          <p>The asset you're looking for doesn't exist.</p>
+          <Link to="/assets" className="btn btn-primary">
+            Back to Assets
+          </Link>
+        </div>
+      </div>
+    );
 
   const imageUrl = asset.imageUrl?.startsWith('http')
     ? asset.imageUrl
     : `${API_BASE}${asset.imageUrl}`;
 
   return (
-    <div style={{ maxWidth: 720, margin: '24px auto' }}>
-      <h2>Asset Details</h2>
-      <Link to="/assets">Back to list</Link>
-      <div style={{ marginTop: 16 }}>
-        {!editing ? (
-          <>
-            <div>
-              <strong>Make:</strong> {asset.make}
+    <div className="asset-detail-page">
+      <div className="page-header">
+        <h1>Asset Details</h1>
+        <div className="back-link">
+          <Link to="/assets" className="btn btn-secondary">
+            ← Back to Assets
+          </Link>
+        </div>
+      </div>
+
+      {!editing ? (
+        <div className="asset-details">
+          <div className="asset-header">
+            <div className="asset-title-section">
+              <h2 className="asset-title">
+                {asset.make} {asset.model}
+              </h2>
+              <span className="asset-category">{asset.category || 'Uncategorized'}</span>
             </div>
-            <div>
-              <strong>Model:</strong> {asset.model}
+            <div className="asset-value">
+              <span className="price">${asset.value.toFixed(2)}</span>
             </div>
-            <div>
-              <strong>Serial:</strong> {asset.serialNumber}
+          </div>
+
+          {asset.imageUrl && (
+            <div className="asset-image-section">
+              <img src={imageUrl} alt={`${asset.make} ${asset.model}`} className="asset-image" />
             </div>
-            <div>
-              <strong>Description:</strong> {asset.description}
-            </div>
-            <div>
-              <strong>Category:</strong> {asset.category}
-            </div>
-            <div>
-              <strong>Value:</strong> ${asset.value.toFixed(2)}
-            </div>
-            <div>
-              <strong>Created:</strong> {new Date(asset.createdAt).toLocaleString()}
-            </div>
-            <div>
-              <strong>Updated:</strong> {new Date(asset.updatedAt).toLocaleString()}
-            </div>
-            {asset.imageUrl && (
-              <div>
-                <img src={imageUrl} alt="asset" style={{ maxWidth: '100%', marginTop: 8 }} />
+          )}
+
+          <div className="asset-info-grid">
+            {asset.serialNumber && (
+              <div className="info-item">
+                <label>Serial Number</label>
+                <span>{asset.serialNumber}</span>
               </div>
             )}
-            <div style={{ marginTop: 16 }}>
-              <button
-                onClick={() => setEditing(true)}
-                style={{ padding: '6px 12px', marginRight: 8 }}
-              >
-                Edit
-              </button>
-              <button
-                onClick={handleDelete}
-                style={{
-                  padding: '6px 12px',
-                  background: '#e74c3c',
-                  color: 'white',
-                  border: 'none',
-                }}
-              >
-                Delete
-              </button>
+
+            {asset.description && (
+              <div className="info-item full-width">
+                <label>Description</label>
+                <span>{asset.description}</span>
+              </div>
+            )}
+
+            <div className="info-item">
+              <label>Created</label>
+              <span>{new Date(asset.createdAt).toLocaleString()}</span>
             </div>
-          </>
-        ) : (
+
+            <div className="info-item">
+              <label>Last Updated</label>
+              <span>{new Date(asset.updatedAt).toLocaleString()}</span>
+            </div>
+          </div>
+
+          <div className="asset-actions">
+            <button onClick={() => setEditing(true)} className="btn btn-secondary">
+              Edit Asset
+            </button>
+            <button onClick={handleDelete} className="btn btn-danger">
+              Delete Asset
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="edit-form-container">
           <AssetForm
             householdId={HOUSEHOLD}
             onCreate={() => Promise.resolve()} // Not used in edit
             onUpdate={handleUpdate}
             initialAsset={asset}
           />
-        )}
-      </div>
+          <div className="form-actions">
+            <button onClick={() => setEditing(false)} className="btn btn-secondary">
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

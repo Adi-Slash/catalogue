@@ -7,16 +7,39 @@ import AddAssetPage from './pages/AddAssetPage';
 function AppRoutes() {
   return (
     <BrowserRouter>
-      <div style={{ padding: 12 }}>
-        <header style={{ marginBottom: 12 }}>
-          <Link to="/assets">Assets</Link>
+      <div id="root">
+        <header className="header">
+          <div className="header-content">
+            <Link to="/" className="logo">
+              AssetCatalogue
+            </Link>
+            <nav className="nav-links">
+              <Link to="/assets">Browse Assets</Link>
+              <Link to="/assets/add">Add Asset</Link>
+              <div className="search-bar">
+                <input type="text" placeholder="Search assets..." />
+                <button type="submit">🔍</button>
+              </div>
+            </nav>
+          </div>
         </header>
-        <Routes>
-          <Route path="/assets" element={<AssetListPage />} />
-          <Route path="/assets/add" element={<AddAssetPage />} />
-          <Route path="/assets/:id" element={<AssetDetailPage />} />
-          <Route path="/" element={<AssetListPage />} />
-        </Routes>
+
+        <main className="main-content">
+          <div className="app-container">
+            <Routes>
+              <Route path="/assets" element={<AssetListPage />} />
+              <Route path="/assets/add" element={<AddAssetPage />} />
+              <Route path="/assets/:id" element={<AssetDetailPage />} />
+              <Route path="/" element={<AssetListPage />} />
+            </Routes>
+          </div>
+        </main>
+
+        <footer className="footer">
+          <div className="footer-content">
+            <p>&copy; 2026 AssetCatalogue. All rights reserved.</p>
+          </div>
+        </footer>
       </div>
     </BrowserRouter>
   );

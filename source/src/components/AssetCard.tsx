@@ -1,4 +1,5 @@
 import type { Asset as AssetType } from '../types/asset';
+import './AssetCard.css';
 
 type Props = {
   asset: AssetType;
@@ -12,59 +13,49 @@ export default function AssetCard({ asset, onDelete, onClick }: Props) {
   const imageUrl = asset.imageUrl?.startsWith('http')
     ? asset.imageUrl
     : `${API_BASE}${asset.imageUrl}`;
+
   return (
-    <div
-      style={{
-        border: '1px solid #ddd',
-        padding: 12,
-        borderRadius: 6,
-        marginBottom: 8,
-        cursor: onClick ? 'pointer' : 'default',
-      }}
-      onClick={onClick}
-    >
-      {asset.imageUrl && (
-        <div style={{ marginBottom: 8 }}>
-          <img
-            src={imageUrl}
-            alt={`${asset.make} ${asset.model}`}
-            style={{ maxWidth: '100%', maxHeight: 100, objectFit: 'cover' }}
-          />
-        </div>
-      )}
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <div>
-          <div style={{ fontWeight: 600 }}>
-            {asset.make} {asset.model}
+    <div className="asset-card" onClick={onClick}>
+      <div className="card-image">
+        {asset.imageUrl ? (
+          <img src={imageUrl} alt={`${asset.make} ${asset.model}`} className="asset-image" />
+        ) : (
+          <div className="no-image">
+            <span>No Image</span>
           </div>
-          <div style={{ color: '#666' }}>{asset.serialNumber || ''}</div>
-          <div style={{ color: '#666', fontSize: 12 }}>{asset.category || ''}</div>
-        </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontWeight: 700 }}>${asset.value.toFixed(2)}</div>
-          <div style={{ fontSize: 12, color: '#999' }}>
-            {new Date(asset.createdAt).toLocaleDateString()}
-          </div>
+        )}
+        <div className="card-overlay">
+          <button
+            className="delete-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onDelete) {
+                onDelete(asset.id);
+              }
+            }}
+            aria-label="Delete asset"
+          >
+            🗑️
+          </button>
         </div>
       </div>
-      <div style={{ marginTop: 8 }}>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            if (onDelete) {
-              onDelete(asset.id);
-            }
-          }}
-          style={{
-            color: 'white',
-            background: '#e74c3c',
-            border: 'none',
-            padding: '6px 10px',
-            borderRadius: 4,
-          }}
-        >
-          Delete
-        </button>
+
+      <div className="card-content">
+        <div className="asset-info">
+          <h3 className="asset-title">
+            {asset.make} {asset.model}
+          </h3>
+          {asset.serialNumber && <p className="asset-serial">SN: {asset.serialNumber}</p>}
+          <span className="asset-category">{asset.category || 'Uncategorized'}</span>
+        </div>
+
+        <div className="asset-price">
+          <span className="price">${asset.value.toFixed(2)}</span>
+        </div>
+      </div>
+
+      <div className="card-footer">
+        <span className="asset-date">Added {new Date(asset.createdAt).toLocaleDateString()}</span>
       </div>
     </div>
   );

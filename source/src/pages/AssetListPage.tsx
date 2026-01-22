@@ -3,6 +3,7 @@ import { getAssets, deleteAsset } from '../api/assets';
 import AssetCard from '../components/AssetCard';
 import type { Asset } from '../types/asset';
 import { useNavigate, Link } from 'react-router-dom';
+import './AssetListPage.css';
 
 const HOUSEHOLD = 'house-1';
 const CATEGORIES = ['All', 'Electrical', 'Jewelry', 'Furniture', 'Instrument', 'Tools', 'Fitness'];
@@ -43,53 +44,36 @@ export default function AssetListPage() {
   }
 
   const totalValue = assets.reduce((sum, a) => sum + a.value, 0);
-
   const filteredAssets =
     activeTab === 'All' ? assets : assets.filter((a) => a.category === activeTab);
-
   const tabValue =
     activeTab === 'All' ? totalValue : filteredAssets.reduce((sum, a) => sum + a.value, 0);
 
   return (
-    <div style={{ maxWidth: 720, margin: '24px auto' }}>
-      <h2>Assets</h2>
-      <div style={{ marginBottom: 16, padding: 12, background: '#f0f0f0', borderRadius: 6 }}>
-        <strong>Total Value: ${totalValue.toFixed(2)}</strong>
+    <div className="asset-list-page">
+      <div className="page-header">
+        <h1>Asset Catalogue</h1>
+        <div className="stats-card">
+          <div className="stat">
+            <span className="stat-label">Total Portfolio Value</span>
+            <span className="stat-value">${totalValue.toFixed(2)}</span>
+          </div>
+        </div>
       </div>
-      <Link to="/">Home</Link>
-      <div style={{ marginTop: 16, marginBottom: 16 }}>
-        <Link to="/assets/add">
-          <button
-            style={{
-              padding: '8px 16px',
-              background: '#28a745',
-              color: 'white',
-              border: 'none',
-              borderRadius: 4,
-              cursor: 'pointer',
-            }}
-          >
-            + Add Asset
-          </button>
+
+      <div className="actions-bar">
+        <Link to="/assets/add" className="btn btn-primary">
+          + Add New Asset
         </Link>
       </div>
 
       {/* Category Tabs */}
-      <div style={{ marginTop: 16, marginBottom: 16, borderBottom: '1px solid #ddd' }}>
+      <div className="category-tabs">
         {CATEGORIES.map((category) => (
           <button
             key={category}
             onClick={() => setActiveTab(category)}
-            style={{
-              padding: '8px 16px',
-              border: 'none',
-              background: activeTab === category ? '#007bff' : 'transparent',
-              color: activeTab === category ? 'white' : '#007bff',
-              borderRadius: '4px 4px 0 0',
-              cursor: 'pointer',
-              marginRight: 4,
-              fontWeight: activeTab === category ? 'bold' : 'normal',
-            }}
+            className={`tab-button ${activeTab === category ? 'active' : ''}`}
           >
             {category}
           </button>
@@ -97,24 +81,31 @@ export default function AssetListPage() {
       </div>
 
       {/* Tab Content */}
-      <div style={{ marginBottom: 16, padding: 12, background: '#f8f9fa', borderRadius: 6 }}>
-        <strong>
-          {activeTab} Assets Value: ${tabValue.toFixed(2)}
-        </strong>
+      <div className="tab-summary">
+        <span className="summary-text">
+          {activeTab} Assets • ${tabValue.toFixed(2)} total value
+        </span>
       </div>
 
-      {loading && <div>Loading…</div>}
-      {error && <div style={{ color: 'red' }}>{error}</div>}
+      {loading && <div className="loading">Loading assets...</div>}
+      {error && <div className="error-message">{error}</div>}
       {!loading && filteredAssets.length === 0 && (
-        <div>No {activeTab === 'All' ? '' : activeTab.toLowerCase() + ' '}assets yet</div>
+        <div className="empty-state">
+          <h3>No {activeTab === 'All' ? '' : activeTab.toLowerCase() + ' '}assets found</h3>
+          <p>Start building your collection by adding your first asset.</p>
+          <Link to="/assets/add" className="btn btn-primary">
+            Add Asset
+          </Link>
+        </div>
       )}
-      <div>
-        {filteredAssets.map((a) => (
+
+      <div className="assets-grid">
+        {filteredAssets.map((asset) => (
           <AssetCard
-            key={a.id}
-            asset={a}
+            key={asset.id}
+            asset={asset}
             onDelete={handleDelete}
-            onClick={() => navigate(`/assets/${a.id}`)}
+            onClick={() => navigate(`/assets/${asset.id}`)}
           />
         ))}
       </div>

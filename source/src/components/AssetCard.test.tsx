@@ -20,14 +20,14 @@ describe('AssetCard', () => {
   it('renders asset details', () => {
     render(<AssetCard asset={mockAsset} />);
     expect(screen.getByText('Sony X1')).toBeInTheDocument();
-    expect(screen.getByText('123')).toBeInTheDocument();
+    expect(screen.getByText('SN: 123')).toBeInTheDocument();
     expect(screen.getByText('$100.00')).toBeInTheDocument();
   });
 
   it('calls onDelete when delete button is clicked', () => {
     const mockOnDelete = vi.fn();
     render(<AssetCard asset={mockAsset} onDelete={mockOnDelete} />);
-    const deleteButton = screen.getByText('Delete');
+    const deleteButton = screen.getByLabelText('Delete asset');
     deleteButton.click();
     expect(mockOnDelete).toHaveBeenCalledWith('1');
   });
@@ -44,7 +44,7 @@ describe('AssetCard', () => {
     const mockOnClick = vi.fn();
     const mockOnDelete = vi.fn();
     render(<AssetCard asset={mockAsset} onClick={mockOnClick} onDelete={mockOnDelete} />);
-    const deleteButton = screen.getByText('Delete');
+    const deleteButton = screen.getByLabelText('Delete asset');
     deleteButton.click();
     expect(mockOnDelete).toHaveBeenCalledWith('1');
     expect(mockOnClick).not.toHaveBeenCalled();
