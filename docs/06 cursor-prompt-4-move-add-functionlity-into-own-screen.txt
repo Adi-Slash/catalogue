@@ -1,1 +1,1 @@
-alter the user interface so that adding new assets is accessed via the add asset button but exists in its own screen as opposed to being on the same home screen where the assets are listed.
+alter the user interface so that adding a new asset is accessed via the add asset button but exists in its own screen as opposed to being on the same home screen where the assets are listed.

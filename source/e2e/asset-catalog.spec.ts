@@ -17,6 +17,7 @@ test.describe('Asset Catalog', () => {
   });
 
   test('should create a new asset', async ({ page }) => {
+    await page.click('button:has-text("+ Add Asset")');
     await page.fill('input[placeholder="Make"]', 'Sony');
     await page.fill('input[placeholder="Model"]', 'X1');
     await page.fill('input[placeholder="Estimated value"]', '100');
@@ -27,6 +28,7 @@ test.describe('Asset Catalog', () => {
 
   test('should view asset details', async ({ page }) => {
     // First create an asset
+    await page.click('button:has-text("+ Add Asset")');
     await page.fill('input[placeholder="Make"]', 'Sony');
     await page.fill('input[placeholder="Model"]', 'X1');
     await page.fill('input[placeholder="Estimated value"]', '100');
@@ -41,6 +43,7 @@ test.describe('Asset Catalog', () => {
 
   test('should edit an asset', async ({ page }) => {
     // Create asset
+    await page.click('button:has-text("+ Add Asset")');
     await page.fill('input[placeholder="Make"]', 'Sony');
     await page.fill('input[placeholder="Model"]', 'X1');
     await page.fill('input[placeholder="Estimated value"]', '100');
@@ -61,12 +64,13 @@ test.describe('Asset Catalog', () => {
 
   test('should delete an asset from the card', async ({ page }) => {
     // Create asset
+    await page.click('button:has-text("+ Add Asset")');
     await page.fill('input[placeholder="Make"]', 'Sony');
     await page.fill('input[placeholder="Model"]', 'X1');
     await page.fill('input[placeholder="Estimated value"]', '100');
     await page.click('button:has-text("Add Asset")');
     // Delete from card
-    page.on('dialog', dialog => dialog.accept());
+    page.on('dialog', (dialog) => dialog.accept());
     await page.click('button:has-text("Delete")');
     // Should show empty
     await expect(page.getByText('No assets yet')).toBeVisible();

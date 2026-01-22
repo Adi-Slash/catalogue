@@ -1,53 +1,54 @@
-import { useState, useEffect } from 'react'
-import type { FormEvent } from 'react'
-import { uploadImage } from '../api/assets'
-import type { NewAsset, Asset } from '../types/asset'
+import { useState, useEffect } from 'react';
+import type { FormEvent } from 'react';
+import { uploadImage } from '../api/assets';
+import type { NewAsset, Asset } from '../types/asset';
 
 type Props = {
-  householdId: string
-  onCreate: (payload: NewAsset) => Promise<void>
-  onUpdate?: (payload: Partial<NewAsset>) => Promise<void>
-  initialAsset?: Asset
-}
+  householdId: string;
+  onCreate: (payload: NewAsset) => Promise<void>;
+  onUpdate?: (payload: Partial<NewAsset>) => Promise<void>;
+  initialAsset?: Asset;
+};
 
 export default function AssetForm({ householdId, onCreate, onUpdate, initialAsset }: Props) {
-  const [make, setMake] = useState('')
-  const [model, setModel] = useState('')
-  const [serialNumber, setSerialNumber] = useState('')
-  const [description, setDescription] = useState('')
-  const [category, setCategory] = useState('')
-  const [value, setValue] = useState<number | ''>('')
-  const [file, setFile] = useState<File | null>(null)
-  const [imageUrl, setImageUrl] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [make, setMake] = useState('');
+  const [model, setModel] = useState('');
+  const [serialNumber, setSerialNumber] = useState('');
+  const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('');
+  const [value, setValue] = useState<number | ''>('');
+  const [file, setFile] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (initialAsset) {
-      setMake(initialAsset.make)
-      setModel(initialAsset.model)
-      setSerialNumber(initialAsset.serialNumber || '')
-      setDescription(initialAsset.description || '')
-      setCategory(initialAsset.category || '')
-      setValue(initialAsset.value)
-      setImageUrl(initialAsset.imageUrl || '')
+      setMake(initialAsset.make);
+      setModel(initialAsset.model);
+      setSerialNumber(initialAsset.serialNumber || '');
+      setDescription(initialAsset.description || '');
+      setCategory(initialAsset.category || '');
+      setValue(initialAsset.value);
+      setImageUrl(initialAsset.imageUrl || '');
     }
-  }, [initialAsset])
+  }, [initialAsset]);
 
   async function submit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setError(null)
+    e.preventDefault();
+    setError(null);
     if (!make || !model || value === '') {
-      setError('Make, model and value are required')
-      return
+      setError('Make, model and value are required');
+      return;
     }
-    let finalImageUrl = imageUrl
+    let finalImageUrl = imageUrl;
     if (file) {
       try {
-        finalImageUrl = await uploadImage(file, householdId)
-      } catch (err: any) {
-        setError('Image upload failed: ' + err.message)
-        return
+        finalImageUrl = await uploadImage(file, householdId);
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        setError('Image upload failed: ' + errorMessage);
+        return;
       }
     }
     const payload: Partial<NewAsset> = {
@@ -59,57 +60,67 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       category: category || undefined,
       value: Number(value),
       imageUrl: finalImageUrl,
-    }
-    setLoading(true)
+    };
+    setLoading(true);
     try {
       if (initialAsset && onUpdate) {
-        await onUpdate(payload)
+        await onUpdate(payload);
       } else {
-        await onCreate(payload as NewAsset)
+        await onCreate(payload as NewAsset);
       }
       // Reset form on success
       if (!initialAsset) {
-        setMake('')
-        setModel('')
-        setSerialNumber('')
-        setDescription('')
-        setCategory('')
-        setValue('')
-        setFile(null)
-        setImageUrl('')
+        setMake('');
+        setModel('');
+        setSerialNumber('');
+        setDescription('');
+        setCategory('');
+        setValue('');
+        setFile(null);
+        setImageUrl('');
       }
-    } catch (err: any) {
-      setError(err?.message || 'Save failed')
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Save failed';
+      setError(errorMessage);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const selectedFile = e.target.files?.[0]
+    const selectedFile = e.target.files?.[0];
     if (selectedFile) {
-      setFile(selectedFile)
-      const url = URL.createObjectURL(selectedFile)
-      setImageUrl(url)
+      setFile(selectedFile);
+      const url = URL.createObjectURL(selectedFile);
+      setImageUrl(url);
     }
   }
 
   return (
     <form onSubmit={submit} style={{ marginBottom: 16 }}>
       <div>
-        <input placeholder="Make" value={make} onChange={e => setMake(e.target.value)} />
+        <input placeholder="Make" value={make} onChange={(e) => setMake(e.target.value)} />
       </div>
       <div>
-        <input placeholder="Model" value={model} onChange={e => setModel(e.target.value)} />
+        <input placeholder="Model" value={model} onChange={(e) => setModel(e.target.value)} />
       </div>
       <div>
-        <input placeholder="Serial Number" value={serialNumber} onChange={e => setSerialNumber(e.target.value)} />
+        <input
+          placeholder="Serial Number"
+          value={serialNumber}
+          onChange={(e) => setSerialNumber(e.target.value)}
+        />
       </div>
       <div>
-        <textarea placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} rows={3} />
+        <textarea
+          placeholder="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={3}
+        />
       </div>
       <div>
-        <select value={category} onChange={e => setCategory(e.target.value)}>
+        <select value={category} onChange={(e) => setCategory(e.target.value)}>
           <option value="">Select Category</option>
           <option value="Electrical">Electrical</option>
           <option value="Jewelry">Jewelry</option>
@@ -120,7 +131,12 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
         </select>
       </div>
       <div>
-        <input placeholder="Estimated value" type="number" value={value as any} onChange={e => setValue(e.target.value === '' ? '' : Number(e.target.value))} />
+        <input
+          placeholder="Estimated value"
+          type="number"
+          value={value}
+          onChange={(e) => setValue(e.target.value === '' ? '' : Number(e.target.value))}
+        />
       </div>
       <div>
         <input type="file" accept="image/*" capture="environment" onChange={handleFileChange} />
@@ -137,5 +153,5 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       </div>
       {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
     </form>
-  )
+  );
 }

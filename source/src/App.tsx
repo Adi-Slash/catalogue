@@ -1,7 +1,8 @@
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
-import './App.css'
-import AssetListPage from './pages/AssetListPage'
-import AssetDetailPage from './pages/AssetDetailPage'
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import './App.css';
+import AssetListPage from './pages/AssetListPage';
+import AssetDetailPage from './pages/AssetDetailPage';
+import AddAssetPage from './pages/AddAssetPage';
 
 function AppRoutes() {
   return (
@@ -12,12 +13,13 @@ function AppRoutes() {
         </header>
         <Routes>
           <Route path="/assets" element={<AssetListPage />} />
+          <Route path="/assets/add" element={<AddAssetPage />} />
           <Route path="/assets/:id" element={<AssetDetailPage />} />
           <Route path="/" element={<AssetListPage />} />
         </Routes>
       </div>
     </BrowserRouter>
-  )
+  );
 }
 
-export default AppRoutes
+export default AppRoutes;
