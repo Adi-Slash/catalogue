@@ -3,6 +3,7 @@ import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import multer from 'multer';
 
 interface Asset {
   id: string;
@@ -33,6 +34,32 @@ app.use(cors());
 app.use(express.json());
 
 const DB_PATH = path.join(process.cwd(), 'mock-server', 'db.json');
+const UPLOAD_DIR = path.join(process.cwd(), 'mock-server', 'uploads');
+
+// Ensure upload directory exists
+if (!fs.existsSync(UPLOAD_DIR)) {
+  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
+
+// Serve uploaded images
+app.use('/uploads', express.static(UPLOAD_DIR));
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: UPLOAD_DIR,
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, uuidv4() + ext);
+  },
+});
+const upload = multer({ storage });
+
+// Upload endpoint (before auth middleware)
+app.post('/upload', upload.single('image'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+  const imageUrl = `/uploads/${req.file.filename}`;
+  res.json({ imageUrl });
+});
 
 function readDb(): Database {
   const raw = fs.readFileSync(DB_PATH, 'utf-8');

@@ -4,24 +4,32 @@
 
 .form-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 1.5rem;
+  align-items: start;
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 3rem;
+  align-items: start;
 }
 
 .form-group.full-width {
   grid-column: 1 / -1;
+  grid-template-columns: 200px 1fr;
 }
 
 .form-label {
   font-weight: 600;
   color: #333;
-  margin-bottom: 0.5rem;
   font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0.75rem 1rem 0 0;
+  white-space: nowrap;
 }
 
 .form-input,
@@ -33,6 +41,36 @@
   font-size: 1rem;
   transition: all 0.2s ease;
   background: white;
+  height: 44px;
+  box-sizing: border-box;
+  font-family: inherit;
+  line-height: 1.2;
+  width: 100%;
+  margin: 0;
+}
+
+.form-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2.5rem;
+  cursor: pointer;
+  display: block;
+  height: 44px;
+  line-height: 1.2;
+}
+
+.form-textarea {
+  height: auto;
+  min-height: 100px;
+  align-self: start;
+}
+
+.form-group.full-width .form-label {
+  align-self: start;
 }
 
 .form-input:focus,
@@ -43,10 +81,6 @@
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
-.form-textarea {
-  resize: vertical;
-  min-height: 100px;
-}
 
 .form-file {
   padding: 0.5rem;

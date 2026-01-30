@@ -155,7 +155,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
           >
             <option value="">Select Category</option>
             <option value="Electrical">Electrical</option>
-            <option value="Jewelry">Jewelry</option>
+            <option value="Jewellery">Jewellery</option>
             <option value="Furniture">Furniture</option>
             <option value="Instrument">Instrument</option>
             <option value="Tools">Tools</option>
@@ -165,7 +165,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
 
         <div className="form-group full-width">
           <label htmlFor="value" className="form-label">
-            Estimated Value ($) *
+            Estimated Value (£) *
           </label>
           <input
             id="value"

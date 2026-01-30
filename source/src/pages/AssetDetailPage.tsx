@@ -100,7 +100,7 @@ export default function AssetDetailPage() {
               <span className="asset-category">{asset.category || 'Uncategorized'}</span>
             </div>
             <div className="asset-value">
-              <span className="price">${asset.value.toFixed(2)}</span>
+              <span className="price">£{asset.value.toFixed(2)}</span>
             </div>
           </div>
 

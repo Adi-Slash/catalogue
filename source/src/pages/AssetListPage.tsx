@@ -6,7 +6,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import './AssetListPage.css';
 
 const HOUSEHOLD = 'house-1';
-const CATEGORIES = ['All', 'Electrical', 'Jewelry', 'Furniture', 'Instrument', 'Tools', 'Fitness'];
+const CATEGORIES = ['All', 'Electrical', 'Jewellery', 'Furniture', 'Instrument', 'Tools', 'Fitness'];
 
 export default function AssetListPage() {
   const navigate = useNavigate();
@@ -56,14 +56,14 @@ export default function AssetListPage() {
         <div className="stats-card">
           <div className="stat">
             <span className="stat-label">Total Portfolio Value</span>
-            <span className="stat-value">${totalValue.toFixed(2)}</span>
+            <span className="stat-value">£{totalValue.toFixed(2)}</span>
           </div>
         </div>
       </div>
 
       <div className="actions-bar">
         <Link to="/assets/add" className="btn btn-primary">
-          + Add New Asset
+          + Add Asset
         </Link>
       </div>
 
@@ -83,7 +83,7 @@ export default function AssetListPage() {
       {/* Tab Content */}
       <div className="tab-summary">
         <span className="summary-text">
-          {activeTab} Assets • ${tabValue.toFixed(2)} total value
+          {activeTab} Assets • £{tabValue.toFixed(2)} total value
         </span>
       </div>
 
