@@ -51,6 +51,19 @@
       "imageUrl": "http://localhost:4000/uploads/56dc2cb3-60db-42e4-9bfc-794c914a34bf.jpg",
       "createdAt": "2026-02-05T09:11:08.129Z",
       "updatedAt": "2026-02-05T09:11:08.129Z"
+    },
+    {
+      "id": "1954e126-921c-4a9a-a7e1-7313776b228b",
+      "householdId": "house-1",
+      "make": "yyy",
+      "model": "yyy",
+      "serialNumber": "yyy",
+      "description": "",
+      "category": "Tools",
+      "value": 5,
+      "imageUrl": "http://localhost:4000/uploads/64a9858a-b90a-4fa0-84e2-808b4f83b623.jpg",
+      "createdAt": "2026-02-05T09:36:50.062Z",
+      "updatedAt": "2026-02-05T09:36:50.062Z"
     }
   ]
 }
