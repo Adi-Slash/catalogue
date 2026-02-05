@@ -1,0 +1,1 @@
+az deployment group create -g rg-ak-aai-003 -f infra/main.bicep -p baseName=ak-aai-003

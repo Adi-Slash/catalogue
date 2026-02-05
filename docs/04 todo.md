@@ -18,19 +18,6 @@ Each task includes **acceptance criteria** that must be met before it can be con
 - TypeScript compilation succeeds with no errors — Verified (`tsc -b` completed during `npm run build`)
 - Project structure is clean and documented — Verified (added `src/components`, `src/pages`, `src/api` READMEs and updated project README)
 
----
-
-### ⬜ Initialize Azure Infrastructure
-**Tasks**
-- Create Azure Static Web App
-- Create Azure Functions project
-- Create Azure Cosmos DB instance
-- Create Azure Blob Storage container
-
-**Acceptance Criteria**
-- Frontend is deployable to Azure
-- Azure Functions can be invoked via HTTP
-- Cosmos DB and Blob Storage are accessible from Functions
 
 ---
 
@@ -263,6 +250,22 @@ Each task includes **acceptance criteria** that must be met before it can be con
 - All core features work as specified
 - No critical bugs remain
 - App is ready for real-world use
+
+---
+
+## Phase 8 – Deploy Azure Infrastructure (Hard)
+
+### ⬜ Initialize Azure Infrastructure
+**Tasks**
+- Create Azure Static Web App in Resource Group rg-ak-aai-003
+- Create Azure Functions project in Resource Group rg-ak-aai-003
+- Create Azure Cosmos DB instance in Resource Group rg-ak-aai-003
+- Create Azure Blob Storage container in Resource Group rg-ak-aai-003
+
+**Acceptance Criteria**
+- Frontend is deployable to Azure
+- Azure Functions can be invoked via HTTP
+- Cosmos DB and Blob Storage are accessible from Functions
 
 ---
 
