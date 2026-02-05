@@ -1,0 +1,68 @@
+CLI notes for **Phase 9 – Deploy application into Azure**.  
+These commands assume you already ran the Phase 8 infra deployment (see `docs/08 cli-deploy-azure-resources.txt`).
+
+---
+
+## 1. Build the frontend
+
+From the `source` directory:
+
+```bash
+npm install
+npm run build
+```
+
+This produces the production build in `source/dist/`, which Azure Static Web Apps will serve.
+
+> In Azure, connect your GitHub repo to the Static Web App `swa-ak-aai-003`  
+> so that pushes to `main` run `npm run build` and deploy automatically.
+
+---
+
+## 2. Configure frontend to call the Azure Functions API
+
+The React app reads the API base URL from `VITE_API_BASE`:
+
+```3:5:source/src/api/assets.ts
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
+```
+
+In the Static Web App resource, set an application setting:
+
+- `VITE_API_BASE=https://func-api-ak-aai-003.azurewebsites.net`  
+  (or whatever hostname your Function App uses)
+
+Rebuild / redeploy so the frontend calls the Azure Functions backend instead of the local mock server.
+
+---
+
+## 3. Deploy the Azure Functions project
+
+From your **Functions project folder** (not included in this repo), use Azure Functions Core Tools:
+
+```bash
+func azure functionapp publish func-api-ak-aai-003
+```
+
+Make sure the Function App’s application settings include:
+
+- `AzureWebJobsStorage` – set by `infra/main.bicep`
+- `COSMOS_CONNECTION_STRING` – set by `infra/main.bicep`
+- `BLOB_ACCOUNT_NAME` / `BLOB_CONTAINER_NAME` – set by `infra/main.bicep`
+
+These settings allow the Functions to talk to **Storage**, **Cosmos DB**, and the **asset-images** blob container.
+
+---
+
+## 4. What to verify for Phase 9 acceptance criteria
+
+In Azure, manually verify:
+
+1. **Function is deployed and callable**
+   - You can hit an HTTP-triggered function endpoint on `func-api-ak-aai-003` and receive a valid response.
+
+2. **Web app is deployed and can call the function**
+   - The Static Web App loads the React app.
+   - UI operations that call the API (e.g. loading the asset list) succeed against the Azure Functions backend.
+
+Only after these checks pass should you mark Phase 9 as ✅ in `docs/04 todo.md`.

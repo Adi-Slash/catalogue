@@ -269,6 +269,22 @@ Each task includes **acceptance criteria** that must be met before it can be con
 
 ---
 
+## Phase 9 – Deploy application into azure (Hard)
+
+### ⬜ Deploy code components
+**Tasks**
+- Build and deploy web app into the Static Web App in Resource Group rg-ak-aai-003
+- Build and deploy Functions project into the Function app in Resource Group rg-ak-aai-003
+- Ensure the web app configuration enables communicatrion with the function api
+- Ensure the function app is configured to enable it to connect to the storage account
+- Ensure the function app is configured to enable it to connect to the cosmos account
+
+**Acceptance Criteria**
+- Function is deployed to Azure
+- Web app is deployed to Azure and can call function
+
+---
+
 ## Completion Definition
 
 ✅ All checklist items completed  
