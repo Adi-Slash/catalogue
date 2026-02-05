@@ -8,7 +8,11 @@ import './AssetListPage.css';
 const HOUSEHOLD = 'house-1';
 const CATEGORIES = ['All', 'Electrical', 'Jewellery', 'Furniture', 'Instrument', 'Tools', 'Fitness'];
 
-export default function AssetListPage() {
+type Props = {
+  searchTerm: string;
+};
+
+export default function AssetListPage({ searchTerm }: Props) {
   const navigate = useNavigate();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,10 +48,33 @@ export default function AssetListPage() {
   }
 
   const totalValue = assets.reduce((sum, a) => sum + a.value, 0);
-  const filteredAssets =
+
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+
+  const matchesSearch = (asset: Asset) => {
+    if (!normalizedSearch) return true;
+    const haystack = [
+      asset.make,
+      asset.model,
+      asset.serialNumber,
+      asset.description,
+      asset.category,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+    return haystack.includes(normalizedSearch);
+  };
+
+  const assetsByCategory =
     activeTab === 'All' ? assets : assets.filter((a) => a.category === activeTab);
+
+  const filteredAssets = assetsByCategory.filter(matchesSearch);
+
   const tabValue =
-    activeTab === 'All' ? totalValue : filteredAssets.reduce((sum, a) => sum + a.value, 0);
+    activeTab === 'All'
+      ? assets.filter(matchesSearch).reduce((sum, a) => sum + a.value, 0)
+      : filteredAssets.reduce((sum, a) => sum + a.value, 0);
 
   return (
     <div className="asset-list-page">
