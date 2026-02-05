@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getAsset, updateAsset, deleteAsset } from '../api/assets';
 import AssetForm from '../components/AssetForm';
 import type { Asset } from '../types/asset';
+import './AssetDetailPage.css';
 
 const HOUSEHOLD = 'house-1';
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
@@ -111,19 +112,16 @@ export default function AssetDetailPage() {
           )}
 
           <div className="asset-info-grid">
-            {asset.serialNumber && (
-              <div className="info-item">
-                <label>Serial Number</label>
-                <span>{asset.serialNumber}</span>
-              </div>
-            )}
 
-            {asset.description && (
-              <div className="info-item full-width">
-                <label>Description</label>
-                <span>{asset.description}</span>
-              </div>
-            )}
+            <div className="info-item">
+              <label>Serial Number</label>
+              <span>{asset.serialNumber}</span>
+            </div>
+
+            <div className="info-item full-width">
+              <label>Description</label>
+              <span>{asset.description}</span>
+            </div>
 
             <div className="info-item">
               <label>Created</label>

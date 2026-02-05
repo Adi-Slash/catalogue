@@ -25,6 +25,32 @@
       "imageUrl": "http://localhost:4000/uploads/b139a4a4-7887-410e-9ed3-46c80a0c553b.jpg",
       "createdAt": "2026-01-30T13:52:05.398Z",
       "updatedAt": "2026-01-30T13:52:05.398Z"
+    },
+    {
+      "id": "3f1e8fec-c942-4da3-a314-f4d28ca0b5ac",
+      "householdId": "house-1",
+      "make": "z",
+      "model": "z",
+      "serialNumber": "z",
+      "description": "",
+      "category": "Jewellery",
+      "value": 200,
+      "imageUrl": "http://localhost:4000/uploads/fd949bc3-4944-47a8-bb24-129f8316b124.jpg",
+      "createdAt": "2026-02-05T09:10:33.488Z",
+      "updatedAt": "2026-02-05T09:10:33.488Z"
+    },
+    {
+      "id": "b807114f-007d-43dd-9a6f-45a25fdd3e64",
+      "householdId": "house-1",
+      "make": "ddd",
+      "model": "ddd",
+      "serialNumber": "ddd",
+      "description": "",
+      "category": "Instrument",
+      "value": 500,
+      "imageUrl": "http://localhost:4000/uploads/56dc2cb3-60db-42e4-9bfc-794c914a34bf.jpg",
+      "createdAt": "2026-02-05T09:11:08.129Z",
+      "updatedAt": "2026-02-05T09:11:08.129Z"
     }
   ]
 }

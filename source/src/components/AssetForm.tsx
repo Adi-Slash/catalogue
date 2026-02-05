@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { uploadImage } from '../api/assets';
 import type { NewAsset, Asset } from '../types/asset';
+import './AssetForm.css';
 
 type Props = {
   householdId: string;
