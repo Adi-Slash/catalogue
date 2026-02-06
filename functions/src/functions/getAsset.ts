@@ -32,7 +32,7 @@ export async function getAsset(request: HttpRequest, context: InvocationContext)
       jsonBody: asset,
     };
   } catch (error: any) {
-    context.log.error('Error getting asset:', error);
+    context.error('Error getting asset:', error);
     return {
       status: 500,
       jsonBody: { error: 'Internal server error' },

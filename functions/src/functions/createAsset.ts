@@ -42,7 +42,7 @@ export async function createAssetHandler(request: HttpRequest, context: Invocati
       jsonBody: created,
     };
   } catch (error: any) {
-    context.log.error('Error creating asset:', error);
+    context.error('Error creating asset:', error);
     return {
       status: 500,
       jsonBody: { error: 'Internal server error' },

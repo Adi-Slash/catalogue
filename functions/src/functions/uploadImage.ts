@@ -35,7 +35,7 @@ export async function uploadImageHandler(request: HttpRequest, context: Invocati
       jsonBody: { imageUrl: blobUrl },
     };
   } catch (error: any) {
-    context.log.error('Error uploading image:', error);
+    context.error('Error uploading image:', error);
     return {
       status: 500,
       jsonBody: { error: 'Internal server error' },

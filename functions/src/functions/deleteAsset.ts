@@ -41,7 +41,7 @@ export async function deleteAssetHandler(request: HttpRequest, context: Invocati
       jsonBody: { deleted: true, id },
     };
   } catch (error: any) {
-    context.log.error('Error deleting asset:', error);
+    context.error('Error deleting asset:', error);
     return {
       status: 500,
       jsonBody: { error: 'Internal server error' },

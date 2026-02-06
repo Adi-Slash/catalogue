@@ -43,7 +43,7 @@ export async function updateAssetHandler(request: HttpRequest, context: Invocati
       jsonBody: result,
     };
   } catch (error: any) {
-    context.log.error('Error updating asset:', error);
+    context.error('Error updating asset:', error);
     return {
       status: 500,
       jsonBody: { error: 'Internal server error' },

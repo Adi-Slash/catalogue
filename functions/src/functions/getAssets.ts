@@ -17,7 +17,7 @@ export async function getAssets(request: HttpRequest, context: InvocationContext
       jsonBody: assets,
     };
   } catch (error: any) {
-    context.log.error('Error getting assets:', error);
+    context.error('Error getting assets:', error);
     return {
       status: 500,
       jsonBody: { error: 'Internal server error' },
