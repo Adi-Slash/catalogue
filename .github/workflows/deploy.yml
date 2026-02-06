@@ -60,6 +60,10 @@ jobs:
         working-directory: functions
         run: npm run build
 
+      - name: Install production dependencies only
+        working-directory: functions
+        run: npm prune --production
+
       - name: Deploy Azure Functions
         uses: Azure/functions-action@v1
         with:

@@ -115,6 +115,14 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
           value: '1'
         }
         {
+          name: 'FUNCTIONS_WORKER_RUNTIME'
+          value: 'node'
+        }
+        {
+          name: 'FUNCTIONS_EXTENSION_VERSION'
+          value: '~4'
+        }
+        {
           name: 'COSMOS_CONNECTION_STRING'
           value: 'AccountEndpoint=${cosmos.properties.documentEndpoint};AccountKey=${listKeys(cosmos.id, cosmosApiVersion).primaryMasterKey};'
         }
