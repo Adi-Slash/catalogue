@@ -1,0 +1,24 @@
+{
+  "name": "asset-catalog-api",
+  "version": "1.0.0",
+  "description": "Azure Functions API for Asset Catalog",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "prestart": "npm run build",
+    "start": "func start",
+    "test": "echo \"No tests yet\""
+  },
+  "dependencies": {
+    "@azure/cosmos": "^4.0.0",
+    "@azure/storage-blob": "^12.22.0",
+    "@azure/functions": "^4.5.1",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/uuid": "^9.0.0",
+    "azure-functions-core-tools": "^4.0.0",
+    "typescript": "^5.9.3"
+  }
+}

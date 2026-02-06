@@ -39,18 +39,30 @@ jobs:
           api_location: ""              # no integrated SWA APIs; separate Function App is used
           output_location: "dist"       # build output from npm run build
 
-  # Functions deployment job - uncomment when Functions project is created
-  # deploy-functions:
-  #   runs-on: ubuntu-latest
-  #   needs: build-and-deploy-frontend
-  #
-  #   steps:
-  #     - name: Checkout repo
-  #       uses: actions/checkout@v4
-  #
-  #     - name: Deploy Azure Functions
-  #       uses: Azure/functions-action@v1
-  #       with:
-  #         app-name: "func-api-ak-aai-003"
-  #         package: "./functions"
-  #         publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+  deploy-functions:
+    runs-on: ubuntu-latest
+    needs: build-and-deploy-frontend
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Functions dependencies
+        working-directory: functions
+        run: npm ci
+
+      - name: Build Functions
+        working-directory: functions
+        run: npm run build
+
+      - name: Deploy Azure Functions
+        uses: Azure/functions-action@v1
+        with:
+          app-name: "func-api-ak-aai-003"
+          package: "./functions"
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}

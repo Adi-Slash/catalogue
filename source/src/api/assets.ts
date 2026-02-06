@@ -58,5 +58,7 @@ export async function uploadImage(file: File, householdId: string): Promise<stri
     body: formData,
   });
   const data = await handleRes(res);
-  return `${API_BASE}${data.imageUrl}`;
+  // If imageUrl is already a full URL (starts with http), use it directly
+  // Otherwise, prepend API_BASE for relative paths (mock server compatibility)
+  return data.imageUrl.startsWith('http') ? data.imageUrl : `${API_BASE}${data.imageUrl}`;
 }

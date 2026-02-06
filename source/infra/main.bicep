@@ -25,7 +25,7 @@ resource storage 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   }
 }
 
-// Blob container for asset images
+// Blob container for asset images (private - accessed via SAS tokens)
 resource imageContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
   name: '${storage.name}/default/asset-images'
   properties: {
@@ -124,7 +124,7 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
         }
         {
           name: 'BLOB_CONTAINER_NAME'
-          value: imageContainer.name
+          value: 'asset-images'
         }
       ]
     }
@@ -135,6 +135,7 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
 }
 
 // Azure Static Web App for frontend
+// Note: Deployed via GitHub Actions, not through Static Web App's built-in GitHub integration
 resource staticWeb 'Microsoft.Web/staticSites@2022-03-01' = {
   name: 'swa-${baseName}'
   location: location
@@ -143,13 +144,7 @@ resource staticWeb 'Microsoft.Web/staticSites@2022-03-01' = {
     tier: 'Standard'
   }
   properties: {
-    repositoryUrl: 'https://example.com/your-repo-url' // replace with real repo
-    branch: 'main'
-    buildProperties: {
-      appLocation: 'source'
-      appBuildCommand: 'npm run build'
-      outputLocation: 'dist'
-    }
+    // No repositoryUrl needed - deployment is handled by GitHub Actions
   }
 }
 
