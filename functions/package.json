@@ -2,6 +2,7 @@
   "name": "asset-catalog-api",
   "version": "1.0.0",
   "description": "Azure Functions API for Asset Catalog",
+  "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
