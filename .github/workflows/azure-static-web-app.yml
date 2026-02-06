@@ -1,6 +1,6 @@
 name: Build and Deploy React App to Azure Static Web Apps
 env:
-  APP_LOCATION: "/"
+  APP_LOCATION: "/source"
   API_LOCATION: "api"
   APP_ARTEFACT_LOCATION: "build"
 on: push
