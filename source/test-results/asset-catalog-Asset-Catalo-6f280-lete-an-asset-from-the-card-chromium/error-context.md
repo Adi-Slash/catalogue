@@ -1,0 +1,42 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "AssetCatalogue" [ref=e6] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=e7]:
+        - link "Browse Assets" [ref=e8] [cursor=pointer]:
+          - /url: /assets
+        - link "Add Asset" [ref=e9] [cursor=pointer]:
+          - /url: /assets/add
+        - generic [ref=e10]:
+          - textbox "Search assets..." [ref=e11]
+          - button "🔍" [ref=e12] [cursor=pointer]
+  - main [ref=e13]:
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - heading "Asset Catalogue" [level=1] [ref=e17]
+        - generic [ref=e19]:
+          - generic [ref=e20]: Total Portfolio Value
+          - generic [ref=e21]: £0.00
+      - link "+ Add Asset" [ref=e23] [cursor=pointer]:
+        - /url: /assets/add
+      - generic [ref=e24]:
+        - button "All" [ref=e25] [cursor=pointer]
+        - button "Electrical" [ref=e26] [cursor=pointer]
+        - button "Jewellery" [ref=e27] [cursor=pointer]
+        - button "Furniture" [ref=e28] [cursor=pointer]
+        - button "Instrument" [ref=e29] [cursor=pointer]
+        - button "Tools" [ref=e30] [cursor=pointer]
+        - button "Fitness" [ref=e31] [cursor=pointer]
+      - generic [ref=e33]: All Assets • £0.00 total value
+      - generic [ref=e34]:
+        - heading "No assets found" [level=3] [ref=e35]
+        - paragraph [ref=e36]: Start building your collection by adding your first asset.
+        - link "Add Asset" [ref=e37] [cursor=pointer]:
+          - /url: /assets/add
+  - contentinfo [ref=e38]:
+    - paragraph [ref=e40]: © 2026 AssetCatalogue. All rights reserved.
+```

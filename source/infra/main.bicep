@@ -6,6 +6,7 @@ param baseName string = 'ak-aai-003'
 
 var storageApiVersion = '2023-01-01'
 var cosmosApiVersion = '2023-04-15'
+var staticWebAppUrl = 'https://swa-${baseName}.azurestaticapps.net'
 
 // primary key and connection string for the storage account
 var storageAccountKey = listKeys(storage.id, storageApiVersion).keys[0].value
@@ -105,6 +106,13 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
     serverFarmId: functionPlan.id
     httpsOnly: true
     siteConfig: {
+      cors: {
+        allowedOrigins: [
+          staticWebAppUrl
+          'http://localhost:5173' // For local development
+        ]
+        supportCredentials: false
+      }
       appSettings: [
         {
           name: 'AzureWebJobsStorage'
