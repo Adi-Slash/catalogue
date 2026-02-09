@@ -23,22 +23,29 @@ function getClient(): CosmosClient {
 async function ensureDatabaseAndContainer(): Promise<void> {
   if (initialized) return;
 
-  const cosmosClient = getClient();
-  
-  // Create database if it doesn't exist
-  const { database } = await cosmosClient.databases.createIfNotExists({
-    id: databaseId,
-  });
-  
-  // Create container if it doesn't exist
-  await database.containers.createIfNotExists({
-    id: containerId,
-    partitionKey: {
-      paths: ['/householdId'],
-    },
-  });
-  
-  initialized = true;
+  try {
+    const cosmosClient = getClient();
+    
+    // Create database if it doesn't exist
+    const { database } = await cosmosClient.databases.createIfNotExists({
+      id: databaseId,
+    });
+    
+    // Create container if it doesn't exist
+    await database.containers.createIfNotExists({
+      id: containerId,
+      partitionKey: {
+        paths: ['/householdId'],
+      },
+    });
+    
+    initialized = true;
+  } catch (error) {
+    console.error('Error initializing Cosmos DB:', error);
+    // Don't throw - allow Functions to start even if Cosmos init fails
+    // The first actual request will retry initialization
+    throw error; // But do throw so we know there's a problem
+  }
 }
 
 function getDatabase(): Database {
