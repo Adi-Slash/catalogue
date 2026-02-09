@@ -108,8 +108,14 @@
 }
 
 .asset-category {
-  color: #007bff;
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+  color: white;
   font-weight: 600;
+  border-radius: 15px;
+  font-size: 0.85rem;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
 }
 
 .price {
