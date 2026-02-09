@@ -19,28 +19,24 @@ export default function LoginButton() {
     );
   }
 
-  const loginUrl =
-    window.location.hostname === 'localhost'
-      ? null
-      : `${window.location.origin}/.auth/login/aad?post_login_redirect_uri=${encodeURIComponent(window.location.origin + '/assets')}`;
+  // Treat localhost and 127.0.0.1 as local dev (no auth endpoints)
+  const isLocalDev = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+  const loginUrl = isLocalDev
+    ? null
+    : `${window.location.origin}/.auth/login/aad?post_login_redirect_uri=${encodeURIComponent(window.location.origin + '/assets')}`;
 
-  const handleLoginClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (window.location.hostname === 'localhost') {
-      alert('Authentication is only available when deployed to Azure Static Web Apps.\n\nIn local development, you can use the mock server with x-household-id header.');
-      return;
-    }
-    if (loginUrl) {
-      // Force navigation so nothing can block it
-      window.location.assign(loginUrl);
-    }
+  const handleLocalDevClick = () => {
+    alert(
+      'Authentication is only available when deployed to Azure Static Web Apps.\n\nIn local development, you can use the mock server with x-household-id header.'
+    );
   };
 
+  // Use native <a> navigation so the browser does a full page load to the auth URL.
+  // Do not preventDefault – that can block redirect in some SPA setups.
   if (loginUrl) {
     return (
       <a
         href={loginUrl}
-        onClick={handleLoginClick}
         className="login-btn"
         style={{ textDecoration: 'none', display: 'inline-block' }}
       >
@@ -50,7 +46,7 @@ export default function LoginButton() {
   }
 
   return (
-    <button type="button" onClick={handleLoginClick} className="login-btn">
+    <button type="button" onClick={handleLocalDevClick} className="login-btn">
       Login
     </button>
   );

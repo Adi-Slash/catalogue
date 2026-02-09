@@ -85,10 +85,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             console.log('User authenticated:', userData);
             setUser(userData);
           } else {
-            // Help debug "clientPrincipal is null after login" - log full response
+            // Session cookie was not set or not sent - backend returns null when there is no session
             console.warn(
               '[Auth] /.auth/me returned 200 but clientPrincipal is null. Full response:',
               data
+            );
+            console.warn(
+              '[Auth] This usually means the login callback did not set a session cookie. Check: ' +
+                '1) DevTools → Network: request to /.auth/login/aad/callback — expect 302 and Response Headers contain Set-Cookie. ' +
+                '2) DevTools → Application → Cookies for this site — after login you should see an auth cookie. ' +
+                '3) Redirect URI in Entra ID must be exactly https://<this-host>/.auth/login/aad/callback (same origin, including staging).'
             );
             setUser(null);
           }

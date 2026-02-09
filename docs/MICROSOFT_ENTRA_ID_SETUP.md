@@ -190,10 +190,17 @@ If you sign in successfully but `/.auth/me` returns `clientPrincipal: null` (or 
 4. **401 on the callback**
    - If you see a 401 or error page when redirected to `/.auth/login/aad/callback`, the login did not complete and no cookie is set. Fix redirect URI and secret; ensure ID tokens are enabled.
 
-5. **Debug in the browser**
-   - Open DevTools → Network. After login, check:
-     - Request to `/.auth/login/aad/callback`: should return **302** to your app, not 401/500.
-     - Request to `/.auth/me`: should return **200** with JSON containing `clientPrincipal` (not null). If you get 200 but `clientPrincipal` is null, the app logs the full response in the console for debugging.
+5. **Debug in the browser when you see: `[Auth] /.auth/me returned 200 but clientPrincipal is null`**
+   - The backend returns 200 with `{ clientPrincipal: null }` when **no session cookie** is present. So the cookie was either never set or not sent.
+   - **Check the login callback:**
+     - DevTools → **Network**. Sign in again and find the request to **`/.auth/login/aad/callback`** (it may be the first request after you sign in at Entra).
+     - **Status:** It must be **302** (redirect). If it is **401** or **500**, the callback failed (wrong redirect URI, wrong client secret, or ID tokens not enabled).
+     - **Response headers:** Look for **Set-Cookie**. If there is no Set-Cookie, the backend did not create a session.
+   - **Check cookies:**
+     - DevTools → **Application** (or **Storage**) → **Cookies** → select your Static Web App origin.
+     - After a successful login you should see an auth-related cookie. If there is none, the callback did not set it (see above).
+   - **Staging vs production:**
+     - If you are on a **staging** URL (e.g. from a PR), the redirect URI in Entra must include that exact staging host, e.g. `https://<staging-host>/.auth/login/aad/callback`. Otherwise the cookie is set on a different origin and your current tab has no session.
 
 ### Token validation issues
 - Ensure the Functions app is configured to validate tokens from Microsoft Entra ID
