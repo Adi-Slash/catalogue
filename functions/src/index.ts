@@ -1,4 +1,5 @@
-// Import all functions to register them
+// Azure Functions v4 Programming Model Entry Point
+// Import all functions to register them with the app object
 import './functions/options'; // Must be first to handle OPTIONS requests
 import './functions/getAssets';
 import './functions/getAsset';
