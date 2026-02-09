@@ -1,6 +1,26 @@
 {
   "routes": [
     {
+      "route": "/assets/*.{js,css,png,jpg,jpeg,gif,svg,ico,woff,woff2,ttf,eot,json,webp}",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "route": "/*.{js,css,png,jpg,jpeg,gif,svg,ico,woff,woff2,ttf,eot,json,webp,webmanifest}",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "route": "/assets",
+      "allowedRoles": ["authenticated"]
+    },
+    {
+      "route": "/assets/add",
+      "allowedRoles": ["authenticated"]
+    },
+    {
       "route": "/assets/*",
       "allowedRoles": ["authenticated"]
     },
@@ -11,7 +31,10 @@
   ],
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/assets/*", "/.auth/*"]
+    "exclude": [
+      "/.auth/*",
+      "/*.{js,css,png,jpg,jpeg,gif,svg,ico,woff,woff2,ttf,eot,json,webp,webmanifest}"
+    ]
   },
   "auth": {
     "identityProviders": {
