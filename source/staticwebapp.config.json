@@ -21,6 +21,17 @@
     "rewrite": "/index.html",
     "exclude": ["/assets/*", "/.auth/*"]
   },
+  "auth": {
+    "identityProviders": {
+      "azureActiveDirectory": {
+        "registration": {
+          "openIdIssuer": "https://login.microsoftonline.com/feb0dacb-1322-4fe2-bee7-bcd1eb07fb95/v2.0",
+          "clientIdSettingName": "AZURE_CLIENT_ID",
+          "clientSecretSettingName": "AZURE_CLIENT_SECRET_APP_SETTING_NAME"
+        }
+      }
+    }
+  },
   "responseOverrides": {
     "401": {
       "rewrite": "/login",

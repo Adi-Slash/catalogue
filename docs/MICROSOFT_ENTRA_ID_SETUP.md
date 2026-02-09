@@ -54,26 +54,47 @@ If you need more control or want to use a specific Entra ID application:
    - Add permissions as needed (e.g., Microsoft Graph API)
    - Click **Grant admin consent** if required
 
-4. **Configure Static Web App Authentication:**
+4. **Configure Static Web App Application Settings:**
    - Navigate to your Static Web App in Azure Portal
-   - Go to **Authentication** > **Add identity provider**
-   - Select **Microsoft**
-   - Choose **Advanced** configuration
-   - Enter:
-     - **Client ID**: Your application (client) ID from step 1
-     - **Client secret**: The secret value from step 2
-   - Click **Add**
+   - Go to **Configuration** > **Application settings**
+   - Add the following application settings:
+     - **AZURE_CLIENT_ID**: Your application (client) ID from step 1
+     - **AZURE_CLIENT_SECRET_APP_SETTING_NAME**: The client secret value from step 2
+   - Click **Save** to apply the changes
+   
+   **Note:** The `staticwebapp.config.json` file is already configured to use these application setting names. The tenant ID (`feb0dacb-1322-4fe2-bee7-bcd1eb07fb95`) is hardcoded in the configuration file.
 
-## Step 2: Verify staticwebapp.config.json
+## Step 2: Configure staticwebapp.config.json
 
-The `staticwebapp.config.json` file is already configured to use Microsoft Entra ID authentication:
+The `staticwebapp.config.json` file is configured to use Microsoft Entra ID authentication with a custom app registration:
 
+```json
+{
+  "auth": {
+    "identityProviders": {
+      "azureActiveDirectory": {
+        "registration": {
+          "openIdIssuer": "https://login.microsoftonline.com/feb0dacb-1322-4fe2-bee7-bcd1eb07fb95/v2.0",
+          "clientIdSettingName": "AZURE_CLIENT_ID",
+          "clientSecretSettingName": "AZURE_CLIENT_SECRET_APP_SETTING_NAME"
+        }
+      }
+    }
+  }
+}
+```
+
+**Configuration details:**
 - Login route: `/.auth/login/aad`
 - Logout route: `/.auth/logout`
 - Protected routes: `/assets/*` requires authentication
 - Unauthorized redirect: Redirects to `/login` on 401
+- Tenant ID: `feb0dacb-1322-4fe2-bee7-bcd1eb07fb95`
 
-No changes needed unless you want to customize the configuration.
+**Required Application Settings:**
+You must configure the following application settings in your Static Web App:
+- `AZURE_CLIENT_ID`: Your Microsoft Entra ID application (client) ID
+- `AZURE_CLIENT_SECRET_APP_SETTING_NAME`: Your Microsoft Entra ID client secret value
 
 ## Step 3: Test Authentication
 
