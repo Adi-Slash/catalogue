@@ -33,7 +33,7 @@ The application is optimized for both mobile devices and desktop browsers and is
 
 ### Backend (Azure-hosted)
 - API: Azure Functions (HTTP-triggered REST API)
-- Authentication: Azure AD B2C
+- Authentication: Microsoft Entra Id
 - Database: Azure Cosmos DB (NoSQL / Core API)
 - Image Storage: Azure Blob Storage
 - Hosting:

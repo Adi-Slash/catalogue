@@ -2,19 +2,11 @@
   "routes": [
     {
       "route": "/login",
-      "rewrite": "/.auth/login/aadb2c"
+      "rewrite": "/.auth/login/aad"
     },
     {
       "route": "/logout",
       "rewrite": "/.auth/logout"
-    },
-    {
-      "route": "/.auth/login/aadb2c",
-      "statusCode": 404
-    },
-    {
-      "route": "/.auth/logout",
-      "statusCode": 404
     },
     {
       "route": "/assets/*",
@@ -28,24 +20,6 @@
   "navigationFallback": {
     "rewrite": "/index.html",
     "exclude": ["/assets/*", "/.auth/*"]
-  },
-  "auth": {
-    "identityProviders": {
-      "customOpenIdConnectProviders": {
-        "aadb2c": {
-          "registration": {
-            "openIdConfiguration": "@env:AADB2C_OPENID_CONFIG",
-            "clientIdSettingName": "AADB2C_CLIENT_ID",
-            "clientSecretSettingName": "AADB2C_CLIENT_SECRET"
-          },
-          "login": {
-            "nameClaimType": "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name",
-            "scopes": ["openid", "profile"],
-            "loginParameterNames": []
-          }
-        }
-      }
-    }
   },
   "responseOverrides": {
     "401": {

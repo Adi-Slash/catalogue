@@ -33,13 +33,13 @@ export function getClientPrincipal(request: HttpRequest): ClientPrincipal | null
  * Gets the household ID from the authenticated user.
  * 
  * Priority:
- * 1. From Azure AD B2C client principal (x-ms-client-principal header) - uses userId as householdId
+ * 1. From Microsoft Entra ID client principal (x-ms-client-principal header) - uses userId as householdId
  * 2. From x-household-id header (for local development/mock server compatibility)
  * 
- * In production, you might want to use a custom claim from Azure AD B2C.
+ * In production, you might want to use a custom claim from Microsoft Entra ID.
  */
 export function getHouseholdId(request: HttpRequest): string | null {
-  // First, try to get from Azure AD B2C client principal
+  // First, try to get from Microsoft Entra ID client principal
   const principal = getClientPrincipal(request);
   if (principal) {
     // Use userId as householdId for now
@@ -59,7 +59,7 @@ export function getHouseholdId(request: HttpRequest): string | null {
 /**
  * Checks if the request is authenticated.
  * Returns true if either:
- * - Client principal is present (Azure AD B2C authentication)
+ * - Client principal is present (Microsoft Entra ID authentication)
  * - x-household-id header is present (local development)
  */
 export function isAuthenticated(request: HttpRequest): boolean {

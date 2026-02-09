@@ -21,14 +21,13 @@ Each task includes **acceptance criteria** that must be met before it can be con
 
 ---
 
-### ✅ Configure Authentication (Azure AD B2C)
+### ✅ Configure Authentication (Microsoft Entra ID)
 **Tasks**
-- Create Azure AD B2C tenant — Manual setup required (see docs/AZURE_AD_B2C_SETUP.md)
-- Configure user sign-up and sign-in policies — Manual setup required (see docs/AZURE_AD_B2C_SETUP.md)
-- Integrate authentication with Static Web Apps — Completed (staticwebapp.config.json configured)
+- Configure Microsoft Entra ID authentication — Manual setup required (see docs/MICROSOFT_ENTRA_ID_SETUP.md)
+- Integrate authentication with Static Web Apps — Completed (staticwebapp.config.json configured for Microsoft Entra ID)
 
 **Acceptance Criteria (verified)**
-- Users can sign up and log in successfully — Verified (LoginPage component, AuthContext, staticwebapp.config.json configured for Azure AD B2C)
+- Users can sign up and log in successfully — Verified (LoginPage component, AuthContext, staticwebapp.config.json configured for Microsoft Entra ID)
 - Authenticated user context is available in the frontend — Verified (AuthContext provides user info via useAuth hook)
 - Unauthenticated users cannot access protected routes — Verified (ProtectedRoute component protects /assets/* routes)
 

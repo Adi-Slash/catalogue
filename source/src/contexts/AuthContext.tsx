@@ -57,8 +57,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   function login() {
-    // Redirect to Static Web Apps login endpoint
-    window.location.href = '/.auth/login/aadb2c';
+    // Redirect to Static Web Apps login endpoint for Microsoft Entra ID
+    window.location.href = '/.auth/login/aad';
   }
 
   function logout() {
