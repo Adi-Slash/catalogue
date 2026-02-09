@@ -71,11 +71,6 @@ export default function AssetListPage({ searchTerm }: Props) {
 
   const filteredAssets = assetsByCategory.filter(matchesSearch);
 
-  const tabValue =
-    activeTab === 'All'
-      ? assets.filter(matchesSearch).reduce((sum, a) => sum + a.value, 0)
-      : filteredAssets.reduce((sum, a) => sum + a.value, 0);
-
   return (
     <div className="asset-list-page">
       <div className="page-header">
