@@ -8,6 +8,7 @@ const containerId = 'assets';
 let client: CosmosClient | null = null;
 let database: Database | null = null;
 let container: Container | null = null;
+let initialized = false;
 
 function getClient(): CosmosClient {
   if (!client) {
@@ -19,6 +20,27 @@ function getClient(): CosmosClient {
   return client;
 }
 
+async function ensureDatabaseAndContainer(): Promise<void> {
+  if (initialized) return;
+
+  const cosmosClient = getClient();
+  
+  // Create database if it doesn't exist
+  const { database } = await cosmosClient.databases.createIfNotExists({
+    id: databaseId,
+  });
+  
+  // Create container if it doesn't exist
+  await database.containers.createIfNotExists({
+    id: containerId,
+    partitionKey: {
+      paths: ['/householdId'],
+    },
+  });
+  
+  initialized = true;
+}
+
 function getDatabase(): Database {
   if (!database) {
     database = getClient().database(databaseId);
@@ -26,7 +48,8 @@ function getDatabase(): Database {
   return database;
 }
 
-export function getContainer(): Container {
+export async function getContainer(): Promise<Container> {
+  await ensureDatabaseAndContainer();
   if (!container) {
     container = getDatabase().container(containerId);
   }
@@ -34,7 +57,7 @@ export function getContainer(): Container {
 }
 
 export async function getAssetsByHousehold(householdId: string): Promise<Asset[]> {
-  const container = getContainer();
+  const container = await getContainer();
   const querySpec = {
     query: 'SELECT * FROM c WHERE c.householdId = @householdId',
     parameters: [{ name: '@householdId', value: householdId }],
@@ -44,7 +67,7 @@ export async function getAssetsByHousehold(householdId: string): Promise<Asset[]
 }
 
 export async function getAssetById(id: string, householdId: string): Promise<Asset | null> {
-  const container = getContainer();
+  const container = await getContainer();
   try {
     const { resource } = await container.item(id, householdId).read<Asset>();
     return resource || null;
@@ -57,7 +80,7 @@ export async function getAssetById(id: string, householdId: string): Promise<Ass
 }
 
 export async function createAsset(asset: Asset): Promise<Asset> {
-  const container = getContainer();
+  const container = await getContainer();
   const { resource } = await container.items.create(asset);
   if (!resource) {
     throw new Error('Failed to create asset');
@@ -66,7 +89,7 @@ export async function createAsset(asset: Asset): Promise<Asset> {
 }
 
 export async function updateAsset(asset: Asset): Promise<Asset> {
-  const container = getContainer();
+  const container = await getContainer();
   const { resource } = await container.item(asset.id, asset.householdId).replace(asset);
   if (!resource) {
     throw new Error('Failed to update asset');
@@ -75,6 +98,6 @@ export async function updateAsset(asset: Asset): Promise<Asset> {
 }
 
 export async function deleteAsset(id: string, householdId: string): Promise<void> {
-  const container = getContainer();
+  const container = await getContainer();
   await container.item(id, householdId).delete();
 }

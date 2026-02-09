@@ -1,14 +1,15 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { uploadImage } from '../shared/blob';
+import { addCorsHeaders } from '../shared/cors';
 
 export async function uploadImageHandler(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
   try {
     const householdId = request.headers.get('x-household-id');
     if (!householdId) {
-      return {
+      return addCorsHeaders({
         status: 401,
         jsonBody: { error: 'Missing x-household-id header' },
-      };
+      });
     }
 
     // Get the file from the request
@@ -16,10 +17,10 @@ export async function uploadImageHandler(request: HttpRequest, context: Invocati
     const file = formData.get('image') as File | null;
 
     if (!file) {
-      return {
+      return addCorsHeaders({
         status: 400,
         jsonBody: { error: 'No file uploaded' },
-      };
+      });
     }
 
     // Convert File to Buffer
@@ -30,16 +31,16 @@ export async function uploadImageHandler(request: HttpRequest, context: Invocati
     const blobUrl = await uploadImage(buffer, file.type, file.name);
 
     // Return the full blob URL
-    return {
+    return addCorsHeaders({
       status: 200,
       jsonBody: { imageUrl: blobUrl },
-    };
+    });
   } catch (error: any) {
     context.error('Error uploading image:', error);
-    return {
+    return addCorsHeaders({
       status: 500,
-      jsonBody: { error: 'Internal server error' },
-    };
+      jsonBody: { error: 'Internal server error', details: error.message },
+    });
   }
 }
 

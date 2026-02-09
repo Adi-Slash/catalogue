@@ -1,5 +1,6 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { createAsset } from '../shared/cosmos';
+import { addCorsHeaders } from '../shared/cors';
 import { v4 as uuidv4 } from 'uuid';
 import type { Asset } from '../shared/types';
 
@@ -7,18 +8,18 @@ export async function createAssetHandler(request: HttpRequest, context: Invocati
   try {
     const householdId = request.headers.get('x-household-id');
     if (!householdId) {
-      return {
+      return addCorsHeaders({
         status: 401,
         jsonBody: { error: 'Missing x-household-id header' },
-      };
+      });
     }
 
     const body = await request.json() as Partial<Asset>;
     if (typeof body.value !== 'number') {
-      return {
+      return addCorsHeaders({
         status: 400,
         jsonBody: { error: 'Invalid value' },
-      };
+      });
     }
 
     const now = new Date().toISOString();
@@ -37,16 +38,16 @@ export async function createAssetHandler(request: HttpRequest, context: Invocati
     };
 
     const created = await createAsset(asset);
-    return {
+    return addCorsHeaders({
       status: 201,
       jsonBody: created,
-    };
+    });
   } catch (error: any) {
     context.error('Error creating asset:', error);
-    return {
+    return addCorsHeaders({
       status: 500,
-      jsonBody: { error: 'Internal server error' },
-    };
+      jsonBody: { error: 'Internal server error', details: error.message },
+    });
   }
 }
 

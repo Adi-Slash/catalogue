@@ -1,31 +1,32 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { getAssetById, updateAsset } from '../shared/cosmos';
+import { addCorsHeaders } from '../shared/cors';
 import type { Asset } from '../shared/types';
 
 export async function updateAssetHandler(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
   try {
     const householdId = request.headers.get('x-household-id');
     if (!householdId) {
-      return {
+      return addCorsHeaders({
         status: 401,
         jsonBody: { error: 'Missing x-household-id header' },
-      };
+      });
     }
 
     const id = request.params.id;
     if (!id) {
-      return {
+      return addCorsHeaders({
         status: 400,
         jsonBody: { error: 'Missing asset id' },
-      };
+      });
     }
 
     const existing = await getAssetById(id, householdId);
     if (!existing) {
-      return {
+      return addCorsHeaders({
         status: 404,
         jsonBody: { error: 'Not found' },
-      };
+      });
     }
 
     const body = await request.json() as Partial<Asset>;
@@ -38,16 +39,16 @@ export async function updateAssetHandler(request: HttpRequest, context: Invocati
     };
 
     const result = await updateAsset(updated);
-    return {
+    return addCorsHeaders({
       status: 200,
       jsonBody: result,
-    };
+    });
   } catch (error: any) {
     context.error('Error updating asset:', error);
-    return {
+    return addCorsHeaders({
       status: 500,
-      jsonBody: { error: 'Internal server error' },
-    };
+      jsonBody: { error: 'Internal server error', details: error.message },
+    });
   }
 }
 

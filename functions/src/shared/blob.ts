@@ -20,8 +20,8 @@ function getContainerClient(): ContainerClient {
 export async function uploadImage(file: Buffer, contentType: string, originalName: string): Promise<string> {
   const container = getContainerClient();
   
-  // Ensure container exists
-  await container.createIfNotExists({ access: 'blob' });
+  // Ensure container exists (private access - images accessed via SAS tokens)
+  await container.createIfNotExists({ access: 'none' });
   
   // Generate unique filename
   const ext = originalName.substring(originalName.lastIndexOf('.'));

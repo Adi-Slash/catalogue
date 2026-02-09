@@ -13,7 +13,21 @@ const API_BASE = import.meta.env.VITE_API_BASE || DEFAULT_API_BASE;
 const API_PREFIX = API_BASE.includes('localhost') ? '' : '/api';
 
 async function handleRes(res: Response) {
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  if (!res.ok) {
+    let errorMessage = `${res.status} ${res.statusText}`;
+    try {
+      const errorData = await res.json();
+      if (errorData.error) {
+        errorMessage = errorData.error;
+        if (errorData.details) {
+          errorMessage += `: ${errorData.details}`;
+        }
+      }
+    } catch {
+      // If response is not JSON, use status text
+    }
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
