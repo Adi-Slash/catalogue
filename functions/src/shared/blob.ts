@@ -21,7 +21,8 @@ export async function uploadImage(file: Buffer, contentType: string, originalNam
   const container = getContainerClient();
   
   // Ensure container exists (private access - images accessed via SAS tokens)
-  await container.createIfNotExists({ access: 'none' });
+  // Omitting 'access' property means private (no public access)
+  await container.createIfNotExists();
   
   // Generate unique filename
   const ext = originalName.substring(originalName.lastIndexOf('.'));
