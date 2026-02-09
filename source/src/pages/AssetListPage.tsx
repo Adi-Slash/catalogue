@@ -6,7 +6,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import './AssetListPage.css';
 
 const HOUSEHOLD = 'house-1';
-const CATEGORIES = ['All', 'Electrical', 'Jewellery', 'Furniture', 'Instrument', 'Tools', 'Fitness'];
+const CATEGORIES = ['All', 'Electrical', 'Jewellery', 'Furniture', 'Instrument', 'Tools', 'Fitness', 'Transport'];
 
 type Props = {
   searchTerm: string;

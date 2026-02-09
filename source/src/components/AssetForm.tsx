@@ -161,6 +161,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
             <option value="Instrument">Instrument</option>
             <option value="Tools">Tools</option>
             <option value="Fitness">Fitness</option>
+            <option value="Transport">Transport</option>
           </select>
         </div>
 
