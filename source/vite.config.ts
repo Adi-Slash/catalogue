@@ -4,6 +4,10 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 // https://vite.dev/config/
 export default defineConfig({
+  build: {
+    // Use '_assets' instead of 'assets' to avoid conflict with /assets route
+    assetsDir: '_assets',
+  },
   plugins: [
     react(),
     VitePWA({
