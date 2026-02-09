@@ -79,7 +79,6 @@ export default function AssetListPage({ searchTerm }: Props) {
   return (
     <div className="asset-list-page">
       <div className="page-header">
-        <h1>Asset Catalogue</h1>
         <div className="stats-card">
           <div className="stat">
             <span className="stat-label">Total Portfolio Value</span>
@@ -105,13 +104,6 @@ export default function AssetListPage({ searchTerm }: Props) {
             {category}
           </button>
         ))}
-      </div>
-
-      {/* Tab Content */}
-      <div className="tab-summary">
-        <span className="summary-text">
-          {activeTab} Assets • £{tabValue.toFixed(2)} total value
-        </span>
       </div>
 
       {loading && <div className="loading">Loading assets...</div>}

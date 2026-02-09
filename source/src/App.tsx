@@ -20,11 +20,9 @@ function AppRoutes() {
         <header className="header">
           <div className="header-content">
             <Link to="/" className="logo">
-              AssetCatalogue
+              Asset Catalogue
             </Link>
             <nav className="nav-links">
-              <Link to="/assets">Browse Assets</Link>
-              <Link to="/assets/add">Add Asset</Link>
               <form className="search-bar" onSubmit={handleSearchSubmit}>
                 <input
                   type="text"
@@ -55,7 +53,7 @@ function AppRoutes() {
 
         <footer className="footer">
           <div className="footer-content">
-            <p>&copy; 2026 AssetCatalogue. All rights reserved.</p>
+            <p>&copy; 2026 Asset Catalogue. All rights reserved.</p>
           </div>
         </footer>
       </div>
