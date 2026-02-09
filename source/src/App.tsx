@@ -81,15 +81,25 @@ function AppRoutes() {
                   </ProtectedRoute>
                 }
               />
-              {/* Catch-all for unknown routes - but exclude /.auth/* paths */}
+              {/* Catch-all for unknown routes - exclude /.auth/* paths */}
               <Route
                 path="*"
                 element={
-                  <div style={{ padding: '2rem', textAlign: 'center' }}>
-                    <h2>Page Not Found</h2>
-                    <p>The page you're looking for doesn't exist.</p>
-                    <Link to="/">Go to Home</Link>
-                  </div>
+                  (() => {
+                    // Don't show 404 for authentication endpoints
+                    const path = window.location.pathname;
+                    if (path.startsWith('/.auth/')) {
+                      // Let the browser handle the auth endpoint
+                      return null;
+                    }
+                    return (
+                      <div style={{ padding: '2rem', textAlign: 'center' }}>
+                        <h2>Page Not Found</h2>
+                        <p>The page you're looking for doesn't exist.</p>
+                        <Link to="/">Go to Home</Link>
+                      </div>
+                    );
+                  })()
                 }
               />
             </Routes>

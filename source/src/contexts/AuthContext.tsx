@@ -90,17 +90,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Redirect to Static Web Apps login endpoint for Microsoft Entra ID
       // Use post_login_redirect_uri parameter (note: 'uri' not 'url')
       // Redirect to /assets after successful login
-      // Use window.location.href for full page navigation (bypasses React Router)
       const redirectUrl = encodeURIComponent(window.location.origin + '/assets');
       const loginUrl = `/.auth/login/aad?post_login_redirect_uri=${redirectUrl}`;
       
       console.log('Redirecting to login:', loginUrl);
-      // Full page navigation - this will bypass React Router
-      window.location.href = loginUrl;
+      
+      // Force a full page navigation that bypasses React Router
+      // Using both methods to ensure it works
+      if (window.location.replace) {
+        window.location.replace(loginUrl);
+      } else {
+        window.location.href = loginUrl;
+      }
     } catch (error) {
       console.error('Error during login redirect:', error);
       // Fallback: try simple redirect
-      window.location.href = '/.auth/login/aad';
+      try {
+        window.location.replace('/.auth/login/aad');
+      } catch {
+        window.location.href = '/.auth/login/aad';
+      }
     }
   }
 
