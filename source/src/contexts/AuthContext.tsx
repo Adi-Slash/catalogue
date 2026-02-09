@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
 interface User {
@@ -22,6 +22,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const hasLoggedNullPrincipal = useRef(false);
 
   useEffect(() => {
     // When landing after redirect from auth callback, the auth cookie may not be
@@ -71,9 +72,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (response.ok) {
         const contentType = response.headers.get('content-type');
         // Check if response is actually JSON (not HTML error page)
-        if (contentType && contentType.includes('application/json')) {
+          if (contentType && contentType.includes('application/json')) {
           const data = await response.json();
-          console.log('Auth check response:', data);
           if (data.clientPrincipal) {
             const userData = {
               userId: data.clientPrincipal.userId,
@@ -85,18 +85,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             console.log('User authenticated:', userData);
             setUser(userData);
           } else {
-            // Session cookie was not set or not sent - backend returns null when there is no session
-            console.warn(
-              '[Auth] /.auth/me returned 200 but clientPrincipal is null. Full response:',
-              data
-            );
-            console.warn(
-              '[Auth] This usually means the login callback did not set a session cookie. Check: ' +
-                '1) DevTools → Network: request to /.auth/login/aad/callback — expect 302 and Response Headers contain Set-Cookie. ' +
-                '2) DevTools → Application → Cookies for this site — after login you should see an auth cookie. ' +
-                '3) Redirect URI in Entra ID must be exactly https://<this-host>/.auth/login/aad/callback (same origin, including staging).'
-            );
             setUser(null);
+            // Log once per page load to avoid console spam when polling on /.auth/ path
+            if (!hasLoggedNullPrincipal.current) {
+              hasLoggedNullPrincipal.current = true;
+              console.warn(
+                '[Auth] /.auth/me returned 200 but clientPrincipal is null. The session cookie was not set or not sent.'
+              );
+              console.warn(
+                '[Auth] Fix: 1) In Entra ID add Redirect URI exactly: https://' +
+                  window.location.host +
+                  '/.auth/login/aad/callback — 2) Enable ID tokens (Authentication). ' +
+                  '3) In SWA set AZURE_CLIENT_ID and AZURE_CLIENT_SECRET. ' +
+                  '4) In Network tab after login, check /.auth/login/aad/callback returns 302 with Set-Cookie.'
+              );
+              console.warn(
+                '[Auth] If you never saw the Microsoft sign-in page after clicking Login, open the Login link in a new tab or ensure you are on the deployed Azure Static Web Apps URL (not localhost).'
+              );
+            }
           }
         } else {
           // Response is not JSON (likely HTML error page in local dev)
