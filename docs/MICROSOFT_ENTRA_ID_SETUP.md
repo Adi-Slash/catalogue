@@ -62,10 +62,10 @@ If you need more control or want to use a specific Entra ID application:
 
 5. **Configure Static Web App Application Settings:**
    - Navigate to your Static Web App in Azure Portal
-   - Go to **Configuration** > **Application settings**
+   - Go to **Configuration** > **Application settings** (or **Environment variables** in the portal)
    - Add the following application settings:
      - **AZURE_CLIENT_ID**: Your application (client) ID from step 1
-     - **AZURE_CLIENT_SECRET_APP_SETTING_NAME**: The client secret value from step 2
+     - **AZURE_CLIENT_SECRET**: The client secret *value* from step 2. The config uses `clientSecretSettingName: "AZURE_CLIENT_SECRET"`, so the platform reads the app setting named **AZURE_CLIENT_SECRET** and uses its value as the secret.
    - Click **Save** to apply the changes
    
    **Note:** The `staticwebapp.config.json` file is already configured to use these application setting names. The tenant ID (`feb0dacb-1322-4fe2-bee7-bcd1eb07fb95`) is hardcoded in the configuration file.
@@ -82,7 +82,7 @@ The `staticwebapp.config.json` file is configured to use Microsoft Entra ID auth
         "registration": {
           "openIdIssuer": "https://login.microsoftonline.com/feb0dacb-1322-4fe2-bee7-bcd1eb07fb95/v2.0",
           "clientIdSettingName": "AZURE_CLIENT_ID",
-          "clientSecretSettingName": "AZURE_CLIENT_SECRET_APP_SETTING_NAME"
+          "clientSecretSettingName": "AZURE_CLIENT_SECRET"
         }
       }
     }
@@ -100,7 +100,7 @@ The `staticwebapp.config.json` file is configured to use Microsoft Entra ID auth
 **Required Application Settings:**
 You must configure the following application settings in your Static Web App:
 - `AZURE_CLIENT_ID`: Your Microsoft Entra ID application (client) ID
-- `AZURE_CLIENT_SECRET_APP_SETTING_NAME`: Your Microsoft Entra ID client secret value
+- `AZURE_CLIENT_SECRET`: Your Microsoft Entra ID client secret value
 
 ## Step 3: Test Authentication
 
@@ -171,6 +171,29 @@ Static Web Apps uses the OpenID Connect flow and expects an ID token; this setti
 - Verify users have access to the application in Microsoft Entra ID
 - Check that the authentication provider is properly configured
 - Ensure routes are correctly protected in `staticwebapp.config.json`
+
+### clientPrincipal is null after logging in
+If you sign in successfully but `/.auth/me` returns `clientPrincipal: null` (or the app never shows you as logged in), the session cookie was likely never set. Check the following:
+
+1. **Callback URL in Entra ID**
+   - In the app registration, **Authentication** → **Web** → **Redirect URIs** must include exactly:
+     - `https://<your-static-web-app-host>/.auth/login/aad/callback`
+   - Use the real host (e.g. `something.azurestaticapps.net` or your custom domain). No trailing slash.
+
+2. **ID tokens**
+   - In the app registration, **Authentication** → **Implicit grant and hybrid flows** → **ID tokens** must be enabled (see AADSTS700054 above).
+
+3. **Application settings**
+   - **AZURE_CLIENT_ID**: must be the Application (client) ID from the same app registration that has the redirect URI and ID tokens.
+   - **AZURE_CLIENT_SECRET**: must be the client secret value from that app registration. If the callback returns 401, the secret or redirect URI is usually wrong.
+
+4. **401 on the callback**
+   - If you see a 401 or error page when redirected to `/.auth/login/aad/callback`, the login did not complete and no cookie is set. Fix redirect URI and secret; ensure ID tokens are enabled.
+
+5. **Debug in the browser**
+   - Open DevTools → Network. After login, check:
+     - Request to `/.auth/login/aad/callback`: should return **302** to your app, not 401/500.
+     - Request to `/.auth/me`: should return **200** with JSON containing `clientPrincipal` (not null). If you get 200 but `clientPrincipal` is null, the app logs the full response in the console for debugging.
 
 ### Token validation issues
 - Ensure the Functions app is configured to validate tokens from Microsoft Entra ID

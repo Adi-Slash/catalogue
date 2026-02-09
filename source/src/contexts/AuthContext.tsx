@@ -24,27 +24,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check authentication status on mount
-    checkAuth();
-    
+    // When landing after redirect from auth callback, the auth cookie may not be
+    // visible to the first request yet. Delay the initial check slightly when
+    // we might have just completed login (e.g. on /assets with referrer from .auth).
+    const referrer = typeof document !== 'undefined' ? document.referrer : '';
+    const mightBePostLogin =
+      window.location.pathname.startsWith('/assets') &&
+      (referrer.includes('/.auth/') || referrer === '');
+    const initialDelay = mightBePostLogin ? 400 : 0;
+
+    const timeoutId = setTimeout(() => {
+      checkAuth();
+    }, initialDelay);
+
     // Also check auth status when URL changes (e.g., after login redirect)
     const handleLocationChange = () => {
-      // Small delay to allow auth endpoint to process
-      setTimeout(() => {
-        checkAuth();
-      }, 500);
+      setTimeout(() => checkAuth(), 500);
     };
-    
+
     window.addEventListener('popstate', handleLocationChange);
-    
+
     // Check periodically if we're on an auth callback URL
     const interval = setInterval(() => {
       if (window.location.pathname.startsWith('/.auth/')) {
         checkAuth();
       }
     }, 1000);
-    
+
     return () => {
+      clearTimeout(timeoutId);
       window.removeEventListener('popstate', handleLocationChange);
       clearInterval(interval);
     };
@@ -77,7 +85,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             console.log('User authenticated:', userData);
             setUser(userData);
           } else {
-            console.log('No clientPrincipal in response');
+            // Help debug "clientPrincipal is null after login" - log full response
+            console.warn(
+              '[Auth] /.auth/me returned 200 but clientPrincipal is null. Full response:',
+              data
+            );
             setUser(null);
           }
         } else {
