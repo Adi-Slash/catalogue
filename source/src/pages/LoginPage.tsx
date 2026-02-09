@@ -33,7 +33,14 @@ export default function LoginPage() {
       <div className="login-container">
         <h1>Asset Catalogue</h1>
         <p>Sign in to manage your household assets</p>
-        <button onClick={login} className="btn btn-primary login-button">
+        <button 
+          onClick={(e) => {
+            e.preventDefault();
+            console.log('Sign In button clicked');
+            login();
+          }} 
+          className="btn btn-primary login-button"
+        >
           Sign In
         </button>
       </div>

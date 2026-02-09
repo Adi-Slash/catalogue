@@ -20,7 +20,14 @@ export default function LoginButton() {
   }
 
   return (
-    <button onClick={login} className="login-btn">
+    <button 
+      onClick={(e) => {
+        e.preventDefault();
+        console.log('Login button clicked');
+        login();
+      }} 
+      className="login-btn"
+    >
       Login
     </button>
   );

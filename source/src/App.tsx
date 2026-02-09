@@ -81,6 +81,17 @@ function AppRoutes() {
                   </ProtectedRoute>
                 }
               />
+              {/* Catch-all for unknown routes - but exclude /.auth/* paths */}
+              <Route
+                path="*"
+                element={
+                  <div style={{ padding: '2rem', textAlign: 'center' }}>
+                    <h2>Page Not Found</h2>
+                    <p>The page you're looking for doesn't exist.</p>
+                    <Link to="/">Go to Home</Link>
+                  </div>
+                }
+              />
             </Routes>
           </div>
         </main>
