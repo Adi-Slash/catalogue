@@ -2,16 +2,23 @@ import { useNavigate, Link } from 'react-router-dom';
 import { createAsset } from '../api/assets';
 import AssetForm from '../components/AssetForm';
 import type { NewAsset } from '../types/asset';
+import { useHouseholdId } from '../utils/auth';
 import './AddAssetPage.css';
-
-const HOUSEHOLD = 'house-1';
 
 export default function AddAssetPage() {
   const navigate = useNavigate();
+  const householdId = useHouseholdId();
 
   async function handleCreate(payload: NewAsset) {
+    if (!householdId) {
+      throw new Error('Not authenticated');
+    }
     await createAsset(payload);
     navigate('/assets');
+  }
+
+  if (!householdId) {
+    return <div className="error-message">Not authenticated</div>;
   }
 
   return (
@@ -28,7 +35,7 @@ export default function AddAssetPage() {
       </div>
 
       <div className="form-container">
-        <AssetForm householdId={HOUSEHOLD} onCreate={handleCreate} />
+        <AssetForm householdId={householdId} onCreate={handleCreate} />
       </div>
     </div>
   );

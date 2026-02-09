@@ -5,6 +5,10 @@ import './App.css';
 import AssetListPage from './pages/AssetListPage';
 import AssetDetailPage from './pages/AssetDetailPage';
 import AddAssetPage from './pages/AddAssetPage';
+import LoginPage from './pages/LoginPage';
+import { AuthProvider } from './contexts/AuthContext';
+import LoginButton from './components/LoginButton';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function AppRoutes() {
   const [searchInput, setSearchInput] = useState('');
@@ -36,6 +40,7 @@ function AppRoutes() {
                 />
                 <button type="submit">🔍</button>
               </form>
+              <LoginButton />
             </nav>
           </div>
         </header>
@@ -43,10 +48,39 @@ function AppRoutes() {
         <main className="main-content">
           <div className="app-container">
             <Routes>
-              <Route path="/assets" element={<AssetListPage searchTerm={searchTerm} />} />
-              <Route path="/assets/add" element={<AddAssetPage />} />
-              <Route path="/assets/:id" element={<AssetDetailPage />} />
-              <Route path="/" element={<AssetListPage searchTerm={searchTerm} />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route
+                path="/assets"
+                element={
+                  <ProtectedRoute>
+                    <AssetListPage searchTerm={searchTerm} />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/assets/add"
+                element={
+                  <ProtectedRoute>
+                    <AddAssetPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/assets/:id"
+                element={
+                  <ProtectedRoute>
+                    <AssetDetailPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <AssetListPage searchTerm={searchTerm} />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           </div>
         </main>
@@ -61,4 +95,12 @@ function AppRoutes() {
   );
 }
 
-export default AppRoutes;
+function App() {
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
+  );
+}
+
+export default App;

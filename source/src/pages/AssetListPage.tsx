@@ -3,9 +3,9 @@ import { getAssets, deleteAsset } from '../api/assets';
 import AssetCard from '../components/AssetCard';
 import type { Asset } from '../types/asset';
 import { useNavigate, Link } from 'react-router-dom';
+import { useHouseholdId } from '../utils/auth';
 import './AssetListPage.css';
 
-const HOUSEHOLD = 'house-1';
 const CATEGORIES = ['All', 'Electrical', 'Fitness', 'Furniture', 'Instrument', 'Jewellery', 'Tools', 'Transport'];
 
 type Props = {
@@ -14,16 +14,22 @@ type Props = {
 
 export default function AssetListPage({ searchTerm }: Props) {
   const navigate = useNavigate();
+  const householdId = useHouseholdId();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('All');
 
   async function load() {
+    if (!householdId) {
+      setError('Not authenticated');
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
-      const a = await getAssets(HOUSEHOLD);
+      const a = await getAssets(householdId);
       setAssets(a);
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load';
@@ -35,11 +41,12 @@ export default function AssetListPage({ searchTerm }: Props) {
 
   useEffect(() => {
     load();
-  }, []);
+  }, [householdId]);
 
   async function handleDelete(id: string) {
+    if (!householdId) return;
     try {
-      await deleteAsset(id, HOUSEHOLD);
+      await deleteAsset(id, householdId);
       setAssets((prev) => prev.filter((a) => a.id !== id));
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete asset';

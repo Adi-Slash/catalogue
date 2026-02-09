@@ -1,14 +1,15 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { getAssetById } from '../shared/cosmos';
 import { addCorsHeaders } from '../shared/cors';
+import { getHouseholdId } from '../shared/auth';
 
 export async function getAsset(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
   try {
-    const householdId = request.headers.get('x-household-id');
+    const householdId = getHouseholdId(request);
     if (!householdId) {
       return addCorsHeaders({
         status: 401,
-        jsonBody: { error: 'Missing x-household-id header' },
+        jsonBody: { error: 'Unauthorized - authentication required' },
       });
     }
 

@@ -3,25 +3,26 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getAsset, updateAsset, deleteAsset } from '../api/assets';
 import AssetForm from '../components/AssetForm';
 import type { Asset } from '../types/asset';
+import { useHouseholdId } from '../utils/auth';
 import './AssetDetailPage.css';
 
-const HOUSEHOLD = 'house-1';
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
 
 export default function AssetDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const householdId = useHouseholdId();
   const [asset, setAsset] = useState<Asset | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
 
   const load = useCallback(async () => {
-    if (!id) return;
+    if (!id || !householdId) return;
     setLoading(true);
     setError(null);
     try {
-      const a = await getAsset(id, HOUSEHOLD);
+      const a = await getAsset(id, householdId);
       setAsset(a);
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load';
@@ -29,23 +30,23 @@ export default function AssetDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, householdId]);
 
   useEffect(() => {
     load();
   }, [load]);
 
   async function handleUpdate(payload: Partial<Asset>) {
-    if (!asset) return;
-    const updated = await updateAsset(asset.id, payload, HOUSEHOLD);
+    if (!asset || !householdId) return;
+    const updated = await updateAsset(asset.id, payload, householdId);
     setAsset(updated);
     setEditing(false);
   }
 
   async function handleDelete() {
-    if (!asset) return;
+    if (!asset || !householdId) return;
     if (!window.confirm('Are you sure you want to delete this asset?')) return;
-    await deleteAsset(asset.id, HOUSEHOLD);
+    await deleteAsset(asset.id, householdId);
     navigate('/assets');
   }
 
@@ -145,12 +146,14 @@ export default function AssetDetailPage() {
         </div>
       ) : (
         <div className="edit-form-container">
-          <AssetForm
-            householdId={HOUSEHOLD}
-            onCreate={() => Promise.resolve()} // Not used in edit
-            onUpdate={handleUpdate}
-            initialAsset={asset}
-          />
+          {householdId && (
+            <AssetForm
+              householdId={householdId}
+              onCreate={() => Promise.resolve()} // Not used in edit
+              onUpdate={handleUpdate}
+              initialAsset={asset}
+            />
+          )}
           <div className="form-actions">
             <button onClick={() => setEditing(false)} className="btn btn-secondary">
               Cancel

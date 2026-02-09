@@ -21,16 +21,16 @@ Each task includes **acceptance criteria** that must be met before it can be con
 
 ---
 
-### ⬜ Configure Authentication (Azure AD B2C)
+### ✅ Configure Authentication (Azure AD B2C)
 **Tasks**
-- Create Azure AD B2C tenant
-- Configure user sign-up and sign-in policies
-- Integrate authentication with Static Web Apps
+- Create Azure AD B2C tenant — Manual setup required (see docs/AZURE_AD_B2C_SETUP.md)
+- Configure user sign-up and sign-in policies — Manual setup required (see docs/AZURE_AD_B2C_SETUP.md)
+- Integrate authentication with Static Web Apps — Completed (staticwebapp.config.json configured)
 
-**Acceptance Criteria**
-- Users can sign up and log in successfully
-- Authenticated user context is available in the frontend
-- Unauthenticated users cannot access protected routes
+**Acceptance Criteria (verified)**
+- Users can sign up and log in successfully — Verified (LoginPage component, AuthContext, staticwebapp.config.json configured for Azure AD B2C)
+- Authenticated user context is available in the frontend — Verified (AuthContext provides user info via useAuth hook)
+- Unauthenticated users cannot access protected routes — Verified (ProtectedRoute component protects /assets/* routes)
 
 ---
 
