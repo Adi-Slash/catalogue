@@ -32,8 +32,19 @@ async function handleRes(res: Response) {
 }
 
 export async function getAssets(householdId: string): Promise<Asset[]> {
-  const res = await fetch(`${API_BASE}${API_PREFIX}/assets`, { headers: { 'x-household-id': householdId } });
-  return handleRes(res);
+  const url = `${API_BASE}${API_PREFIX}/assets`;
+  console.log('Fetching assets from:', url);
+  try {
+    const res = await fetch(url, { headers: { 'x-household-id': householdId } });
+    console.log('Response status:', res.status, res.statusText);
+    return handleRes(res);
+  } catch (error) {
+    console.error('Fetch error:', error);
+    console.error('API_BASE:', API_BASE);
+    console.error('API_PREFIX:', API_PREFIX);
+    console.error('Full URL:', url);
+    throw error;
+  }
 }
 
 export async function getAsset(id: string, householdId: string): Promise<Asset> {

@@ -108,8 +108,7 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
     siteConfig: {
       cors: {
         allowedOrigins: [
-          staticWebAppUrl
-          'http://localhost:5173' // For local development
+          '*'
         ]
         supportCredentials: false
       }
