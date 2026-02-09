@@ -9,6 +9,7 @@ import LoginPage from './pages/LoginPage';
 import { AuthProvider } from './contexts/AuthContext';
 import LoginButton from './components/LoginButton';
 import ProtectedRoute from './components/ProtectedRoute';
+import AuthCallbackHandler from './components/AuthCallbackHandler';
 
 function AppRoutes() {
   const [searchInput, setSearchInput] = useState('');
@@ -47,6 +48,7 @@ function AppRoutes() {
 
         <main className="main-content">
           <div className="app-container">
+            <AuthCallbackHandler />
             <Routes>
               <Route path="/login" element={<LoginPage />} />
               <Route
@@ -86,11 +88,15 @@ function AppRoutes() {
                 path="*"
                 element={
                   (() => {
-                    // Don't show 404 for authentication endpoints
+                    // Don't show 404 for authentication endpoints - let them handle redirects
                     const path = window.location.pathname;
                     if (path.startsWith('/.auth/')) {
-                      // Let the browser handle the auth endpoint
-                      return null;
+                      // Show loading while auth processes
+                      return (
+                        <div style={{ padding: '2rem', textAlign: 'center' }}>
+                          <div className="loading">Completing authentication...</div>
+                        </div>
+                      );
                     }
                     return (
                       <div style={{ padding: '2rem', textAlign: 'center' }}>

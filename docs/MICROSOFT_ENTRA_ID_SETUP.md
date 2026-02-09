@@ -41,7 +41,13 @@ If you need more control or want to use a specific Entra ID application:
    - Click **Register**
    - Note the **Application (client) ID** - you'll need this
 
-2. **Create a Client Secret:**
+2. **Enable ID tokens (required for Static Web Apps):**
+   - In your app registration, go to **Authentication**
+   - Under **Implicit grant and hybrid flows**, enable **ID tokens**
+   - This is required; otherwise you will get error **AADSTS700054: response_type 'id_token' is not enabled for the application**
+   - Click **Save**
+
+3. **Create a Client Secret:**
    - In your app registration, go to **Certificates & secrets**
    - Click **New client secret**
    - Description: `Static Web App Secret`
@@ -49,12 +55,12 @@ If you need more control or want to use a specific Entra ID application:
    - Click **Add**
    - **IMPORTANT**: Copy the secret value immediately - you won't be able to see it again
 
-3. **Configure API Permissions (if needed):**
+4. **Configure API Permissions (if needed):**
    - Go to **API permissions**
    - Add permissions as needed (e.g., Microsoft Graph API)
    - Click **Grant admin consent** if required
 
-4. **Configure Static Web App Application Settings:**
+5. **Configure Static Web App Application Settings:**
    - Navigate to your Static Web App in Azure Portal
    - Go to **Configuration** > **Application settings**
    - Add the following application settings:
@@ -142,10 +148,24 @@ For local development, authentication will not work exactly as in production bec
 
 ## Troubleshooting
 
+### AADSTS700054: response_type 'id_token' is not enabled for the application
+
+This error appears after clicking Sign in when the app registration does not allow ID token issuance.
+
+**Fix:**
+1. Go to [Azure Portal](https://portal.azure.com) → **Microsoft Entra ID** → **App registrations**
+2. Open your application (the one whose Client ID is in `AZURE_CLIENT_ID`)
+3. Go to **Authentication**
+4. Under **Implicit grant and hybrid flows**, check **ID tokens**
+5. Click **Save**
+
+Static Web Apps uses the OpenID Connect flow and expects an ID token; this setting must be enabled.
+
 ### Users cannot sign in
 - Verify the redirect URI in Microsoft Entra ID matches your Static Web App URL
 - Check that authentication is enabled in the Static Web App
 - Ensure the app registration is configured correctly
+- Ensure **ID tokens** is enabled under Authentication → Implicit grant and hybrid flows
 
 ### 401 Unauthorized errors
 - Verify users have access to the application in Microsoft Entra ID

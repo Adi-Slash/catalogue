@@ -26,6 +26,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Check authentication status on mount
     checkAuth();
+    
+    // Also check auth status when URL changes (e.g., after login redirect)
+    const handleLocationChange = () => {
+      // Small delay to allow auth endpoint to process
+      setTimeout(() => {
+        checkAuth();
+      }, 500);
+    };
+    
+    window.addEventListener('popstate', handleLocationChange);
+    
+    // Check periodically if we're on an auth callback URL
+    const interval = setInterval(() => {
+      if (window.location.pathname.startsWith('/.auth/')) {
+        checkAuth();
+      }
+    }, 1000);
+    
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      clearInterval(interval);
+    };
   }, []);
 
   async function checkAuth() {
@@ -35,6 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // In local development, it will fail gracefully
       const response = await fetch('/.auth/me', {
         credentials: 'include',
+        cache: 'no-store', // Don't cache auth status
       });
       
       if (response.ok) {
@@ -42,23 +65,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Check if response is actually JSON (not HTML error page)
         if (contentType && contentType.includes('application/json')) {
           const data = await response.json();
+          console.log('Auth check response:', data);
           if (data.clientPrincipal) {
-            setUser({
+            const userData = {
               userId: data.clientPrincipal.userId,
               userDetails: data.clientPrincipal.userDetails,
               identityProvider: data.clientPrincipal.identityProvider,
               userRoles: data.clientPrincipal.userRoles || [],
               claims: data.clientPrincipal.claims || {},
-            });
+            };
+            console.log('User authenticated:', userData);
+            setUser(userData);
           } else {
+            console.log('No clientPrincipal in response');
             setUser(null);
           }
         } else {
           // Response is not JSON (likely HTML error page in local dev)
+          console.log('Response is not JSON, content-type:', contentType);
           setUser(null);
         }
       } else {
         // 401 or other error - user is not authenticated
+        console.log('Auth check failed with status:', response.status);
         setUser(null);
       }
     } catch (error) {
