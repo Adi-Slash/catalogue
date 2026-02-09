@@ -19,34 +19,39 @@ export default function LoginButton() {
     );
   }
 
-  // Use a direct anchor link to bypass React Router
-  // This ensures the navigation happens immediately without React Router interference
-  const getLoginUrl = () => {
-    if (window.location.hostname === 'localhost') {
-      return '#';
-    }
-    const redirectUrl = encodeURIComponent(window.location.origin + '/assets');
-    return `/.auth/login/aad?post_login_redirect_uri=${redirectUrl}`;
-  };
+  const loginUrl =
+    window.location.hostname === 'localhost'
+      ? null
+      : `${window.location.origin}/.auth/login/aad?post_login_redirect_uri=${encodeURIComponent(window.location.origin + '/assets')}`;
 
-  const handleLoginClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleLoginClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     if (window.location.hostname === 'localhost') {
-      e.preventDefault();
       alert('Authentication is only available when deployed to Azure Static Web Apps.\n\nIn local development, you can use the mock server with x-household-id header.');
       return;
     }
-    // Let the anchor tag handle the navigation naturally
-    console.log('Login link clicked, navigating to:', getLoginUrl());
+    if (loginUrl) {
+      // Force navigation so nothing can block it
+      window.location.assign(loginUrl);
+    }
   };
 
+  if (loginUrl) {
+    return (
+      <a
+        href={loginUrl}
+        onClick={handleLoginClick}
+        className="login-btn"
+        style={{ textDecoration: 'none', display: 'inline-block' }}
+      >
+        Login
+      </a>
+    );
+  }
+
   return (
-    <a 
-      href={getLoginUrl()}
-      onClick={handleLoginClick}
-      className="login-btn"
-      style={{ textDecoration: 'none', display: 'inline-block' }}
-    >
+    <button type="button" onClick={handleLoginClick} className="login-btn">
       Login
-    </a>
+    </button>
   );
 }
