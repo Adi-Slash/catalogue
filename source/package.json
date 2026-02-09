@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && npm run copy-config",
+    "copy-config": "node --input-type=commonjs -e \"require('fs').copyFileSync('staticwebapp.config.json', 'dist/staticwebapp.config.json')\"",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",

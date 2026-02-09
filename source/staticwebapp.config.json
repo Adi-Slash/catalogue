@@ -1,14 +1,6 @@
 {
   "routes": [
     {
-      "route": "/login",
-      "rewrite": "/.auth/login/aad"
-    },
-    {
-      "route": "/logout",
-      "rewrite": "/.auth/logout"
-    },
-    {
       "route": "/assets/*",
       "allowedRoles": ["authenticated"]
     },

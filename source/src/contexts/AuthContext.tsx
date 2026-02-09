@@ -31,7 +31,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function checkAuth() {
     try {
       // Static Web Apps provides authentication info at /.auth/me
-      const response = await fetch('/.auth/me');
+      const response = await fetch('/.auth/me', {
+        credentials: 'include',
+      });
+      
       if (response.ok) {
         const data = await response.json();
         if (data.clientPrincipal) {
@@ -46,12 +49,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(null);
         }
       } else {
+        // 401 or other error - user is not authenticated
         setUser(null);
       }
     } catch (error) {
+      // Network error or other issue - assume not authenticated
       console.error('Failed to check auth status:', error);
       setUser(null);
     } finally {
+      // Always set loading to false, even on error
       setLoading(false);
     }
   }
