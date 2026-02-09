@@ -130,6 +130,10 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
           value: '~4'
         }
         {
+          name: 'WEBSITE_NODE_DEFAULT_VERSION'
+          value: '~20'
+        }
+        {
           name: 'COSMOS_CONNECTION_STRING'
           value: 'AccountEndpoint=${cosmos.properties.documentEndpoint};AccountKey=${listKeys(cosmos.id, cosmosApiVersion).primaryMasterKey};'
         }

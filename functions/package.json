@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "Azure Functions API for Asset Catalog",
   "main": "dist/index.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
