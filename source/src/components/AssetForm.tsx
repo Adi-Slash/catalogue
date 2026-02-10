@@ -18,8 +18,9 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [value, setValue] = useState<number | ''>('');
-  const [file, setFile] = useState<File | null>(null);
-  const [imageUrl, setImageUrl] = useState('');
+  // Support up to four images per asset
+  const [files, setFiles] = useState<File[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -31,7 +32,10 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       setDescription(initialAsset.description || '');
       setCategory(initialAsset.category || '');
       setValue(initialAsset.value);
-      setImageUrl(initialAsset.imageUrl || '');
+      const existing =
+        (initialAsset.imageUrls && initialAsset.imageUrls.length > 0 && initialAsset.imageUrls) ||
+        (initialAsset.imageUrl ? [initialAsset.imageUrl] : []);
+      setImageUrls(existing);
     }
   }, [initialAsset]);
 
@@ -42,10 +46,12 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       setError('Make, model and value are required');
       return;
     }
-    let finalImageUrl = imageUrl;
-    if (file) {
+    let finalImageUrls = imageUrls;
+    // If user selected new files, upload them and replace existing URLs
+    if (files.length > 0) {
       try {
-        finalImageUrl = await uploadImage(file, householdId);
+        const uploaded = await Promise.all(files.map((f) => uploadImage(f, householdId)));
+        finalImageUrls = uploaded.slice(0, 4);
       } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';
         setError('Image upload failed: ' + errorMessage);
@@ -60,7 +66,8 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       description: description || undefined,
       category: category || undefined,
       value: Number(value),
-      imageUrl: finalImageUrl,
+      imageUrl: finalImageUrls[0],
+      imageUrls: finalImageUrls,
     };
     setLoading(true);
     try {
@@ -77,8 +84,8 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
         setDescription('');
         setCategory('');
         setValue('');
-        setFile(null);
-        setImageUrl('');
+        setFiles([]);
+        setImageUrls([]);
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Save failed';
@@ -89,12 +96,10 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      const url = URL.createObjectURL(selectedFile);
-      setImageUrl(url);
-    }
+    const selectedFiles = Array.from(e.target.files || []).slice(0, 4);
+    setFiles(selectedFiles);
+    const previewUrls = selectedFiles.map((file) => URL.createObjectURL(file));
+    setImageUrls(previewUrls);
   }
 
   return (
@@ -198,19 +203,24 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
 
         <div className="form-group full-width">
           <label htmlFor="image" className="form-label">
-            Asset Image
+            Asset Images (up to 4)
           </label>
           <input
             id="image"
             type="file"
             accept="image/*"
             capture="environment"
+            multiple
             onChange={handleFileChange}
             className="form-file"
           />
-          {imageUrl && (
-            <div className="image-preview">
-              <img src={imageUrl} alt="Asset preview" className="preview-image" />
+          {imageUrls.length > 0 && (
+            <div className="image-preview-grid">
+              {imageUrls.slice(0, 4).map((url, index) => (
+                <div className="image-preview" key={index}>
+                  <img src={url} alt={`Asset preview ${index + 1}`} className="preview-image" />
+                </div>
+              ))}
             </div>
           )}
         </div>

@@ -32,21 +32,23 @@ function AppRoutes() {
                   <span className="logo-line-2">Catalogue</span>
                 </Link>
               </div>
-              <div className="header-center">
-                <form className="search-bar" onSubmit={handleSearchSubmit}>
-                  <input
-                    type="text"
-                    placeholder="Search assets..."
-                    value={searchInput}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setSearchInput(value);
-                      setSearchTerm(value.trim());
-                    }}
-                  />
-                  <button type="submit">🔍</button>
-                </form>
-              </div>
+              {user && (
+                <div className="header-center">
+                  <form className="search-bar" onSubmit={handleSearchSubmit}>
+                    <input
+                      type="text"
+                      placeholder="Search assets..."
+                      value={searchInput}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setSearchInput(value);
+                        setSearchTerm(value.trim());
+                      }}
+                    />
+                    <button type="submit">🔍</button>
+                  </form>
+                </div>
+              )}
               <div className="header-auth">
                 <LoginButton />
               </div>

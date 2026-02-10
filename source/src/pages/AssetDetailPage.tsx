@@ -77,9 +77,14 @@ export default function AssetDetailPage() {
       </div>
     );
 
-  const imageUrl = asset.imageUrl?.startsWith('http')
-    ? asset.imageUrl
-    : `${API_BASE}${asset.imageUrl}`;
+  const primaryImagePath =
+    (asset.imageUrls && asset.imageUrls.length > 0 && asset.imageUrls[0]) || asset.imageUrl;
+
+  const imageUrl = primaryImagePath
+    ? primaryImagePath.startsWith('http')
+      ? primaryImagePath
+      : `${API_BASE}${primaryImagePath}`
+    : undefined;
 
   return (
     <div className="asset-detail-page">
@@ -106,7 +111,7 @@ export default function AssetDetailPage() {
             </div>
           </div>
 
-          {asset.imageUrl && (
+          {imageUrl && (
             <div className="asset-image-section">
               <img src={imageUrl} alt={`${asset.make} ${asset.model}`} className="asset-image" />
             </div>

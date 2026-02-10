@@ -10,9 +10,14 @@ type Props = {
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
 
 export default function AssetCard({ asset, onDelete, onClick }: Props) {
-  const imageUrl = asset.imageUrl?.startsWith('http')
-    ? asset.imageUrl
-    : `${API_BASE}${asset.imageUrl}`;
+  const primaryImagePath =
+    (asset.imageUrls && asset.imageUrls.length > 0 && asset.imageUrls[0]) || asset.imageUrl;
+
+  const imageUrl = primaryImagePath
+    ? primaryImagePath.startsWith('http')
+      ? primaryImagePath
+      : `${API_BASE}${primaryImagePath}`
+    : undefined;
 
   return (
     <div className="asset-card" onClick={onClick}>
@@ -31,7 +36,7 @@ export default function AssetCard({ asset, onDelete, onClick }: Props) {
         </button>
       </div>
       <div className="card-image">
-        {asset.imageUrl ? (
+        {imageUrl ? (
           <img src={imageUrl} alt={`${asset.make} ${asset.model}`} className="asset-image" />
         ) : (
           <div className="no-image">

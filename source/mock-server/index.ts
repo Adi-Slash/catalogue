@@ -15,6 +15,7 @@ interface Asset {
   category?: string;
   value: number;
   imageUrl?: string;
+  imageUrls?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -102,6 +103,11 @@ app.post('/assets', (req, res) => {
   const body = req.body;
   if (typeof body.value !== 'number') return res.status(400).json({ error: 'Invalid value' });
   const now = new Date().toISOString();
+  const bodyImageUrls = Array.isArray(body.imageUrls)
+    ? body.imageUrls
+    : body.imageUrl
+    ? [body.imageUrl]
+    : [];
   const asset: Asset = {
     id: uuidv4(),
     householdId,
@@ -111,7 +117,8 @@ app.post('/assets', (req, res) => {
     description: body.description || '',
     category: body.category || '',
     value: body.value,
-    imageUrl: body.imageUrl || '',
+    imageUrl: bodyImageUrls[0] || '',
+    imageUrls: bodyImageUrls,
     createdAt: now,
     updatedAt: now,
   };
