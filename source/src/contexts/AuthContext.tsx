@@ -64,45 +64,66 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Static Web Apps provides authentication info at /.auth/me
       // This endpoint only exists when deployed to Azure Static Web Apps
       // In local development, it will fail gracefully
-      const response = await fetch('/.auth/me', {
+      // Use absolute URL to ensure same-origin and avoid CORB issues
+      const authUrl = `${window.location.origin}/.auth/me`;
+      const response = await fetch(authUrl, {
         credentials: 'include',
         cache: 'no-store', // Don't cache auth status
+        headers: {
+          'Accept': 'application/json',
+        },
       });
       
       if (response.ok) {
         const contentType = response.headers.get('content-type');
         // Check if response is actually JSON (not HTML error page)
-          if (contentType && contentType.includes('application/json')) {
-          const data = await response.json();
-          if (data.clientPrincipal) {
-            const userData = {
-              userId: data.clientPrincipal.userId,
-              userDetails: data.clientPrincipal.userDetails,
-              identityProvider: data.clientPrincipal.identityProvider,
-              userRoles: data.clientPrincipal.userRoles || [],
-              claims: data.clientPrincipal.claims || {},
-            };
-            console.log('User authenticated:', userData);
-            setUser(userData);
-          } else {
-            setUser(null);
-            // Log once per page load to avoid console spam when polling on /.auth/ path
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            const data = await response.json();
+            if (data.clientPrincipal) {
+              const userData = {
+                userId: data.clientPrincipal.userId,
+                userDetails: data.clientPrincipal.userDetails,
+                identityProvider: data.clientPrincipal.identityProvider,
+                userRoles: data.clientPrincipal.userRoles || [],
+                claims: data.clientPrincipal.claims || {},
+              };
+              console.log('User authenticated:', userData);
+              setUser(userData);
+            } else {
+              setUser(null);
+              // Log once per page load to avoid console spam when polling on /.auth/ path
+              if (!hasLoggedNullPrincipal.current) {
+                hasLoggedNullPrincipal.current = true;
+                console.warn(
+                  '[Auth] /.auth/me returned 200 but clientPrincipal is null. The session cookie was not set or not sent.'
+                );
+                console.warn(
+                  '[Auth] Fix: 1) In Entra ID add Redirect URI exactly: https://' +
+                    window.location.host +
+                    '/.auth/login/aad/callback — 2) Enable ID tokens (Authentication). ' +
+                    '3) In SWA set AZURE_CLIENT_ID and AZURE_CLIENT_SECRET. ' +
+                    '4) In Network tab after login, check /.auth/login/aad/callback returns 302 with Set-Cookie.'
+                );
+                console.warn(
+                  '[Auth] If you see CORB errors, ensure you are accessing the app from the same domain as the cookie (check Application → Cookies).'
+                );
+              }
+            }
+          } catch (jsonError) {
+            // CORB or JSON parse error - log and treat as unauthenticated
             if (!hasLoggedNullPrincipal.current) {
               hasLoggedNullPrincipal.current = true;
-              console.warn(
-                '[Auth] /.auth/me returned 200 but clientPrincipal is null. The session cookie was not set or not sent.'
+              console.error(
+                '[Auth] Failed to parse JSON response from /.auth/me. This may be a CORB (Cross-Origin Read Blocking) issue.',
+                jsonError
               );
               console.warn(
-                '[Auth] Fix: 1) In Entra ID add Redirect URI exactly: https://' +
-                  window.location.host +
-                  '/.auth/login/aad/callback — 2) Enable ID tokens (Authentication). ' +
-                  '3) In SWA set AZURE_CLIENT_ID and AZURE_CLIENT_SECRET. ' +
-                  '4) In Network tab after login, check /.auth/login/aad/callback returns 302 with Set-Cookie.'
-              );
-              console.warn(
-                '[Auth] If you never saw the Microsoft sign-in page after clicking Login, open the Login link in a new tab or ensure you are on the deployed Azure Static Web Apps URL (not localhost).'
+                '[Auth] Ensure you are accessing the app from: ' + window.location.origin +
+                ' (the cookie domain is: white-water-01b9a7403.4.azurestaticapps.net)'
               );
             }
+            setUser(null);
           }
         } else {
           // Response is not JSON (likely HTML error page in local dev)
@@ -117,11 +138,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       // Network error or other issue - assume not authenticated
       // In local development, /.auth/me doesn't exist, so this is expected
-      if (window.location.hostname === 'localhost') {
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
         // In local dev, allow anonymous access
         console.log('Local development: Authentication endpoints not available');
       } else {
-        console.error('Failed to check auth status:', error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (errorMessage.includes('CORB') || errorMessage.includes('Cross-Origin')) {
+          console.error(
+            '[Auth] CORB error detected. Ensure you are accessing the app from the same domain as the auth cookie.',
+            error
+          );
+        } else {
+          console.error('Failed to check auth status:', error);
+        }
       }
       setUser(null);
     } finally {
