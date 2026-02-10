@@ -24,6 +24,12 @@
   margin: 0 auto;
   padding: 0 20px;
   display: flex;
+  flex-direction: column;
+  row-gap: 0.35rem;
+}
+
+.header-row {
+  display: flex;
   justify-content: space-between;
   align-items: center;
 }
@@ -123,7 +129,7 @@
 @media (max-width: 768px) {
   .header-content {
     padding: 0 12px;
-    column-gap: 0.5rem;
+    row-gap: 0.25rem;
   }
 
   .header-left {

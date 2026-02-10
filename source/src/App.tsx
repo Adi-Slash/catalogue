@@ -25,35 +25,37 @@ function AppRoutes() {
       <div id="root">
         <header className="header">
           <div className="header-content">
-            <div className="header-left">
-              <Link to="/" className="logo">
-                <span className="logo-line-1">Asset</span>
-                <span className="logo-line-2">Catalogue</span>
-              </Link>
-              {user && (
-                <div className="header-user-name">
-                  {user.userDetails}
-                </div>
-              )}
+            <div className="header-row">
+              <div className="header-left">
+                <Link to="/" className="logo">
+                  <span className="logo-line-1">Asset</span>
+                  <span className="logo-line-2">Catalogue</span>
+                </Link>
+              </div>
+              <div className="header-center">
+                <form className="search-bar" onSubmit={handleSearchSubmit}>
+                  <input
+                    type="text"
+                    placeholder="Search assets..."
+                    value={searchInput}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setSearchInput(value);
+                      setSearchTerm(value.trim());
+                    }}
+                  />
+                  <button type="submit">🔍</button>
+                </form>
+              </div>
+              <div className="header-auth">
+                <LoginButton />
+              </div>
             </div>
-            <div className="header-center">
-              <form className="search-bar" onSubmit={handleSearchSubmit}>
-                <input
-                  type="text"
-                  placeholder="Search assets..."
-                  value={searchInput}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setSearchInput(value);
-                    setSearchTerm(value.trim());
-                  }}
-                />
-                <button type="submit">🔍</button>
-              </form>
-            </div>
-            <div className="header-auth">
-              <LoginButton />
-            </div>
+            {user && (
+              <div className="header-user-name">
+                {user.userDetails}
+              </div>
+            )}
           </div>
         </header>
 
