@@ -14,6 +14,10 @@ export default defineConfig({
       registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        // Do NOT let the PWA service worker intercept Azure Static Web Apps
+        // authentication routes; they must hit the platform so it can issue
+        // redirects and cookies.
+        navigateFallbackDenylist: [/^\/\.auth\//],
       },
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
