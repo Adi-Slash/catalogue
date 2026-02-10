@@ -1,3 +1,22 @@
 {
-  "assets": []
+  "assets": [
+    {
+      "id": "c07af55e-d2fd-4825-bfba-c92528cb7da4",
+      "householdId": "adrian-test-household",
+      "make": "Rolex",
+      "model": "Watch",
+      "serialNumber": "nmjhkkn",
+      "description": "",
+      "category": "Jewellery",
+      "value": 100,
+      "imageUrl": "http://localhost:4000/uploads/00522b60-29ea-4baf-b511-638d6b701c7d.jpg",
+      "imageUrls": [
+        "http://localhost:4000/uploads/00522b60-29ea-4baf-b511-638d6b701c7d.jpg",
+        "http://localhost:4000/uploads/f5142ae9-9baa-4795-ba73-1af568a25bbd.png",
+        "http://localhost:4000/uploads/95f9549b-57b2-4294-a521-b37c1961ff60.jpg"
+      ],
+      "createdAt": "2026-02-10T15:36:55.982Z",
+      "updatedAt": "2026-02-10T15:36:55.982Z"
+    }
+  ]
 }

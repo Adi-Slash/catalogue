@@ -4,9 +4,18 @@ import { useAuth } from '../contexts/AuthContext';
  * Gets the household ID from the authenticated user.
  * For now, we use the user's ID as the household ID.
  * In the future, this could be derived from a custom claim or user attribute.
+ * 
+ * In local development without authentication, returns a default test household ID.
  */
 export function useHouseholdId(): string | null {
   const { user } = useAuth();
+  
+  // In local development without auth, use a default test household ID
+  const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  if (!user && isLocalDev) {
+    return 'adrian-test-household';
+  }
+  
   if (!user) return null;
   
   // Use userId as householdId for now (all users in same household share same userId pattern)

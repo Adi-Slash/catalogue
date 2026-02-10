@@ -11,7 +11,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   
   // In local development, authentication endpoints don't exist
   // Allow access for local development
-  const isLocalDev = window.location.hostname === 'localhost';
+  const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 
   if (loading) {
     return <div className="loading">Loading...</div>;

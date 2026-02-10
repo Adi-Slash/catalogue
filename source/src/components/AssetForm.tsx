@@ -20,7 +20,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
   const [value, setValue] = useState<number | ''>('');
   // Support up to four images per asset
   const [files, setFiles] = useState<File[]>([]);
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]); // Mix of existing URLs (strings) and blob URLs for new photos
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -46,12 +46,15 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       setError('Make, model and value are required');
       return;
     }
-    let finalImageUrls = imageUrls;
-    // If user selected new files, upload them and replace existing URLs
+    // Separate existing URLs (strings) from new blob URLs (files to upload)
+    const existingUrls = imageUrls.filter((url) => !url.startsWith('blob:'));
+    let finalImageUrls = existingUrls;
+
+    // Upload new files and combine with existing URLs
     if (files.length > 0) {
       try {
         const uploaded = await Promise.all(files.map((f) => uploadImage(f, householdId)));
-        finalImageUrls = uploaded.slice(0, 4);
+        finalImageUrls = [...existingUrls, ...uploaded].slice(0, 4);
       } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';
         setError('Image upload failed: ' + errorMessage);
@@ -78,6 +81,12 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       }
       // Reset form on success
       if (!initialAsset) {
+        // Clean up blob URLs before resetting
+        imageUrls.forEach((url) => {
+          if (url.startsWith('blob:')) {
+            URL.revokeObjectURL(url);
+          }
+        });
         setMake('');
         setModel('');
         setSerialNumber('');
@@ -96,10 +105,43 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const selectedFiles = Array.from(e.target.files || []).slice(0, 4);
-    setFiles(selectedFiles);
-    const previewUrls = selectedFiles.map((file) => URL.createObjectURL(file));
-    setImageUrls(previewUrls);
+    const newFiles = Array.from(e.target.files || []);
+    if (newFiles.length === 0) return;
+
+    // Count existing images (both existing URLs and new files)
+    const currentCount = imageUrls.length;
+    const remainingSlots = Math.max(0, 4 - currentCount);
+    const filesToAdd = newFiles.slice(0, remainingSlots);
+
+    if (filesToAdd.length > 0) {
+      const updatedFiles = [...files, ...filesToAdd];
+      setFiles(updatedFiles);
+
+      // Create preview URLs for new files and add to existing URLs
+      const newPreviews = filesToAdd.map((file) => URL.createObjectURL(file));
+      setImageUrls([...imageUrls, ...newPreviews]);
+    }
+
+    // Reset the input so it can be used again for another photo
+    e.target.value = '';
+  }
+
+  function removeImage(index: number) {
+    const urlToRemove = imageUrls[index];
+    
+    // If it's a blob URL (new photo), revoke it and remove from files array
+    if (urlToRemove.startsWith('blob:')) {
+      URL.revokeObjectURL(urlToRemove);
+      // Find which file index this corresponds to (count blob URLs before this index)
+      const blobUrlsBefore = imageUrls.slice(0, index).filter((url) => url.startsWith('blob:')).length;
+      const fileIndex = blobUrlsBefore;
+      const updatedFiles = files.filter((_, i) => i !== fileIndex);
+      setFiles(updatedFiles);
+    }
+
+    // Remove from preview URLs
+    const updatedUrls = imageUrls.filter((_, i) => i !== index);
+    setImageUrls(updatedUrls);
   }
 
   return (
@@ -205,19 +247,37 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
           <label htmlFor="image" className="form-label">
             Asset Images (up to 4)
           </label>
-          <input
-            id="image"
-            type="file"
-            accept="image/*"
-            capture="environment"
-            multiple
-            onChange={handleFileChange}
-            className="form-file"
-          />
+          <div className="camera-controls">
+            <input
+              id="image"
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={handleFileChange}
+              className="form-file"
+              disabled={files.length >= 4}
+            />
+            {files.length >= 4 && (
+              <span className="max-photos-message">Maximum of 4 photos reached</span>
+            )}
+            {files.length > 0 && files.length < 4 && (
+              <span className="photo-count-message">
+                {files.length} of 4 photos taken. Tap to take another photo.
+              </span>
+            )}
+          </div>
           {imageUrls.length > 0 && (
             <div className="image-preview-grid">
               {imageUrls.slice(0, 4).map((url, index) => (
                 <div className="image-preview" key={index}>
+                  <button
+                    type="button"
+                    className="remove-image-btn"
+                    onClick={() => removeImage(index)}
+                    aria-label={`Remove photo ${index + 1}`}
+                  >
+                    ×
+                  </button>
                   <img src={url} alt={`Asset preview ${index + 1}`} className="preview-image" />
                 </div>
               ))}

@@ -77,14 +77,24 @@ export default function AssetDetailPage() {
       </div>
     );
 
-  const primaryImagePath =
-    (asset.imageUrls && asset.imageUrls.length > 0 && asset.imageUrls[0]) || asset.imageUrl;
+  const rawPaths =
+    (asset.imageUrls && asset.imageUrls.length > 0 && asset.imageUrls) ||
+    (asset.imageUrl ? [asset.imageUrl] : []);
 
-  const imageUrl = primaryImagePath
-    ? primaryImagePath.startsWith('http')
-      ? primaryImagePath
-      : `${API_BASE}${primaryImagePath}`
-    : undefined;
+  const imageUrls = rawPaths.map((p) => (p.startsWith('http') ? p : `${API_BASE}${p}`)).slice(0, 4);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const mainImageUrl = imageUrls[selectedIndex];
+  const hasMultiple = imageUrls.length > 1;
+
+  const goPrev = () => {
+    if (!hasMultiple) return;
+    setSelectedIndex((prev) => (prev - 1 + imageUrls.length) % imageUrls.length);
+  };
+
+  const goNext = () => {
+    if (!hasMultiple) return;
+    setSelectedIndex((prev) => (prev + 1) % imageUrls.length);
+  };
 
   return (
     <div className="asset-detail-page">
@@ -111,9 +121,49 @@ export default function AssetDetailPage() {
             </div>
           </div>
 
-          {imageUrl && (
+          {mainImageUrl && (
             <div className="asset-image-section">
-              <img src={imageUrl} alt={`${asset.make} ${asset.model}`} className="asset-image" />
+              <div className="asset-image-wrapper">
+                <img
+                  src={mainImageUrl}
+                  alt={`${asset.make} ${asset.model}`}
+                  className="asset-image"
+                />
+                {hasMultiple && (
+                  <div className="asset-carousel-nav">
+                    <button
+                      type="button"
+                      className="asset-carousel-btn prev"
+                      aria-label="Previous image"
+                      onClick={goPrev}
+                    >
+                      ‹
+                    </button>
+                    <button
+                      type="button"
+                      className="asset-carousel-btn next"
+                      aria-label="Next image"
+                      onClick={goNext}
+                    >
+                      ›
+                    </button>
+                  </div>
+                )}
+              </div>
+              {imageUrls.length > 1 && (
+                <div className="asset-image-thumbs">
+                  {imageUrls.slice(0, 4).map((url, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      className={`thumb ${index === selectedIndex ? 'selected' : ''}`}
+                      onClick={() => setSelectedIndex(index)}
+                    >
+                      <img src={url} alt={`Asset thumbnail ${index + 1}`} />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

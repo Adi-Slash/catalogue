@@ -15,8 +15,8 @@
 
 .card-image {
   position: relative;
-  width: 200px;
-  height: 200px;
+  width: 220px;
+  height: 180px;
   margin: 0 auto;
   overflow: hidden;
   background: #f8f9fa;
@@ -130,6 +130,80 @@
 .card-footer {
   padding: 0 1.5rem 1rem 1.5rem;
   border-top: 1px solid #e9ecef;
+}
+
+.carousel-nav {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px;
+  transform: translateY(-50%);
+  pointer-events: none; /* allow buttons only to capture clicks */
+}
+
+.carousel-btn {
+  pointer-events: auto;
+  border: none;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.carousel-btn:hover {
+  background: rgba(0, 0, 0, 0.6);
+  transform: scale(1.05);
+}
+
+.card-thumbnails {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem 0;
+}
+
+.thumbnail {
+  border: none;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  opacity: 0.8;
+  transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
+}
+
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.thumbnail.selected {
+  opacity: 1;
+  box-shadow: 0 0 0 2px #667eea;
+  transform: translateY(-1px);
+}
+
+.thumbnail:hover {
+  opacity: 1;
+  transform: translateY(-2px);
 }
 
 
