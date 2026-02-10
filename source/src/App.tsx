@@ -6,7 +6,7 @@ import AssetListPage from './pages/AssetListPage';
 import AssetDetailPage from './pages/AssetDetailPage';
 import AddAssetPage from './pages/AddAssetPage';
 import LoginPage from './pages/LoginPage';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LoginButton from './components/LoginButton';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthCallbackHandler from './components/AuthCallbackHandler';
@@ -14,6 +14,7 @@ import AuthCallbackHandler from './components/AuthCallbackHandler';
 function AppRoutes() {
   const [searchInput, setSearchInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const { user } = useAuth();
 
   function handleSearchSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -24,10 +25,17 @@ function AppRoutes() {
       <div id="root">
         <header className="header">
           <div className="header-content">
-            <Link to="/" className="logo">
-              <span className="logo-line-1">Asset</span>
-              <span className="logo-line-2">Catalogue</span>
-            </Link>
+            <div className="header-left">
+              <Link to="/" className="logo">
+                <span className="logo-line-1">Asset</span>
+                <span className="logo-line-2">Catalogue</span>
+              </Link>
+              {user && (
+                <div className="header-user-name">
+                  {user.userDetails}
+                </div>
+              )}
+            </div>
             <div className="header-center">
               <form className="search-bar" onSubmit={handleSearchSubmit}>
                 <input
