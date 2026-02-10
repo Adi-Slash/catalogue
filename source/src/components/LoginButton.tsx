@@ -10,12 +10,9 @@ export default function LoginButton() {
 
   if (user) {
     return (
-      <div className="login-button">
-        <span className="user-name">{user.userDetails}</span>
-        <button onClick={logout} className="logout-btn">
-          Logout
-        </button>
-      </div>
+      <button onClick={logout} className="logout-btn">
+        Logout
+      </button>
     );
   }
 
