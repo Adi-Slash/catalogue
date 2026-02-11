@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { FormEvent } from 'react';
 import { uploadImage } from '../api/assets';
 import type { NewAsset, Asset } from '../types/asset';
@@ -23,6 +23,8 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
   const [imageUrls, setImageUrls] = useState<string[]>([]); // Mix of existing URLs (strings) and blob URLs for new photos
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [fileInputKey, setFileInputKey] = useState(0); // Key to force input reset on mobile
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (initialAsset) {
@@ -48,18 +50,39 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
     }
     // Separate existing URLs (strings) from new blob URLs (files to upload)
     const existingUrls = imageUrls.filter((url) => !url.startsWith('blob:'));
+    const blobUrls = imageUrls.filter((url) => url.startsWith('blob:'));
+    console.log('[AssetForm] Submitting. Existing URLs:', existingUrls.length, 'Blob URLs:', blobUrls.length, 'Files:', files.length);
+    
+    // Validation: blob URLs should match files count (each blob URL should have a corresponding file)
+    if (blobUrls.length !== files.length) {
+      console.warn('[AssetForm] Mismatch detected! Blob URLs:', blobUrls.length, 'but Files:', files.length);
+      // If we have more blob URLs than files, we might have lost some files
+      // If we have more files than blob URLs, we might have extra files
+      // For now, proceed with what we have, but log the issue
+    }
+    
     let finalImageUrls = existingUrls;
 
     // Upload new files and combine with existing URLs
     if (files.length > 0) {
       try {
-        const uploaded = await Promise.all(files.map((f) => uploadImage(f, householdId)));
+        console.log('[AssetForm] Uploading', files.length, 'files...');
+        const uploaded = await Promise.all(files.map((f, idx) => {
+          console.log('[AssetForm] Uploading file', idx + 1, 'of', files.length, '-', f.name, f.size, 'bytes');
+          return uploadImage(f, householdId);
+        }));
+        console.log('[AssetForm] Uploaded', uploaded.length, 'images. URLs:', uploaded);
         finalImageUrls = [...existingUrls, ...uploaded].slice(0, 4);
+        console.log('[AssetForm] Final image URLs count:', finalImageUrls.length);
       } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        console.error('[AssetForm] Upload error:', err);
         setError('Image upload failed: ' + errorMessage);
         return;
       }
+    } else if (blobUrls.length > 0) {
+      // We have blob URLs but no files - this shouldn't happen, but log it
+      console.warn('[AssetForm] Warning: Have blob URLs but no files to upload. Blob URLs will be lost.');
     }
     const payload: Partial<NewAsset> = {
       householdId,
@@ -95,6 +118,8 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
         setValue('');
         setFiles([]);
         setImageUrls([]);
+        // Reset file input key to allow fresh captures
+        setFileInputKey(0);
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Save failed';
@@ -108,22 +133,56 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
     const newFiles = Array.from(e.target.files || []);
     if (newFiles.length === 0) return;
 
-    // Count existing images (both existing URLs and new files)
-    const currentCount = imageUrls.length;
-    const remainingSlots = Math.max(0, 4 - currentCount);
+    // Count total images: existing URLs (when editing) + new files already captured
+    const totalImageCount = imageUrls.length;
+    const remainingSlots = Math.max(0, 4 - totalImageCount);
+    
+    if (remainingSlots === 0) {
+      // Already at max, reset input and return
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      return;
+    }
+
+    // Take only as many files as we have slots remaining
     const filesToAdd = newFiles.slice(0, remainingSlots);
 
     if (filesToAdd.length > 0) {
-      const updatedFiles = [...files, ...filesToAdd];
-      setFiles(updatedFiles);
+      // Add new files to the files array
+      setFiles((prevFiles) => {
+        const updatedFiles = [...prevFiles, ...filesToAdd];
+        console.log('[AssetForm] Added files. Total files:', updatedFiles.length, 'New files:', filesToAdd.length);
+        return updatedFiles;
+      });
 
-      // Create preview URLs for new files and add to existing URLs
+      // Create preview URLs (blob URLs) for new files and add to existing URLs
       const newPreviews = filesToAdd.map((file) => URL.createObjectURL(file));
-      setImageUrls([...imageUrls, ...newPreviews]);
-    }
+      const newTotalCount = imageUrls.length + newPreviews.length;
+      
+      setImageUrls((prevUrls) => {
+        const updatedUrls = [...prevUrls, ...newPreviews];
+        console.log('[AssetForm] Added image URLs. Total URLs:', updatedUrls.length, 'New previews:', newPreviews.length);
+        return updatedUrls;
+      });
 
-    // Reset the input so it can be used again for another photo
-    e.target.value = '';
+      // Reset the input so it can be used again for another photo
+      // On mobile devices, use a key to force input recreation for reliable sequential camera captures
+      setTimeout(() => {
+        if (fileInputRef.current && newTotalCount < 4) {
+          fileInputRef.current.value = '';
+          // Increment key to force input reset on mobile (helps with sequential camera captures)
+          setFileInputKey((prev) => prev + 1);
+        }
+      }, 100);
+    } else {
+      // No files added (shouldn't happen), but reset input anyway
+      setTimeout(() => {
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      }, 0);
+    }
   }
 
   function removeImage(index: number) {
@@ -133,15 +192,21 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
     if (urlToRemove.startsWith('blob:')) {
       URL.revokeObjectURL(urlToRemove);
       // Find which file index this corresponds to (count blob URLs before this index)
-      const blobUrlsBefore = imageUrls.slice(0, index).filter((url) => url.startsWith('blob:')).length;
-      const fileIndex = blobUrlsBefore;
-      const updatedFiles = files.filter((_, i) => i !== fileIndex);
-      setFiles(updatedFiles);
+      setFiles((prevFiles) => {
+        const blobUrlsBefore = imageUrls.slice(0, index).filter((url) => url.startsWith('blob:')).length;
+        const fileIndex = blobUrlsBefore;
+        const updatedFiles = prevFiles.filter((_, i) => i !== fileIndex);
+        console.log('[AssetForm] Removed file at index', fileIndex, 'Remaining files:', updatedFiles.length);
+        return updatedFiles;
+      });
     }
 
     // Remove from preview URLs
-    const updatedUrls = imageUrls.filter((_, i) => i !== index);
-    setImageUrls(updatedUrls);
+    setImageUrls((prevUrls) => {
+      const updatedUrls = prevUrls.filter((_, i) => i !== index);
+      console.log('[AssetForm] Removed image URL at index', index, 'Remaining URLs:', updatedUrls.length);
+      return updatedUrls;
+    });
   }
 
   return (
@@ -249,20 +314,22 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
           </label>
           <div className="camera-controls">
             <input
+              key={fileInputKey}
+              ref={fileInputRef}
               id="image"
               type="file"
               accept="image/*"
               capture="environment"
               onChange={handleFileChange}
               className="form-file"
-              disabled={files.length >= 4}
+              disabled={imageUrls.length >= 4}
             />
-            {files.length >= 4 && (
+            {imageUrls.length >= 4 && (
               <span className="max-photos-message">Maximum of 4 photos reached</span>
             )}
-            {files.length > 0 && files.length < 4 && (
+            {imageUrls.length > 0 && imageUrls.length < 4 && (
               <span className="photo-count-message">
-                {files.length} of 4 photos taken. Tap to take another photo.
+                {imageUrls.length} of 4 photos taken. Tap to take another photo.
               </span>
             )}
           </div>
