@@ -84,15 +84,31 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
     // Increased delay for mobile devices which might be slower
     await new Promise((resolve) => setTimeout(resolve, 200));
 
+    // CRITICAL FIX: Wait for any pending imageUrls updates to complete
+    // Since handleFileChange uses setTimeout to update imageUrls, we need to wait
+    // for those timeouts to execute before reading the state
+    // Wait a bit longer to ensure all setTimeout callbacks have executed
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     // Separate existing URLs (strings) from new blob URLs (files to upload)
     // Always prefer filesRef.current as it's updated synchronously in handleFileChange
     // The ref should have the latest files even if state hasn't updated yet
     const currentFiles = filesRef.current.length >= files.length ? filesRef.current : files;
     
-    // For imageUrls, we need to check if state has updated
-    // If we have more blob URLs than files, it might mean state hasn't updated yet
-    // In that case, we should still upload all files we have
-    const currentImageUrls = imageUrls;
+    // Re-read imageUrls after waiting - it should now have all the blob URLs
+    // Use a functional update to get the latest state
+    let currentImageUrls = imageUrls;
+    // Force a re-read by checking if we need to wait more
+    // If filesRef has more files than imageUrls has blob URLs, wait a bit more
+    const blobUrlsCount = imageUrls.filter((url) => url.startsWith('blob:')).length;
+    if (currentFiles.length > blobUrlsCount && currentFiles.length > 0) {
+      console.log('[AssetForm] Waiting for imageUrls state to catch up. Files:', currentFiles.length, 'Blob URLs:', blobUrlsCount);
+      // Wait a bit more for state to update
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      // Re-read imageUrls state - we can't use functional update here, so we'll rely on the wait
+      // Actually, we'll just use filesRef.current which has all the files
+    }
+    
     const existingUrls = currentImageUrls.filter((url) => !url.startsWith('blob:'));
     const blobUrls = currentImageUrls.filter((url) => url.startsWith('blob:'));
     
@@ -115,11 +131,13 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
     // Upload new files and combine with existing URLs
     // CRITICAL: Always upload all files from currentFiles, even if blobUrls count doesn't match
     // This ensures we don't lose files on mobile when state hasn't updated yet
-    if (currentFiles.length > 0) {
+    // CRITICAL: Use filesRef.current directly to ensure we have all files
+    const filesToUpload = filesRef.current.length > 0 ? filesRef.current : currentFiles;
+    if (filesToUpload.length > 0) {
       try {
-        console.log('[AssetForm] Uploading', currentFiles.length, 'files...');
-        const uploaded = await Promise.all(currentFiles.map((f, idx) => {
-          console.log('[AssetForm] Uploading file', idx + 1, 'of', currentFiles.length, '-', f.name, f.size, 'bytes');
+        console.log('[AssetForm] Uploading', filesToUpload.length, 'files...');
+        const uploaded = await Promise.all(filesToUpload.map((f, idx) => {
+          console.log('[AssetForm] Uploading file', idx + 1, 'of', filesToUpload.length, '-', f.name, f.size, 'bytes');
           return uploadImage(f, householdId);
         }));
         console.log('[AssetForm] Uploaded', uploaded.length, 'images. URLs:', uploaded);
@@ -283,11 +301,17 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
         console.log('[AssetForm] Updated files array. Total files:', updatedFiles.length, 'Added:', filesToAdd.length, 'File names:', filesToAdd.map(f => f.name), 'Ref updated synchronously');
         console.log('[AssetForm] Updated image URLs. Total:', updatedUrls.length, 'Added:', newPreviews.length);
 
-        // CRITICAL FIX: Update imageUrls state separately using setTimeout
-        // This ensures it happens AFTER both callbacks complete in a different event loop tick,
-        // preventing React from batching it with the outer callback's return value
+        // CRITICAL FIX: Update imageUrls state using a functional update
+        // This ensures we merge correctly even if multiple updates happen quickly
+        // Use setTimeout to ensure it happens after the outer callback returns
         setTimeout(() => {
-          setImageUrls(updatedUrls);
+          setImageUrls((currentUrls) => {
+            // Merge: keep all existing URLs, add new previews
+            // This ensures we don't lose blob URLs from previous handleFileChange calls
+            const mergedUrls = [...currentUrls, ...newPreviews].slice(0, 4);
+            console.log('[AssetForm] Merged image URLs. Previous:', currentUrls.length, 'New previews:', newPreviews.length, 'Merged:', mergedUrls.length);
+            return mergedUrls;
+          });
         }, 0);
 
         // Reset processing flag

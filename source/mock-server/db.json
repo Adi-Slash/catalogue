@@ -1,21 +1,17 @@
 {
   "assets": [
     {
-      "id": "126f450d-9d5a-4dd9-9a8a-0acb57447d29",
+      "id": "782e0ccb-a104-496d-b528-f86f686aec42",
       "householdId": "adrian-test-household",
-      "make": "aaa",
-      "model": "aaa",
-      "serialNumber": "aaa",
+      "make": "Sony",
+      "model": "Camera",
+      "serialNumber": "",
       "description": "",
-      "category": "Electrical",
-      "value": 10,
-      "imageUrl": "http://localhost:4000/uploads/3d04c46a-e279-4d8c-8395-b56a0e255f5a.jpg",
-      "imageUrls": [
-        "http://localhost:4000/uploads/3d04c46a-e279-4d8c-8395-b56a0e255f5a.jpg",
-        "http://localhost:4000/uploads/7e7ce8c7-2ff4-4fd1-987b-344b7f2beb20.jpg"
-      ],
-      "createdAt": "2026-02-11T15:43:55.859Z",
-      "updatedAt": "2026-02-11T15:43:55.859Z"
+      "category": "",
+      "value": 500,
+      "imageUrl": "http://localhost:4000/uploads/8756540f-ff7e-462c-ba1a-975ed22e7c5d.png",
+      "createdAt": "2026-02-11T15:56:17.058Z",
+      "updatedAt": "2026-02-11T15:56:17.058Z"
     }
   ]
 }

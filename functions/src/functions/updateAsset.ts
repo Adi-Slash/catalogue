@@ -31,11 +31,32 @@ export async function updateAssetHandler(request: HttpRequest, context: Invocati
     }
 
     const body = await request.json() as Partial<Asset>;
+    
+    // Handle imageUrls - if provided, ensure imageUrl is also set to the first element
+    let imageUrls: string[] | undefined;
+    let imageUrl: string | undefined;
+    
+    if (Array.isArray(body.imageUrls)) {
+      // imageUrls is explicitly provided (could be empty array)
+      imageUrls = body.imageUrls;
+      imageUrl = imageUrls.length > 0 ? imageUrls[0] : body.imageUrl || existing.imageUrl || '';
+    } else if (body.imageUrl) {
+      // Only imageUrl is provided, create imageUrls array from it
+      imageUrl = body.imageUrl;
+      imageUrls = [body.imageUrl];
+    } else {
+      // Neither is provided, preserve existing values
+      imageUrl = existing.imageUrl;
+      imageUrls = existing.imageUrls;
+    }
+    
     const updated: Asset = {
       ...existing,
       ...body,
       id: existing.id, // Ensure ID doesn't change
       householdId: existing.householdId, // Ensure householdId doesn't change
+      imageUrl: imageUrl || '',
+      imageUrls: imageUrls,
       updatedAt: new Date().toISOString(),
     };
 

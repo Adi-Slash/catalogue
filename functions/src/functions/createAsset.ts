@@ -24,6 +24,13 @@ export async function createAssetHandler(request: HttpRequest, context: Invocati
     }
 
     const now = new Date().toISOString();
+    // Handle imageUrls array - if provided, use it; otherwise fall back to imageUrl
+    const bodyImageUrls = Array.isArray(body.imageUrls)
+      ? body.imageUrls
+      : body.imageUrl
+      ? [body.imageUrl]
+      : [];
+    
     const asset: Asset = {
       id: uuidv4(),
       householdId,
@@ -33,7 +40,8 @@ export async function createAssetHandler(request: HttpRequest, context: Invocati
       description: body.description || '',
       category: body.category || '',
       value: body.value,
-      imageUrl: body.imageUrl || '',
+      imageUrl: bodyImageUrls[0] || body.imageUrl || '',
+      imageUrls: bodyImageUrls,
       createdAt: now,
       updatedAt: now,
     };

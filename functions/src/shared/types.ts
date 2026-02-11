@@ -7,7 +7,15 @@ export interface Asset {
   description?: string;
   category?: string;
   value: number;
+  /**
+   * Primary image URL for the asset (kept for backwards compatibility).
+   * When multiple images are present, this should be the first entry in imageUrls.
+   */
   imageUrl?: string;
+  /**
+   * Optional list of up to four image URLs associated with the asset.
+   */
+  imageUrls?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -20,5 +28,13 @@ export interface NewAsset {
   description?: string;
   category?: string;
   value: number;
+  /**
+   * Primary image URL for the asset (kept for backwards compatibility).
+   * When multiple images are present, this should be the first entry in imageUrls.
+   */
   imageUrl?: string;
+  /**
+   * Optional list of up to four image URLs associated with the asset.
+   */
+  imageUrls?: string[];
 }
