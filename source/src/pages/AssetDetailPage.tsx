@@ -16,6 +16,8 @@ export default function AssetDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
+  // Move useState hook before any conditional returns to avoid hooks violation
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   const load = useCallback(async () => {
     if (!id || !householdId) return;
@@ -24,6 +26,8 @@ export default function AssetDetailPage() {
     try {
       const a = await getAsset(id, householdId);
       setAsset(a);
+      // Reset selectedIndex when asset changes
+      setSelectedIndex(0);
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load';
       setError(errorMessage);
@@ -41,6 +45,8 @@ export default function AssetDetailPage() {
     const updated = await updateAsset(asset.id, payload, householdId);
     setAsset(updated);
     setEditing(false);
+    // Reset selectedIndex when asset is updated
+    setSelectedIndex(0);
   }
 
   async function handleDelete() {
@@ -49,6 +55,25 @@ export default function AssetDetailPage() {
     await deleteAsset(asset.id, householdId);
     navigate('/assets');
   }
+
+  // Compute image URLs after hooks but before early returns
+  const rawPaths =
+    asset && ((asset.imageUrls && asset.imageUrls.length > 0 && asset.imageUrls) ||
+    (asset.imageUrl ? [asset.imageUrl] : [])) || [];
+
+  const imageUrls = rawPaths.map((p) => (p.startsWith('http') ? p : `${API_BASE}${p}`)).slice(0, 4);
+  const mainImageUrl = imageUrls[selectedIndex] || undefined;
+  const hasMultiple = imageUrls.length > 1;
+
+  const goPrev = () => {
+    if (!hasMultiple) return;
+    setSelectedIndex((prev) => (prev - 1 + imageUrls.length) % imageUrls.length);
+  };
+
+  const goNext = () => {
+    if (!hasMultiple) return;
+    setSelectedIndex((prev) => (prev + 1) % imageUrls.length);
+  };
 
   if (loading)
     return (
@@ -76,25 +101,6 @@ export default function AssetDetailPage() {
         </div>
       </div>
     );
-
-  const rawPaths =
-    (asset.imageUrls && asset.imageUrls.length > 0 && asset.imageUrls) ||
-    (asset.imageUrl ? [asset.imageUrl] : []);
-
-  const imageUrls = rawPaths.map((p) => (p.startsWith('http') ? p : `${API_BASE}${p}`)).slice(0, 4);
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const mainImageUrl = imageUrls[selectedIndex];
-  const hasMultiple = imageUrls.length > 1;
-
-  const goPrev = () => {
-    if (!hasMultiple) return;
-    setSelectedIndex((prev) => (prev - 1 + imageUrls.length) % imageUrls.length);
-  };
-
-  const goNext = () => {
-    if (!hasMultiple) return;
-    setSelectedIndex((prev) => (prev + 1) % imageUrls.length);
-  };
 
   return (
     <div className="asset-detail-page">
