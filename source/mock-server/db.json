@@ -1,23 +1,21 @@
 {
   "assets": [
     {
-      "id": "c029a481-87f2-4f31-adfe-6a79f21af5c0",
+      "id": "ce75a899-cba7-4eae-b411-d925bad46944",
       "householdId": "adrian-test-household",
-      "make": "Rolex",
-      "model": "Watch",
-      "serialNumber": "nmjhkkn",
+      "make": "a",
+      "model": "a",
+      "serialNumber": "a",
       "description": "",
-      "category": "",
-      "value": 100,
-      "imageUrl": "http://localhost:4000/uploads/d6408f8c-ff80-4b75-9cdc-aa4d1a7c6065.jpg",
+      "category": "Electrical",
+      "value": 10,
+      "imageUrl": "http://localhost:4000/uploads/22120290-de95-495c-9a29-2d363a043e9e.jpg",
       "imageUrls": [
-        "http://localhost:4000/uploads/d6408f8c-ff80-4b75-9cdc-aa4d1a7c6065.jpg",
-        "http://localhost:4000/uploads/f752d0d5-2edf-4ac5-98c8-dd30184bd9a6.jpg",
-        "http://localhost:4000/uploads/09de2ca4-8d97-40be-b480-a9e1aaeada85.jpg",
-        "http://localhost:4000/uploads/e47c1d7e-ad79-461f-9b72-f65787e0ba37.jpg"
+        "http://localhost:4000/uploads/22120290-de95-495c-9a29-2d363a043e9e.jpg",
+        "http://localhost:4000/uploads/37d92342-c82f-464b-be9d-0f44aacea723.jpg"
       ],
-      "createdAt": "2026-02-11T11:05:50.217Z",
-      "updatedAt": "2026-02-11T11:05:50.217Z"
+      "createdAt": "2026-02-11T11:48:50.832Z",
+      "updatedAt": "2026-02-11T11:48:50.832Z"
     }
   ]
 }

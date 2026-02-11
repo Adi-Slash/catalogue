@@ -166,13 +166,13 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
 
     processingRef.current = true;
 
-    // Read current state using functional updates, calculate what to add, then update both states
-    // We'll use the ref to get the latest files state
+    // Read current state values - use functional updates to get latest
+    // We need to coordinate both files and imageUrls
     setImageUrls((prevUrls) => {
       const totalImageCount = prevUrls.length;
       const remainingSlots = Math.max(0, 4 - totalImageCount);
       
-      console.log('[AssetForm] Current state - URLs:', prevUrls.length, 'Files (ref):', filesRef.current.length, 'Remaining slots:', remainingSlots);
+      console.log('[AssetForm] Current state - URLs:', prevUrls.length, 'Remaining slots:', remainingSlots);
       
       if (remainingSlots === 0) {
         console.log('[AssetForm] Already at max capacity (4 images)');
@@ -185,73 +185,87 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
         return prevUrls;
       }
 
-      // Filter out files that are already in the array to prevent duplicates
-      // Use the ref to get the latest files state
-      const existingFileKeys = new Set(
-        filesRef.current.map(f => `${f.name}-${f.size}-${f.lastModified}`)
-      );
-      const uniqueNewFiles = newFiles.filter(
-        f => !existingFileKeys.has(`${f.name}-${f.size}-${f.lastModified}`)
-      );
-
-      if (uniqueNewFiles.length === 0) {
-        console.log('[AssetForm] All files are duplicates, ignoring');
-        processingRef.current = false;
-        setTimeout(() => {
-          if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-          }
-        }, 0);
-        return prevUrls;
-      }
-
-      // Take only as many unique files as we have slots remaining
-      const filesToAdd = uniqueNewFiles.slice(0, remainingSlots);
-      
-      if (filesToAdd.length === 0) {
-        console.log('[AssetForm] No files to add after filtering');
-        processingRef.current = false;
-        setTimeout(() => {
-          if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-          }
-        }, 0);
-        return prevUrls;
-      }
-
-      // Create preview URLs (blob URLs) for new files
-      const newPreviews = filesToAdd.map((file) => {
-        const blobUrl = URL.createObjectURL(file);
-        console.log('[AssetForm] Created blob URL for file:', file.name, 'Size:', file.size, 'bytes');
-        return blobUrl;
-      });
-      
-      const updatedUrls = [...prevUrls, ...newPreviews];
-      console.log('[AssetForm] Updated image URLs. Total:', updatedUrls.length, 'Added:', newPreviews.length);
-
-      // Update files state separately
+      // Now read files state using functional update
       setFiles((prevFiles) => {
+        console.log('[AssetForm] Current files (state):', prevFiles.length, 'Current files (ref):', filesRef.current.length);
+
+        // Use the larger of state or ref to ensure we have latest files
+        // The ref should be updated synchronously, so it might be more recent
+        const currentFilesForCheck = filesRef.current.length > prevFiles.length ? filesRef.current : prevFiles;
+
+        // Filter out files that are already in the array to prevent duplicates
+        const existingFileKeys = new Set(
+          currentFilesForCheck.map(f => `${f.name}-${f.size}-${f.lastModified}`)
+        );
+        const uniqueNewFiles = newFiles.filter(
+          f => !existingFileKeys.has(`${f.name}-${f.size}-${f.lastModified}`)
+        );
+
+        if (uniqueNewFiles.length === 0) {
+          console.log('[AssetForm] All files are duplicates, ignoring');
+          processingRef.current = false;
+          setTimeout(() => {
+            if (fileInputRef.current) {
+              fileInputRef.current.value = '';
+            }
+          }, 0);
+          return prevFiles;
+        }
+
+        // Take only as many unique files as we have slots remaining
+        const filesToAdd = uniqueNewFiles.slice(0, remainingSlots);
+        
+        if (filesToAdd.length === 0) {
+          console.log('[AssetForm] No files to add after filtering');
+          processingRef.current = false;
+          setTimeout(() => {
+            if (fileInputRef.current) {
+              fileInputRef.current.value = '';
+            }
+          }, 0);
+          return prevFiles;
+        }
+
+        // Create preview URLs (blob URLs) for new files
+        const newPreviews = filesToAdd.map((file) => {
+          const blobUrl = URL.createObjectURL(file);
+          console.log('[AssetForm] Created blob URL for file:', file.name, 'Size:', file.size, 'bytes');
+          return blobUrl;
+        });
+
+        // Update files array - use prevFiles (from state) as base, not ref
+        // The ref will be updated after this
         const updatedFiles = [...prevFiles, ...filesToAdd];
-        filesRef.current = updatedFiles;
+        filesRef.current = updatedFiles; // Update ref synchronously
         console.log('[AssetForm] Updated files array. Total files:', updatedFiles.length, 'Added:', filesToAdd.length, 'File names:', filesToAdd.map(f => f.name));
+
+        // Update imageUrls with new previews - update separately
+        const updatedUrls = [...prevUrls, ...newPreviews];
+        console.log('[AssetForm] Updated image URLs. Total:', updatedUrls.length, 'Added:', newPreviews.length);
+        
+        // Update imageUrls state - this will be processed by React
+        setImageUrls(updatedUrls);
+
+        // Reset processing flag immediately after queuing updates
+        // Use a microtask to ensure it happens after the current execution but before next event
+        Promise.resolve().then(() => {
+          processingRef.current = false;
+        });
+
+        // Reset input after a delay to allow state updates to complete
+        // On mobile, this ensures the input is ready for the next capture
+        setTimeout(() => {
+          if (fileInputRef.current && updatedUrls.length < 4) {
+            fileInputRef.current.value = '';
+            // Increment key to force input reset on mobile (helps with sequential camera captures)
+            setFileInputKey((prev) => prev + 1);
+          }
+        }, 250);
+
         return updatedFiles;
       });
 
-      // Reset processing flag after state updates are queued
-      // Use requestAnimationFrame to ensure it happens after React processes the updates
-      requestAnimationFrame(() => {
-        processingRef.current = false;
-      });
-
-      // Reset input after a short delay to allow state updates to complete
-      setTimeout(() => {
-        if (fileInputRef.current && updatedUrls.length < 4) {
-          fileInputRef.current.value = '';
-          setFileInputKey((prev) => prev + 1);
-        }
-      }, 150);
-
-      return updatedUrls;
+      return prevUrls;
     });
   }
 
