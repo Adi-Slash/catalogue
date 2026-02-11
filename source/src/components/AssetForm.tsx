@@ -61,24 +61,60 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       setError('Make, model and value are required');
       return;
     }
+
+    // Wait for any pending file processing to complete
+    // This is critical on mobile where photos might be taken quickly before submit
+    if (processingRef.current) {
+      console.log('[AssetForm] Waiting for file processing to complete before submit...');
+      let attempts = 0;
+      const maxAttempts = 30; // Increased to allow more time for mobile
+      while (processingRef.current && attempts < maxAttempts) {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        attempts++;
+      }
+      if (processingRef.current) {
+        console.warn('[AssetForm] File processing still in progress after wait, proceeding anyway');
+      } else {
+        console.log('[AssetForm] File processing completed after', attempts, 'attempts');
+      }
+    }
+
+    // Give React a moment to process any pending state updates
+    // This ensures that if files were just added, the state has updated
+    // Increased delay for mobile devices which might be slower
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
     // Separate existing URLs (strings) from new blob URLs (files to upload)
-    const existingUrls = imageUrls.filter((url) => !url.startsWith('blob:'));
-    const blobUrls = imageUrls.filter((url) => url.startsWith('blob:'));
-    // Use ref to get the most current files array (in case state hasn't updated yet)
-    const currentFiles = filesRef.current.length > 0 ? filesRef.current : files;
-    console.log('[AssetForm] Submitting. Existing URLs:', existingUrls.length, 'Blob URLs:', blobUrls.length, 'Files (state):', files.length, 'Files (ref):', filesRef.current.length);
+    // Always prefer filesRef.current as it's updated synchronously in handleFileChange
+    // The ref should have the latest files even if state hasn't updated yet
+    const currentFiles = filesRef.current.length >= files.length ? filesRef.current : files;
+    
+    // For imageUrls, we need to check if state has updated
+    // If we have more blob URLs than files, it might mean state hasn't updated yet
+    // In that case, we should still upload all files we have
+    const currentImageUrls = imageUrls;
+    const existingUrls = currentImageUrls.filter((url) => !url.startsWith('blob:'));
+    const blobUrls = currentImageUrls.filter((url) => url.startsWith('blob:'));
+    
+    console.log('[AssetForm] Submitting. Existing URLs:', existingUrls.length, 'Blob URLs:', blobUrls.length, 'Files (state):', files.length, 'Files (ref):', filesRef.current.length, 'Using files:', currentFiles.length);
     
     // Validation: blob URLs should match files count (each blob URL should have a corresponding file)
+    // On mobile, if user takes photos quickly, blobUrls might not match currentFiles yet
+    // In that case, we should still upload all files we have
     if (blobUrls.length !== currentFiles.length) {
       console.warn('[AssetForm] Mismatch detected! Blob URLs:', blobUrls.length, 'but Files:', currentFiles.length);
-      // If we have more blob URLs than files, we might have lost some files
-      // If we have more files than blob URLs, we might have extra files
-      // For now, proceed with what we have, but log the issue
+      if (currentFiles.length > blobUrls.length) {
+        console.log('[AssetForm] Have more files than blob URLs - this is OK, will upload all files');
+      } else {
+        console.warn('[AssetForm] Have more blob URLs than files - some files might be missing');
+      }
     }
     
     let finalImageUrls = existingUrls;
 
     // Upload new files and combine with existing URLs
+    // CRITICAL: Always upload all files from currentFiles, even if blobUrls count doesn't match
+    // This ensures we don't lose files on mobile when state hasn't updated yet
     if (currentFiles.length > 0) {
       try {
         console.log('[AssetForm] Uploading', currentFiles.length, 'files...');
@@ -234,10 +270,11 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
         });
 
         // Update files array - use prevFiles (from state) as base, not ref
-        // The ref will be updated after this
+        // CRITICAL: Update ref FIRST synchronously before state update
+        // This ensures submit() can read the latest files even if state hasn't updated yet
         const updatedFiles = [...prevFiles, ...filesToAdd];
-        filesRef.current = updatedFiles; // Update ref synchronously
-        console.log('[AssetForm] Updated files array. Total files:', updatedFiles.length, 'Added:', filesToAdd.length, 'File names:', filesToAdd.map(f => f.name));
+        filesRef.current = updatedFiles; // Update ref synchronously BEFORE state update
+        console.log('[AssetForm] Updated files array. Total files:', updatedFiles.length, 'Added:', filesToAdd.length, 'File names:', filesToAdd.map(f => f.name), 'Ref updated synchronously');
 
         // Update imageUrls with new previews - update separately
         const updatedUrls = [...prevUrls, ...newPreviews];
