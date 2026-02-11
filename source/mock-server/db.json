@@ -1,21 +1,21 @@
 {
   "assets": [
     {
-      "id": "d130a831-9cef-4de9-9bc5-fc8ed466b20d",
+      "id": "126f450d-9d5a-4dd9-9a8a-0acb57447d29",
       "householdId": "adrian-test-household",
-      "make": "sss",
-      "model": "sss",
-      "serialNumber": "sss",
+      "make": "aaa",
+      "model": "aaa",
+      "serialNumber": "aaa",
       "description": "",
-      "category": "Furniture",
-      "value": 100,
-      "imageUrl": "http://localhost:4000/uploads/6a1e79ae-2006-401f-ac11-c800aed8fef9.jpg",
+      "category": "Electrical",
+      "value": 10,
+      "imageUrl": "http://localhost:4000/uploads/3d04c46a-e279-4d8c-8395-b56a0e255f5a.jpg",
       "imageUrls": [
-        "http://localhost:4000/uploads/6a1e79ae-2006-401f-ac11-c800aed8fef9.jpg",
-        "http://localhost:4000/uploads/e930b1a9-13be-40ac-9498-b9991f54dfad.jpg"
+        "http://localhost:4000/uploads/3d04c46a-e279-4d8c-8395-b56a0e255f5a.jpg",
+        "http://localhost:4000/uploads/7e7ce8c7-2ff4-4fd1-987b-344b7f2beb20.jpg"
       ],
-      "createdAt": "2026-02-11T13:27:29.703Z",
-      "updatedAt": "2026-02-11T13:27:29.703Z"
+      "createdAt": "2026-02-11T15:43:55.859Z",
+      "updatedAt": "2026-02-11T15:43:55.859Z"
     }
   ]
 }

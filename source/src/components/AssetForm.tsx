@@ -202,8 +202,13 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
 
     processingRef.current = true;
 
-    // Read current state values - use functional updates to get latest
-    // We need to coordinate both files and imageUrls
+    // CRITICAL FIX: Read both states separately, calculate updates, then update both states separately
+    // This avoids the race condition where nested state updates overwrite each other
+    
+    // Step 1: Read both states using functional updates to get current values
+    // We'll calculate what needs to be added, then update both states separately (not nested)
+    
+    // First read imageUrls to check capacity
     setImageUrls((prevUrls) => {
       const totalImageCount = prevUrls.length;
       const remainingSlots = Math.max(0, 4 - totalImageCount);
@@ -221,12 +226,11 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
         return prevUrls;
       }
 
-      // Now read files state using functional update
+      // Now read files state to filter duplicates and calculate updates
       setFiles((prevFiles) => {
         console.log('[AssetForm] Current files (state):', prevFiles.length, 'Current files (ref):', filesRef.current.length);
 
         // Use the larger of state or ref to ensure we have latest files
-        // The ref should be updated synchronously, so it might be more recent
         const currentFilesForCheck = filesRef.current.length > prevFiles.length ? filesRef.current : prevFiles;
 
         // Filter out files that are already in the array to prevent duplicates
@@ -269,32 +273,32 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
           return blobUrl;
         });
 
-        // Update files array - use prevFiles (from state) as base, not ref
-        // CRITICAL: Update ref FIRST synchronously before state update
-        // This ensures submit() can read the latest files even if state hasn't updated yet
+        // Calculate updated values
         const updatedFiles = [...prevFiles, ...filesToAdd];
-        filesRef.current = updatedFiles; // Update ref synchronously BEFORE state update
-        console.log('[AssetForm] Updated files array. Total files:', updatedFiles.length, 'Added:', filesToAdd.length, 'File names:', filesToAdd.map(f => f.name), 'Ref updated synchronously');
-
-        // Update imageUrls with new previews - update separately
         const updatedUrls = [...prevUrls, ...newPreviews];
-        console.log('[AssetForm] Updated image URLs. Total:', updatedUrls.length, 'Added:', newPreviews.length);
-        
-        // Update imageUrls state - this will be processed by React
-        setImageUrls(updatedUrls);
 
-        // Reset processing flag immediately after queuing updates
-        // Use a microtask to ensure it happens after the current execution but before next event
+        // CRITICAL: Update ref FIRST synchronously before any state updates
+        // This ensures submit() can read the latest files even if state hasn't updated yet
+        filesRef.current = updatedFiles;
+        console.log('[AssetForm] Updated files array. Total files:', updatedFiles.length, 'Added:', filesToAdd.length, 'File names:', filesToAdd.map(f => f.name), 'Ref updated synchronously');
+        console.log('[AssetForm] Updated image URLs. Total:', updatedUrls.length, 'Added:', newPreviews.length);
+
+        // CRITICAL FIX: Update imageUrls state separately using setTimeout
+        // This ensures it happens AFTER both callbacks complete in a different event loop tick,
+        // preventing React from batching it with the outer callback's return value
+        setTimeout(() => {
+          setImageUrls(updatedUrls);
+        }, 0);
+
+        // Reset processing flag
         Promise.resolve().then(() => {
           processingRef.current = false;
         });
 
-        // Reset input after a delay to allow state updates to complete
-        // On mobile, this ensures the input is ready for the next capture
+        // Reset input after a delay
         setTimeout(() => {
           if (fileInputRef.current && updatedUrls.length < 4) {
             fileInputRef.current.value = '';
-            // Increment key to force input reset on mobile (helps with sequential camera captures)
             setFileInputKey((prev) => prev + 1);
           }
         }, 250);
@@ -302,6 +306,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
         return updatedFiles;
       });
 
+      // Return current URLs - the actual update happens via Promise.resolve().then() inside setFiles
       return prevUrls;
     });
   }
