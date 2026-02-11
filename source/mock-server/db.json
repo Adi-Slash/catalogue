@@ -1,17 +1,23 @@
 {
   "assets": [
     {
-      "id": "9c2eed84-85ec-4b68-a769-1bc91955ab3d",
+      "id": "c029a481-87f2-4f31-adfe-6a79f21af5c0",
       "householdId": "adrian-test-household",
-      "make": "Sony",
-      "model": "Camera",
-      "serialNumber": "",
+      "make": "Rolex",
+      "model": "Watch",
+      "serialNumber": "nmjhkkn",
       "description": "",
       "category": "",
-      "value": 500,
-      "imageUrl": "http://localhost:4000/uploads/f18cf54f-6dc8-41b3-95c8-fbeda6ac24de.png",
-      "createdAt": "2026-02-11T10:39:00.937Z",
-      "updatedAt": "2026-02-11T10:39:00.937Z"
+      "value": 100,
+      "imageUrl": "http://localhost:4000/uploads/d6408f8c-ff80-4b75-9cdc-aa4d1a7c6065.jpg",
+      "imageUrls": [
+        "http://localhost:4000/uploads/d6408f8c-ff80-4b75-9cdc-aa4d1a7c6065.jpg",
+        "http://localhost:4000/uploads/f752d0d5-2edf-4ac5-98c8-dd30184bd9a6.jpg",
+        "http://localhost:4000/uploads/09de2ca4-8d97-40be-b480-a9e1aaeada85.jpg",
+        "http://localhost:4000/uploads/e47c1d7e-ad79-461f-9b72-f65787e0ba37.jpg"
+      ],
+      "createdAt": "2026-02-11T11:05:50.217Z",
+      "updatedAt": "2026-02-11T11:05:50.217Z"
     }
   ]
 }
