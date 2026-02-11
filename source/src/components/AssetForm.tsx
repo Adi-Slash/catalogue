@@ -19,6 +19,8 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
   const [category, setCategory] = useState('');
   const [value, setValue] = useState<number | ''>('');
   // Support up to four images per asset
+  // Use a ref to track files separately to avoid state synchronization issues
+  const filesRef = useRef<File[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]); // Mix of existing URLs (strings) and blob URLs for new photos
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +40,14 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
         (initialAsset.imageUrls && initialAsset.imageUrls.length > 0 && initialAsset.imageUrls) ||
         (initialAsset.imageUrl ? [initialAsset.imageUrl] : []);
       setImageUrls(existing);
+      // Reset files when editing (existing assets don't have new files to upload)
+      setFiles([]);
+      filesRef.current = [];
+    } else {
+      // Reset everything when creating new asset
+      setFiles([]);
+      filesRef.current = [];
+      setImageUrls([]);
     }
   }, [initialAsset]);
 
@@ -51,11 +61,13 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
     // Separate existing URLs (strings) from new blob URLs (files to upload)
     const existingUrls = imageUrls.filter((url) => !url.startsWith('blob:'));
     const blobUrls = imageUrls.filter((url) => url.startsWith('blob:'));
-    console.log('[AssetForm] Submitting. Existing URLs:', existingUrls.length, 'Blob URLs:', blobUrls.length, 'Files:', files.length);
+    // Use ref to get the most current files array (in case state hasn't updated yet)
+    const currentFiles = filesRef.current.length > 0 ? filesRef.current : files;
+    console.log('[AssetForm] Submitting. Existing URLs:', existingUrls.length, 'Blob URLs:', blobUrls.length, 'Files (state):', files.length, 'Files (ref):', filesRef.current.length);
     
     // Validation: blob URLs should match files count (each blob URL should have a corresponding file)
-    if (blobUrls.length !== files.length) {
-      console.warn('[AssetForm] Mismatch detected! Blob URLs:', blobUrls.length, 'but Files:', files.length);
+    if (blobUrls.length !== currentFiles.length) {
+      console.warn('[AssetForm] Mismatch detected! Blob URLs:', blobUrls.length, 'but Files:', currentFiles.length);
       // If we have more blob URLs than files, we might have lost some files
       // If we have more files than blob URLs, we might have extra files
       // For now, proceed with what we have, but log the issue
@@ -64,11 +76,11 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
     let finalImageUrls = existingUrls;
 
     // Upload new files and combine with existing URLs
-    if (files.length > 0) {
+    if (currentFiles.length > 0) {
       try {
-        console.log('[AssetForm] Uploading', files.length, 'files...');
-        const uploaded = await Promise.all(files.map((f, idx) => {
-          console.log('[AssetForm] Uploading file', idx + 1, 'of', files.length, '-', f.name, f.size, 'bytes');
+        console.log('[AssetForm] Uploading', currentFiles.length, 'files...');
+        const uploaded = await Promise.all(currentFiles.map((f, idx) => {
+          console.log('[AssetForm] Uploading file', idx + 1, 'of', currentFiles.length, '-', f.name, f.size, 'bytes');
           return uploadImage(f, householdId);
         }));
         console.log('[AssetForm] Uploaded', uploaded.length, 'images. URLs:', uploaded);
@@ -117,6 +129,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
         setCategory('');
         setValue('');
         setFiles([]);
+        filesRef.current = []; // Reset ref too
         setImageUrls([]);
         // Reset file input key to allow fresh captures
         setFileInputKey(0);
@@ -130,59 +143,81 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const newFiles = Array.from(e.target.files || []);
-    if (newFiles.length === 0) return;
-
-    // Count total images: existing URLs (when editing) + new files already captured
-    const totalImageCount = imageUrls.length;
-    const remainingSlots = Math.max(0, 4 - totalImageCount);
-    
-    if (remainingSlots === 0) {
-      // Already at max, reset input and return
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+    // CRITICAL: Read files synchronously before any async operations
+    // On mobile with camera capture, e.target.files contains only the most recent capture
+    const inputFiles = e.target.files;
+    if (!inputFiles || inputFiles.length === 0) {
+      console.log('[AssetForm] No files in input');
       return;
     }
 
-    // Take only as many files as we have slots remaining
-    const filesToAdd = newFiles.slice(0, remainingSlots);
+    // Convert FileList to array immediately - this preserves the File objects
+    const newFiles = Array.from(inputFiles);
+    console.log('[AssetForm] File change detected. New files:', newFiles.length, 'File names:', newFiles.map(f => f.name), 'Sizes:', newFiles.map(f => f.size + ' bytes'));
 
-    if (filesToAdd.length > 0) {
-      // Add new files to the files array
+    // Use functional updates to get current state and update both files and imageUrls atomically
+    // We need to coordinate both updates based on current imageUrls count
+    setImageUrls((prevUrls) => {
+      const totalImageCount = prevUrls.length;
+      const remainingSlots = Math.max(0, 4 - totalImageCount);
+      
+      console.log('[AssetForm] Current state - URLs:', prevUrls.length, 'Remaining slots:', remainingSlots);
+      
+      if (remainingSlots === 0) {
+        console.log('[AssetForm] Already at max capacity (4 images)');
+        // Reset input for next time
+        setTimeout(() => {
+          if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+          }
+        }, 0);
+        return prevUrls; // No change
+      }
+
+      // Take only as many files as we have slots remaining
+      const filesToAdd = newFiles.slice(0, remainingSlots);
+      
+      if (filesToAdd.length === 0) {
+        console.log('[AssetForm] No files to add');
+        // Reset input
+        setTimeout(() => {
+          if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+          }
+        }, 0);
+        return prevUrls; // No change
+      }
+
+      // Update files array - use ref to ensure we have the latest value
       setFiles((prevFiles) => {
         const updatedFiles = [...prevFiles, ...filesToAdd];
-        console.log('[AssetForm] Added files. Total files:', updatedFiles.length, 'New files:', filesToAdd.length);
+        filesRef.current = updatedFiles; // Keep ref in sync
+        console.log('[AssetForm] Updated files array. Total files:', updatedFiles.length, 'Added:', filesToAdd.length, 'File names:', filesToAdd.map(f => f.name));
         return updatedFiles;
       });
 
-      // Create preview URLs (blob URLs) for new files and add to existing URLs
-      const newPreviews = filesToAdd.map((file) => URL.createObjectURL(file));
-      const newTotalCount = imageUrls.length + newPreviews.length;
-      
-      setImageUrls((prevUrls) => {
-        const updatedUrls = [...prevUrls, ...newPreviews];
-        console.log('[AssetForm] Added image URLs. Total URLs:', updatedUrls.length, 'New previews:', newPreviews.length);
-        return updatedUrls;
+      // Create preview URLs (blob URLs) for new files
+      const newPreviews = filesToAdd.map((file) => {
+        const blobUrl = URL.createObjectURL(file);
+        console.log('[AssetForm] Created blob URL for file:', file.name, 'Size:', file.size, 'bytes');
+        return blobUrl;
       });
+      
+      const updatedUrls = [...prevUrls, ...newPreviews];
+      console.log('[AssetForm] Updated image URLs. Total:', updatedUrls.length, 'Added:', newPreviews.length);
 
       // Reset the input so it can be used again for another photo
       // On mobile devices, use a key to force input recreation for reliable sequential camera captures
       setTimeout(() => {
-        if (fileInputRef.current && newTotalCount < 4) {
+        if (fileInputRef.current && updatedUrls.length < 4) {
           fileInputRef.current.value = '';
           // Increment key to force input reset on mobile (helps with sequential camera captures)
           setFileInputKey((prev) => prev + 1);
         }
       }, 100);
-    } else {
-      // No files added (shouldn't happen), but reset input anyway
-      setTimeout(() => {
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-      }, 0);
-    }
+
+      return updatedUrls;
+    });
   }
 
   function removeImage(index: number) {
@@ -196,6 +231,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
         const blobUrlsBefore = imageUrls.slice(0, index).filter((url) => url.startsWith('blob:')).length;
         const fileIndex = blobUrlsBefore;
         const updatedFiles = prevFiles.filter((_, i) => i !== fileIndex);
+        filesRef.current = updatedFiles; // Keep ref in sync
         console.log('[AssetForm] Removed file at index', fileIndex, 'Remaining files:', updatedFiles.length);
         return updatedFiles;
       });

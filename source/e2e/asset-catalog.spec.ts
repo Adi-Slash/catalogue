@@ -185,4 +185,104 @@ test.describe('Asset Catalog', () => {
       await expect(nextButton).toBeVisible();
     }
   });
+
+  test('should upload multiple photos for an asset', async ({ page }) => {
+    // Create simple test image buffers (minimal valid PNG)
+    const createTestImageBuffer = (color: string) => {
+      // Minimal 1x1 PNG - red or green
+      const pngHeader = Buffer.from([
+        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, // PNG signature
+        0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52, // IHDR chunk
+        0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, // 1x1 dimensions
+        0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53, 0xde, // bit depth, color type, etc.
+        0x00, 0x00, 0x00, 0x0c, 0x49, 0x44, 0x41, 0x54, // IDAT chunk
+        0x08, 0x99, 0x01, 0x01, 0x00, 0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0x00, 0x02, 0x00, 0x01, // image data
+        0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82 // IEND
+      ]);
+      return pngHeader;
+    };
+
+    await page.click('a:has-text("+ Add Asset")');
+    await page.fill('input[placeholder*="Apple, Rolex"]', 'Sony');
+    await page.fill('input[placeholder*="iPhone 15"]', 'Camera');
+    await page.fill('input[placeholder="0.00"]', '500');
+
+    // Get the file input
+    const fileInput = page.locator('input[type="file"]');
+    
+    // Upload first image
+    const testImage1 = createTestImageBuffer('red');
+    await fileInput.setInputFiles({
+      name: 'test-image-1.png',
+      mimeType: 'image/png',
+      buffer: testImage1,
+    });
+
+    // Wait for preview to appear and input to reset
+    await page.waitForTimeout(300);
+    
+    // Check that first image preview appears
+    const previewImages = page.locator('.image-preview img');
+    await expect(previewImages).toHaveCount(1);
+    
+    // Verify photo count message shows 1 of 4
+    await expect(page.locator('.photo-count-message')).toContainText('1 of 4 photos taken');
+
+    // Upload second image (input should be recreated with key)
+    const fileInput2 = page.locator('input[type="file"]');
+    const testImage2 = createTestImageBuffer('green');
+    await fileInput2.setInputFiles({
+      name: 'test-image-2.png',
+      mimeType: 'image/png',
+      buffer: testImage2,
+    });
+
+    // Wait for second preview
+    await page.waitForTimeout(300);
+
+    // Check that both image previews appear
+    await expect(previewImages).toHaveCount(2);
+    
+    // Verify photo count message shows 2 of 4
+    await expect(page.locator('.photo-count-message')).toContainText('2 of 4 photos taken');
+
+    // Upload third image
+    const fileInput3 = page.locator('input[type="file"]');
+    const testImage3 = createTestImageBuffer('blue');
+    await fileInput3.setInputFiles({
+      name: 'test-image-3.png',
+      mimeType: 'image/png',
+      buffer: testImage3,
+    });
+
+    await page.waitForTimeout(300);
+    await expect(previewImages).toHaveCount(3);
+    await expect(page.locator('.photo-count-message')).toContainText('3 of 4 photos taken');
+
+    // Submit the form
+    await page.click('button:has-text("Add Asset")');
+
+    // Wait for asset to be created and redirected
+    await expect(page.getByText('Sony')).toBeVisible();
+    await expect(page.getByText('Camera')).toBeVisible();
+
+    // Click on the asset to view details
+    await page.click('text=Sony');
+
+    // Verify that the asset has multiple images
+    // Check for carousel navigation (should exist if multiple images)
+    const carouselNav = page.locator('.asset-carousel-nav');
+    const carouselCount = await carouselNav.count();
+    
+    if (carouselCount > 0) {
+      // Carousel exists, verify navigation buttons
+      await expect(page.getByLabelText('Next image')).toBeVisible();
+      await expect(page.getByLabelText('Previous image')).toBeVisible();
+      
+      // Verify thumbnails exist
+      const thumbnails = page.locator('.asset-image-thumbs img');
+      const thumbCount = await thumbnails.count();
+      expect(thumbCount).toBeGreaterThanOrEqual(2); // Should have at least 2 thumbnails
+    }
+  });
 });

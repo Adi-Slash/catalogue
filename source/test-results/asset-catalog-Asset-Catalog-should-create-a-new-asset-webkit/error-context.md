@@ -3,40 +3,47 @@
 ```yaml
 - generic [ref=e3]:
   - banner [ref=e4]:
-    - generic [ref=e5]:
-      - link "AssetCatalogue" [ref=e6]:
+    - generic [ref=e6]:
+      - link "Asset Catalogue" [ref=e8]:
         - /url: /
-      - navigation [ref=e7]:
-        - link "Browse Assets" [ref=e8]:
-          - /url: /assets
-        - link "Add Asset" [ref=e9]:
-          - /url: /assets/add
-        - generic [ref=e10]:
-          - textbox "Search assets..." [ref=e11]
-          - button "🔍" [ref=e12] [cursor=pointer]
+        - generic [ref=e9]: Asset
+        - generic [ref=e10]: Catalogue
+      - button "Login" [ref=e12] [cursor=pointer]
   - main [ref=e13]:
     - generic [ref=e15]:
-      - generic [ref=e16]:
-        - heading "Asset Catalogue" [level=1] [ref=e17]
-        - generic [ref=e19]:
-          - generic [ref=e20]: Total Portfolio Value
-          - generic [ref=e21]: £0.00
-      - link "+ Add Asset" [ref=e23] [cursor=pointer]:
+      - generic [ref=e18]:
+        - generic [ref=e19]: Total Portfolio Value
+        - generic [ref=e20]: £100.00
+      - link "+ Add Asset" [ref=e22] [cursor=pointer]:
         - /url: /assets/add
-      - generic [ref=e24]:
-        - button "All" [ref=e25] [cursor=pointer]
-        - button "Electrical" [ref=e26] [cursor=pointer]
-        - button "Jewellery" [ref=e27] [cursor=pointer]
-        - button "Furniture" [ref=e28] [cursor=pointer]
-        - button "Instrument" [ref=e29] [cursor=pointer]
+      - generic [ref=e23]:
+        - button "All" [ref=e24] [cursor=pointer]
+        - button "Electrical" [ref=e25] [cursor=pointer]
+        - button "Fitness" [ref=e26] [cursor=pointer]
+        - button "Furniture" [ref=e27] [cursor=pointer]
+        - button "Instrument" [ref=e28] [cursor=pointer]
+        - button "Jewellery" [ref=e29] [cursor=pointer]
         - button "Tools" [ref=e30] [cursor=pointer]
-        - button "Fitness" [ref=e31] [cursor=pointer]
-      - generic [ref=e33]: All Assets • £0.00 total value
-      - generic [ref=e34]:
-        - heading "No assets found" [level=3] [ref=e35]
-        - paragraph [ref=e36]: Start building your collection by adding your first asset.
-        - link "Add Asset" [ref=e37] [cursor=pointer]:
-          - /url: /assets/add
-  - contentinfo [ref=e38]:
-    - paragraph [ref=e40]: © 2026 AssetCatalogue. All rights reserved.
+        - button "Transport" [ref=e31] [cursor=pointer]
+      - generic [ref=e33] [cursor=pointer]:
+        - button "Delete asset" [ref=e35]: 🗑️
+        - generic [ref=e38]: No Image
+        - generic [ref=e40]:
+          - generic [ref=e41]:
+            - generic [ref=e42]: "Make:"
+            - generic [ref=e43]: Sony
+          - generic [ref=e44]:
+            - generic [ref=e45]: "Model:"
+            - generic [ref=e46]: X1
+          - generic [ref=e47]:
+            - generic [ref=e48]: "Category:"
+            - generic [ref=e49]: Uncategorized
+          - generic [ref=e50]:
+            - generic [ref=e51]: "Value:"
+            - generic [ref=e52]: £100.00
+        - generic [ref=e54]:
+          - generic [ref=e55]: "Added:"
+          - generic [ref=e56]: 2/11/2026
+  - contentinfo [ref=e57]:
+    - paragraph [ref=e59]: © 2026 Asset Catalogue. All rights reserved.
 ```
