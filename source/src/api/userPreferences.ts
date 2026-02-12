@@ -86,7 +86,8 @@ export async function getUserPreferences(userId?: string): Promise<UserPreferenc
   const directUrl = `${FUNCTIONS_DIRECT_URL}/api/user/preferences`;
   const directHeaders: HeadersInit = {};
   
-  // Use x-household-id header for direct Functions call (Functions now accept this as fallback)
+  // Use x-household-id header for direct Functions call (Functions accept this as fallback).
+  // Direct cross-origin calls use credentials: 'omit' so CORS works (wildcard Allow-Origin is not allowed with credentials).
   if (isProduction && userId && !isLocalDev) {
     directHeaders['x-household-id'] = userId;
   }
@@ -113,9 +114,10 @@ export async function getUserPreferences(userId?: string): Promise<UserPreferenc
       console.log('[UserPreferences] Direct headers:', directHeaders);
       
       try {
+        // Use credentials: 'omit' for cross-origin direct call so CORS works with backend's Allow-Origin
         res = await fetch(directUrl, {
           headers: directHeaders,
-          credentials: 'include',
+          credentials: 'omit',
         });
         console.log('[UserPreferences] Direct Functions response status:', res.status, res.statusText);
         console.log('[UserPreferences] Direct Functions response headers:', Object.fromEntries(res.headers.entries()));
@@ -158,7 +160,7 @@ export async function getUserPreferences(userId?: string): Promise<UserPreferenc
         console.log('[UserPreferences] Trying direct Functions URL as fallback');
         const res = await fetch(directUrl, {
           headers: directHeaders,
-          credentials: 'include',
+          credentials: 'omit',
         });
         if (res.ok) {
           return handleRes(res);
@@ -238,7 +240,7 @@ export async function updateUserPreferences(preferences: Partial<UserPreferences
         res = await fetch(directUrl, {
           method: 'PUT',
           headers: directHeaders,
-          credentials: 'include',
+          credentials: 'omit',
           body: JSON.stringify(preferences),
         });
         console.log('[UserPreferences] Direct Functions response status:', res.status, res.statusText);
@@ -287,7 +289,7 @@ export async function updateUserPreferences(preferences: Partial<UserPreferences
         const res = await fetch(directUrl, {
           method: 'PUT',
           headers: directHeaders,
-          credentials: 'include',
+          credentials: 'omit',
           body: JSON.stringify(preferences),
         });
         if (res.ok) {
