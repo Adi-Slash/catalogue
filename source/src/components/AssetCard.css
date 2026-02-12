@@ -217,3 +217,38 @@
     min-width: 80px;
   }
 }
+
+/* Dark Mode Styles */
+:root.dark-mode .asset-card {
+  background: #1a1a1a;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+:root.dark-mode .asset-card:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+}
+
+:root.dark-mode .card-image {
+  background: #2a2a2a;
+}
+
+:root.dark-mode .no-image {
+  background: linear-gradient(135deg, #2a2a2a 0%, #333 100%);
+  color: #888;
+}
+
+:root.dark-mode .property-label {
+  color: #aaa;
+}
+
+:root.dark-mode .property-value {
+  color: #e0e0e0;
+}
+
+:root.dark-mode .price {
+  color: #4caf50;
+}
+
+:root.dark-mode .card-footer {
+  border-top-color: #333;
+}

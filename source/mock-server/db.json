@@ -9,9 +9,12 @@
       "description": "",
       "category": "",
       "value": 500,
-      "imageUrl": "http://localhost:4000/uploads/8756540f-ff7e-462c-ba1a-975ed22e7c5d.png",
+      "imageUrl": "http://localhost:4000/uploads/2de7aee7-3511-416c-b059-8fb2161e6cb0.jpg",
       "createdAt": "2026-02-11T15:56:17.058Z",
-      "updatedAt": "2026-02-11T15:56:17.058Z"
+      "updatedAt": "2026-02-12T09:30:44.235Z",
+      "imageUrls": [
+        "http://localhost:4000/uploads/2de7aee7-3511-416c-b059-8fb2161e6cb0.jpg"
+      ]
     }
   ]
 }

@@ -20,8 +20,16 @@ interface Asset {
   updatedAt: string;
 }
 
+interface UserPreferences {
+  id: string; // userId
+  userId: string;
+  darkMode: boolean;
+  updatedAt: string;
+}
+
 interface Database {
   assets: Asset[];
+  userPreferences: UserPreferences[];
 }
 
 declare module 'express-serve-static-core' {
@@ -71,8 +79,12 @@ function writeDb(db: Database) {
   fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'utf-8');
 }
 
-// Simple auth-like middleware: require `x-household-id` header
+// Simple auth-like middleware: require `x-household-id` header (except for user preferences)
 app.use((req, res, next) => {
+  // Skip auth for user preferences endpoints
+  if (req.path.startsWith('/user/preferences')) {
+    return next();
+  }
   const householdId = req.header('x-household-id');
   if (!householdId) return res.status(401).json({ error: 'Missing x-household-id header' });
   // attach to request
@@ -153,6 +165,53 @@ app.delete('/assets/:id', (req, res) => {
   const [removed] = db.assets.splice(idx, 1);
   writeDb(db);
   res.json({ deleted: true, id: removed.id });
+});
+
+// User Preferences endpoints
+app.get('/user/preferences', (req, res) => {
+  const db = readDb();
+  // For local dev, use x-household-id as userId
+  const userId = req.header('x-household-id') || 'local-user';
+  const preferences = (db.userPreferences || []).find((p) => p.userId === userId);
+  
+  if (preferences) {
+    res.json(preferences);
+  } else {
+    // Return default preferences
+    const defaultPreferences: UserPreferences = {
+      id: userId,
+      userId: userId,
+      darkMode: false,
+      updatedAt: new Date().toISOString(),
+    };
+    res.json(defaultPreferences);
+  }
+});
+
+app.put('/user/preferences', (req, res) => {
+  const db = readDb();
+  // For local dev, use x-household-id as userId
+  const userId = req.header('x-household-id') || 'local-user';
+  const body = req.body;
+  
+  db.userPreferences = db.userPreferences || [];
+  const existingIdx = db.userPreferences.findIndex((p) => p.userId === userId);
+  
+  const preferences: UserPreferences = {
+    id: userId,
+    userId: userId,
+    darkMode: body.darkMode !== undefined ? body.darkMode : false,
+    updatedAt: new Date().toISOString(),
+  };
+  
+  if (existingIdx >= 0) {
+    db.userPreferences[existingIdx] = preferences;
+  } else {
+    db.userPreferences.push(preferences);
+  }
+  
+  writeDb(db);
+  res.json(preferences);
 });
 
 const PORT = process.env.PORT || 4000;

@@ -56,3 +56,17 @@
     padding: 1.5rem;
   }
 }
+
+/* Dark Mode Styles */
+:root.dark-mode .page-header h1 {
+  color: #e0e0e0;
+}
+
+:root.dark-mode .page-header p {
+  color: #aaa;
+}
+
+:root.dark-mode .form-container {
+  background: #1a1a1a;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}

@@ -228,3 +228,54 @@
     grid-column: auto;
   }
 }
+
+/* Dark Mode Styles */
+:root.dark-mode .asset-form {
+  color: #e0e0e0;
+}
+
+:root.dark-mode .form-label {
+  color: #e0e0e0;
+}
+
+:root.dark-mode .form-input,
+:root.dark-mode .form-select,
+:root.dark-mode .form-textarea {
+  background-color: #2a2a2a;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+:root.dark-mode .form-input:focus,
+:root.dark-mode .form-select:focus,
+:root.dark-mode .form-textarea:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+:root.dark-mode .form-input::placeholder,
+:root.dark-mode .form-textarea::placeholder {
+  color: #888;
+}
+
+:root.dark-mode .form-file {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+:root.dark-mode .form-file:hover {
+  background: #333;
+  border-color: #555;
+}
+
+:root.dark-mode .max-photos-message,
+:root.dark-mode .photo-count-message {
+  color: #aaa;
+}
+
+:root.dark-mode .error-message {
+  background: #3a1f1f;
+  color: #ff6b6b;
+  border-left-color: #ff5252;
+}

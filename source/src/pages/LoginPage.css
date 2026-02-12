@@ -33,3 +33,17 @@
   padding: 1rem;
   font-size: 1.1rem;
 }
+
+/* Dark Mode Styles */
+:root.dark-mode .login-container {
+  background: #1a1a1a;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+:root.dark-mode .login-container h1 {
+  color: #e0e0e0;
+}
+
+:root.dark-mode .login-container p {
+  color: #aaa;
+}

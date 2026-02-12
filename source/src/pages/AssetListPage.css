@@ -185,3 +185,55 @@
     font-size: 0.8rem;
   }
 }
+
+/* Dark Mode Styles */
+:root.dark-mode .asset-list-page .page-header h1 {
+  color: #e0e0e0;
+}
+
+:root.dark-mode .category-tabs {
+  border-bottom-color: #333;
+}
+
+:root.dark-mode .tab-button {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+:root.dark-mode .tab-button:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+:root.dark-mode .tab-summary {
+  background: #2a2a2a;
+  border-left-color: #667eea;
+}
+
+:root.dark-mode .summary-text {
+  color: #e0e0e0;
+}
+
+:root.dark-mode .loading {
+  color: #aaa;
+}
+
+:root.dark-mode .error-message {
+  background: #3a1f1f;
+  color: #ff6b6b;
+  border-left-color: #ff5252;
+}
+
+:root.dark-mode .empty-state {
+  background: #1a1a1a;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+:root.dark-mode .empty-state h3 {
+  color: #e0e0e0;
+}
+
+:root.dark-mode .empty-state p {
+  color: #aaa;
+}

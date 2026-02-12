@@ -40,6 +40,11 @@
   align-items: flex-start;
 }
 
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
 .logo {
   font-size: 1.8rem;
   font-weight: bold;
@@ -56,11 +61,6 @@
   margin-left: 0.25rem; /* visual space when on one line */
 }
 
-.header-user-name {
-  margin-top: 0.25rem;
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.9);
-}
 
 .header-center {
   flex: 1;
@@ -68,10 +68,6 @@
   justify-content: center; /* center search between title and login/logout */
 }
 
-.header-auth {
-  display: flex;
-  align-items: center;
-}
 
 .search-bar {
   display: flex;
@@ -158,4 +154,32 @@
     width: 100%;
     min-width: 0;
   }
+}
+
+/* Dark Mode Styles */
+:root.dark-mode .main-content {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+:root.dark-mode .footer {
+  background: #1a1a1a;
+  color: #e0e0e0;
+}
+
+:root.dark-mode .header {
+  background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+:root.dark-mode .search-bar {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+:root.dark-mode .search-bar input {
+  color: white;
+}
+
+:root.dark-mode .search-bar input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
 }

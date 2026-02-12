@@ -7,7 +7,8 @@ import AssetDetailPage from './pages/AssetDetailPage';
 import AddAssetPage from './pages/AddAssetPage';
 import LoginPage from './pages/LoginPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import LoginButton from './components/LoginButton';
+import { DarkModeProvider } from './contexts/DarkModeContext';
+import HamburgerMenu from './components/HamburgerMenu';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthCallbackHandler from './components/AuthCallbackHandler';
 
@@ -49,15 +50,10 @@ function AppRoutes() {
                   </form>
                 </div>
               )}
-              <div className="header-auth">
-                <LoginButton />
+              <div className="header-right">
+                <HamburgerMenu />
               </div>
             </div>
-            {user && (
-              <div className="header-user-name">
-                {user.userDetails}
-              </div>
-            )}
           </div>
         </header>
 
@@ -139,9 +135,11 @@ function AppRoutes() {
 
 function App() {
   return (
-    <AuthProvider>
-      <AppRoutes />
-    </AuthProvider>
+    <DarkModeProvider>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </DarkModeProvider>
   );
 }
 
