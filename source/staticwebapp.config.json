@@ -7,6 +7,10 @@
       }
     },
     {
+      "route": "/api/user/*",
+      "allowedRoles": ["authenticated", "anonymous"]
+    },
+    {
       "route": "/assets",
       "allowedRoles": ["authenticated"]
     },

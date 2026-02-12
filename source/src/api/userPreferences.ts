@@ -2,13 +2,13 @@ import type { UserPreferences } from '../types/userPreferences';
 
 // Determine a sensible default API base:
 // - In local development, talk to the mock server on http://localhost:4000
-// - In Azure Static Web Apps, use the same origin (goes through SWA proxy which adds auth headers)
-// - Fallback to direct Functions URL if VITE_API_BASE is set
+// - In Azure Static Web Apps, use the same origin to go through SWA proxy (adds x-ms-client-principal header)
+// - The Static Web App MUST be linked to the Functions app in Azure Portal for proxy to work
 const isLocalDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
 const DEFAULT_API_BASE = isLocalDev
   ? 'http://localhost:4000'
   : typeof window !== 'undefined'
-  ? window.location.origin // Use same origin to go through Static Web Apps proxy
+  ? window.location.origin // Use Static Web Apps proxy
   : 'https://func-api-ak-aai-003.azurewebsites.net';
 
 const API_BASE = import.meta.env.VITE_API_BASE || DEFAULT_API_BASE;
