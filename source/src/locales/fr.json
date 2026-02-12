@@ -1,0 +1,130 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "back": "Retour",
+    "close": "Fermer",
+    "confirm": "Confirmer",
+    "yes": "Oui",
+    "no": "Non"
+  },
+  "app": {
+    "title": "Catalogue d'Actifs",
+    "titleLine1": "Catalogue",
+    "titleLine2": "d'Actifs"
+  },
+  "menu": {
+    "darkMode": "Mode Sombre",
+    "language": "Langue",
+    "login": "Connexion",
+    "logout": "Déconnexion"
+  },
+  "languages": {
+    "en": "Anglais",
+    "fr": "Français",
+    "de": "Allemand",
+    "ja": "Japonais"
+  },
+  "search": {
+    "placeholder": "Rechercher des actifs...",
+    "noResults": "Aucun résultat trouvé"
+  },
+  "assets": {
+    "title": "Actifs",
+    "addAsset": "Ajouter un Actif",
+    "addNewAsset": "+ Ajouter un Actif",
+    "updateAsset": "Mettre à Jour l'Actif",
+    "totalPortfolioValue": "Valeur Totale du Portefeuille",
+    "loading": "Chargement des actifs...",
+    "noAssets": "Aucun actif trouvé",
+    "noAssetsInCategory": "Aucun actif {category} trouvé",
+    "startBuilding": "Commencez à constituer votre collection en ajoutant votre premier actif.",
+    "all": "Tous",
+    "uncategorized": "Non catégorisé"
+  },
+  "asset": {
+    "details": "Détails de l'Actif",
+    "backToAssets": "Retour aux Actifs",
+    "notFound": "Actif Introuvable",
+    "notFoundMessage": "L'actif que vous recherchez n'existe pas.",
+    "editAsset": "Modifier l'Actif",
+    "deleteAsset": "Supprimer l'Actif",
+    "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cet actif ?",
+    "make": "Marque",
+    "model": "Modèle",
+    "serialNumber": "Numéro de Série",
+    "category": "Catégorie",
+    "value": "Valeur",
+    "estimatedValue": "Valeur Estimée",
+    "description": "Description",
+    "created": "Créé",
+    "lastUpdated": "Dernière Mise à Jour",
+    "added": "Ajouté",
+    "noImage": "Aucune Image",
+    "selectCategory": "Sélectionner une Catégorie",
+    "makePlaceholder": "ex. : Apple, Rolex, Steinway",
+    "modelPlaceholder": "ex. : iPhone 15, Submariner, Model D",
+    "serialNumberPlaceholder": "Numéro de série ou de référence optionnel",
+    "descriptionPlaceholder": "Détails supplémentaires sur l'actif...",
+    "valuePlaceholder": "0,00",
+    "previousImage": "Image précédente",
+    "nextImage": "Image suivante",
+    "deleteAssetAria": "Supprimer l'actif"
+  },
+  "categories": {
+    "all": "Tous",
+    "electrical": "Électrique",
+    "fitness": "Fitness",
+    "furniture": "Mobilier",
+    "instrument": "Instrument",
+    "jewellery": "Bijoux",
+    "tools": "Outils",
+    "transport": "Transport"
+  },
+  "form": {
+    "required": "*",
+    "assetImages": "Images de l'Actif (jusqu'à 4)",
+    "maxPhotos": "Maximum 4 photos autorisées",
+    "maxPhotosReached": "Maximum de 4 photos atteint",
+    "photoCount": "{count} sur 4 photos",
+    "photosTakenMessage": "{count} sur 4 photos prises. Appuyez pour prendre une autre photo.",
+    "removePhoto": "Supprimer la photo",
+    "addPhoto": "Ajouter une Photo",
+    "takePhoto": "Prendre une Photo",
+    "uploadPhoto": "Télécharger une Photo",
+    "chooseFile": "Choisir un Fichier",
+    "noFileChosen": "Aucun fichier sélectionné",
+    "saving": "Enregistrement...",
+    "creating": "Création de l'actif...",
+    "updating": "Mise à jour de l'actif...",
+    "uploading": "Téléchargement des images...",
+    "errorCreating": "Échec de la création de l'actif",
+    "errorUpdating": "Échec de la mise à jour de l'actif",
+    "errorUploading": "Échec du téléchargement des images"
+  },
+  "login": {
+    "title": "Catalogue d'Actifs",
+    "subtitle": "Connectez-vous pour gérer vos actifs ménagers",
+    "signIn": "Se Connecter",
+    "localDevMessage": "L'authentification n'est disponible que lorsqu'elle est déployée sur Azure Static Web Apps.\n\nEn développement local, vous pouvez utiliser le serveur mock avec l'en-tête x-household-id."
+  },
+  "auth": {
+    "completing": "Finalisation de l'authentification...",
+    "notAuthenticated": "Non authentifié",
+    "failedToLoad": "Échec du chargement"
+  },
+  "errors": {
+    "pageNotFound": "Page Introuvable",
+    "pageNotFoundMessage": "La page que vous recherchez n'existe pas.",
+    "goToHome": "Retour à l'Accueil",
+    "failedToLoad": "Échec du chargement",
+    "failedToDelete": "Échec de la suppression de l'actif"
+  },
+  "footer": {
+    "copyright": "© 2026 Catalogue d'Actifs. Tous droits réservés."
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "common": {
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "back": "戻る",
+    "close": "閉じる",
+    "confirm": "確認",
+    "yes": "はい",
+    "no": "いいえ"
+  },
+  "app": {
+    "title": "資産カタログ",
+    "titleLine1": "資産",
+    "titleLine2": "カタログ"
+  },
+  "menu": {
+    "darkMode": "ダークモード",
+    "language": "言語",
+    "login": "ログイン",
+    "logout": "ログアウト"
+  },
+  "languages": {
+    "en": "英語",
+    "fr": "フランス語",
+    "de": "ドイツ語",
+    "ja": "日本語"
+  },
+  "search": {
+    "placeholder": "資産を検索...",
+    "noResults": "結果が見つかりません"
+  },
+  "assets": {
+    "title": "資産",
+    "addAsset": "資産を追加",
+    "addNewAsset": "+ 資産を追加",
+    "updateAsset": "資産を更新",
+    "totalPortfolioValue": "ポートフォリオ総額",
+    "loading": "資産を読み込み中...",
+    "noAssets": "資産が見つかりません",
+    "noAssetsInCategory": "{category}の資産が見つかりません",
+    "startBuilding": "最初の資産を追加してコレクションの構築を始めましょう。",
+    "all": "すべて",
+    "uncategorized": "未分類"
+  },
+  "asset": {
+    "details": "資産詳細",
+    "backToAssets": "資産に戻る",
+    "notFound": "資産が見つかりません",
+    "notFoundMessage": "お探しの資産は存在しません。",
+    "editAsset": "資産を編集",
+    "deleteAsset": "資産を削除",
+    "deleteConfirm": "この資産を削除してもよろしいですか？",
+    "make": "メーカー",
+    "model": "モデル",
+    "serialNumber": "シリアル番号",
+    "category": "カテゴリ",
+    "value": "価値",
+    "estimatedValue": "推定価値",
+    "description": "説明",
+    "created": "作成日",
+    "lastUpdated": "最終更新",
+    "added": "追加日",
+    "noImage": "画像なし",
+    "selectCategory": "カテゴリを選択",
+    "makePlaceholder": "例：Apple、Rolex、Steinway",
+    "modelPlaceholder": "例：iPhone 15、Submariner、Model D",
+    "serialNumberPlaceholder": "シリアル番号または参照番号（オプション）",
+    "descriptionPlaceholder": "資産に関する追加の詳細...",
+    "valuePlaceholder": "0.00",
+    "previousImage": "前の画像",
+    "nextImage": "次の画像",
+    "deleteAssetAria": "資産を削除"
+  },
+  "categories": {
+    "all": "すべて",
+    "electrical": "電気",
+    "fitness": "フィットネス",
+    "furniture": "家具",
+    "instrument": "楽器",
+    "jewellery": "宝石",
+    "tools": "工具",
+    "transport": "交通"
+  },
+  "form": {
+    "required": "*",
+    "assetImages": "資産画像（最大4枚）",
+    "maxPhotos": "最大4枚の写真が許可されています",
+    "maxPhotosReached": "最大4枚の写真に達しました",
+    "photoCount": "4枚中{count}枚",
+    "photosTakenMessage": "4枚中{count}枚の写真を撮影しました。タップして別の写真を撮ります。",
+    "removePhoto": "写真を削除",
+    "addPhoto": "写真を追加",
+    "takePhoto": "写真を撮る",
+    "uploadPhoto": "写真をアップロード",
+    "chooseFile": "ファイルを選択",
+    "noFileChosen": "ファイルが選択されていません",
+    "saving": "保存中...",
+    "creating": "資産を作成中...",
+    "updating": "資産を更新中...",
+    "uploading": "画像をアップロード中...",
+    "errorCreating": "資産の作成に失敗しました",
+    "errorUpdating": "資産の更新に失敗しました",
+    "errorUploading": "画像のアップロードに失敗しました"
+  },
+  "login": {
+    "title": "資産カタログ",
+    "subtitle": "サインインして家計の資産を管理する",
+    "signIn": "サインイン",
+    "localDevMessage": "認証は、Azure Static Web Appsにデプロイされた場合にのみ利用できます。\n\nローカル開発では、x-household-idヘッダーを使用してモックサーバーを使用できます。"
+  },
+  "auth": {
+    "completing": "認証を完了しています...",
+    "notAuthenticated": "認証されていません",
+    "failedToLoad": "読み込みに失敗しました"
+  },
+  "errors": {
+    "pageNotFound": "ページが見つかりません",
+    "pageNotFoundMessage": "お探しのページは存在しません。",
+    "goToHome": "ホームに戻る",
+    "failedToLoad": "読み込みに失敗しました",
+    "failedToDelete": "資産の削除に失敗しました"
+  },
+  "footer": {
+    "copyright": "© 2026 資産カタログ。全著作権所有。"
+  }
+}

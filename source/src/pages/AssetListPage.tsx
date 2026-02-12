@@ -4,9 +4,8 @@ import AssetCard from '../components/AssetCard';
 import type { Asset } from '../types/asset';
 import { useNavigate, Link } from 'react-router-dom';
 import { useHouseholdId } from '../utils/auth';
+import { useLanguage } from '../contexts/LanguageContext';
 import './AssetListPage.css';
-
-const CATEGORIES = ['All', 'Electrical', 'Fitness', 'Furniture', 'Instrument', 'Jewellery', 'Tools', 'Transport'];
 
 type Props = {
   searchTerm: string;
@@ -15,14 +14,29 @@ type Props = {
 export default function AssetListPage({ searchTerm }: Props) {
   const navigate = useNavigate();
   const householdId = useHouseholdId();
+  const { t, formatCurrency } = useLanguage();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('All');
+  // Store activeTab as English category code, not translated string
+  // This ensures filtering works correctly when locale changes
+  const [activeTab, setActiveTab] = useState<string>('All');
+
+  // Translated category labels for display (code is English, label is translated)
+  const CATEGORIES = [
+    { code: 'All', label: t('categories.all') },
+    { code: 'Electrical', label: t('categories.electrical') },
+    { code: 'Fitness', label: t('categories.fitness') },
+    { code: 'Furniture', label: t('categories.furniture') },
+    { code: 'Instrument', label: t('categories.instrument') },
+    { code: 'Jewellery', label: t('categories.jewellery') },
+    { code: 'Tools', label: t('categories.tools') },
+    { code: 'Transport', label: t('categories.transport') },
+  ];
 
   async function load() {
     if (!householdId) {
-      setError('Not authenticated');
+      setError(t('auth.notAuthenticated'));
       setLoading(false);
       return;
     }
@@ -32,7 +46,7 @@ export default function AssetListPage({ searchTerm }: Props) {
       const a = await getAssets(householdId);
       setAssets(a);
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load';
+      const errorMessage = err instanceof Error ? err.message : t('auth.failedToLoad');
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -49,7 +63,7 @@ export default function AssetListPage({ searchTerm }: Props) {
       await deleteAsset(id, householdId);
       setAssets((prev) => prev.filter((a) => a.id !== id));
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete asset';
+      const errorMessage = err instanceof Error ? err.message : t('errors.failedToDelete');
       setError(errorMessage);
     }
   }
@@ -73,6 +87,7 @@ export default function AssetListPage({ searchTerm }: Props) {
     return haystack.includes(normalizedSearch);
   };
 
+  // Filter assets by activeTab (which is already in English)
   const assetsByCategory =
     activeTab === 'All' ? assets : assets.filter((a) => a.category === activeTab);
 
@@ -83,15 +98,15 @@ export default function AssetListPage({ searchTerm }: Props) {
       <div className="page-header">
         <div className="stats-card">
           <div className="stat">
-            <span className="stat-label">Total Portfolio Value</span>
-            <span className="stat-value">£{totalValue.toFixed(2)}</span>
+            <span className="stat-label">{t('assets.totalPortfolioValue')}</span>
+            <span className="stat-value">{formatCurrency(totalValue)}</span>
           </div>
         </div>
       </div>
 
       <div className="actions-bar">
         <Link to="/assets/add" className="btn btn-primary">
-          + Add Asset
+          {t('assets.addNewAsset')}
         </Link>
       </div>
 
@@ -99,23 +114,27 @@ export default function AssetListPage({ searchTerm }: Props) {
       <div className="category-tabs">
         {CATEGORIES.map((category) => (
           <button
-            key={category}
-            onClick={() => setActiveTab(category)}
-            className={`tab-button ${activeTab === category ? 'active' : ''}`}
+            key={category.code}
+            onClick={() => setActiveTab(category.code)}
+            className={`tab-button ${activeTab === category.code ? 'active' : ''}`}
           >
-            {category}
+            {category.label}
           </button>
         ))}
       </div>
 
-      {loading && <div className="loading">Loading assets...</div>}
+      {loading && <div className="loading">{t('assets.loading')}</div>}
       {error && <div className="error-message">{error}</div>}
       {!loading && filteredAssets.length === 0 && (
         <div className="empty-state">
-          <h3>No {activeTab === 'All' ? '' : activeTab.toLowerCase() + ' '}assets found</h3>
-          <p>Start building your collection by adding your first asset.</p>
+          <h3>
+            {activeTab === 'All'
+              ? t('assets.noAssets')
+              : t('assets.noAssetsInCategory', { category: CATEGORIES.find(c => c.code === activeTab)?.label.toLowerCase() || activeTab.toLowerCase() })}
+          </h3>
+          <p>{t('assets.startBuilding')}</p>
           <Link to="/assets/add" className="btn btn-primary">
-            Add Asset
+            {t('assets.addAsset')}
           </Link>
         </div>
       )}

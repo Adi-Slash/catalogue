@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useDarkMode } from '../contexts/DarkModeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import './HamburgerMenu.css';
 
 export default function HamburgerMenu() {
@@ -8,6 +9,7 @@ export default function HamburgerMenu() {
   const menuRef = useRef<HTMLDivElement>(null);
   const { user, logout, loading } = useAuth();
   const { isDarkMode, toggleDarkMode } = useDarkMode();
+  const { language, setLanguage, t, availableLanguages } = useLanguage();
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -35,9 +37,7 @@ export default function HamburgerMenu() {
     if (loginUrl) {
       window.location.href = loginUrl;
     } else {
-      alert(
-        'Authentication is only available when deployed to Azure Static Web Apps.\n\nIn local development, you can use the mock server with x-household-id header.'
-      );
+      alert(t('login.localDevMessage'));
     }
     setIsOpen(false);
   };
@@ -79,15 +79,29 @@ export default function HamburgerMenu() {
               onChange={toggleDarkMode}
               className="dark-mode-checkbox"
             />
-            <span>Dark Mode</span>
+            <span>{t('menu.darkMode')}</span>
           </label>
+          <div className="menu-item menu-language">
+            <label className="language-label">{t('menu.language')}:</label>
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as 'en' | 'fr' | 'de' | 'ja')}
+              className="language-select"
+            >
+              {availableLanguages.map((lang) => (
+                <option key={lang.code} value={lang.code}>
+                  {lang.name}
+                </option>
+              ))}
+            </select>
+          </div>
           {user ? (
             <button onClick={handleLogout} className="menu-item menu-logout">
-              Logout
+              {t('menu.logout')}
             </button>
           ) : (
             <button onClick={handleLogin} className="menu-item menu-login">
-              Login
+              {t('menu.login')}
             </button>
           )}
         </div>

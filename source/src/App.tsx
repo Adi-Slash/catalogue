@@ -8,6 +8,7 @@ import AddAssetPage from './pages/AddAssetPage';
 import LoginPage from './pages/LoginPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { DarkModeProvider } from './contexts/DarkModeContext';
+import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import HamburgerMenu from './components/HamburgerMenu';
 import ProtectedRoute from './components/ProtectedRoute';
 import AuthCallbackHandler from './components/AuthCallbackHandler';
@@ -16,6 +17,7 @@ function AppRoutes() {
   const [searchInput, setSearchInput] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   function handleSearchSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -29,8 +31,8 @@ function AppRoutes() {
             <div className="header-row">
               <div className="header-left">
                 <Link to="/" className="logo">
-                  <span className="logo-line-1">Asset</span>
-                  <span className="logo-line-2">Catalogue</span>
+                  <span className="logo-line-1">{t('app.titleLine1')}</span>
+                  <span className="logo-line-2">{t('app.titleLine2')}</span>
                 </Link>
               </div>
               {user && (
@@ -38,7 +40,7 @@ function AppRoutes() {
                   <form className="search-bar" onSubmit={handleSearchSubmit}>
                     <input
                       type="text"
-                      placeholder="Search assets..."
+                      placeholder={t('search.placeholder')}
                       value={searchInput}
                       onChange={(e) => {
                         const value = e.target.value;
@@ -105,15 +107,15 @@ function AppRoutes() {
                       // Show loading while auth processes
                       return (
                         <div style={{ padding: '2rem', textAlign: 'center' }}>
-                          <div className="loading">Completing authentication...</div>
+                          <div className="loading">{t('auth.completing')}</div>
                         </div>
                       );
                     }
                     return (
                       <div style={{ padding: '2rem', textAlign: 'center' }}>
-                        <h2>Page Not Found</h2>
-                        <p>The page you're looking for doesn't exist.</p>
-                        <Link to="/">Go to Home</Link>
+                        <h2>{t('errors.pageNotFound')}</h2>
+                        <p>{t('errors.pageNotFoundMessage')}</p>
+                        <Link to="/">{t('errors.goToHome')}</Link>
                       </div>
                     );
                   })()
@@ -125,7 +127,7 @@ function AppRoutes() {
 
         <footer className="footer">
           <div className="footer-content">
-            <p>&copy; 2026 Asset Catalogue. All rights reserved.</p>
+            <p>{t('footer.copyright')}</p>
           </div>
         </footer>
       </div>
@@ -136,9 +138,11 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
-      <DarkModeProvider>
-        <AppRoutes />
-      </DarkModeProvider>
+      <LanguageProvider>
+        <DarkModeProvider>
+          <AppRoutes />
+        </DarkModeProvider>
+      </LanguageProvider>
     </AuthProvider>
   );
 }

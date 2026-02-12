@@ -4,6 +4,7 @@ import { getAsset, updateAsset, deleteAsset } from '../api/assets';
 import AssetForm from '../components/AssetForm';
 import type { Asset } from '../types/asset';
 import { useHouseholdId } from '../utils/auth';
+import { useLanguage } from '../contexts/LanguageContext';
 import './AssetDetailPage.css';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
@@ -12,6 +13,7 @@ export default function AssetDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const householdId = useHouseholdId();
+  const { t, formatCurrency } = useLanguage();
   const [asset, setAsset] = useState<Asset | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,12 +31,12 @@ export default function AssetDetailPage() {
       // Reset selectedIndex when asset changes
       setSelectedIndex(0);
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load';
+      const errorMessage = err instanceof Error ? err.message : t('auth.failedToLoad');
       setError(errorMessage);
     } finally {
       setLoading(false);
     }
-  }, [id, householdId]);
+  }, [id, householdId, t]);
 
   useEffect(() => {
     load();
@@ -51,7 +53,7 @@ export default function AssetDetailPage() {
 
   async function handleDelete() {
     if (!asset || !householdId) return;
-    if (!window.confirm('Are you sure you want to delete this asset?')) return;
+    if (!window.confirm(t('asset.deleteConfirm'))) return;
     await deleteAsset(asset.id, householdId);
     navigate('/assets');
   }
@@ -78,7 +80,7 @@ export default function AssetDetailPage() {
   if (loading)
     return (
       <div className="asset-detail-page">
-        <div className="loading">Loading asset details...</div>
+        <div className="loading">{t('common.loading')}</div>
       </div>
     );
 
@@ -93,10 +95,10 @@ export default function AssetDetailPage() {
     return (
       <div className="asset-detail-page">
         <div className="empty-state">
-          <h2>Asset Not Found</h2>
-          <p>The asset you're looking for doesn't exist.</p>
+          <h2>{t('asset.notFound')}</h2>
+          <p>{t('asset.notFoundMessage')}</p>
           <Link to="/assets" className="btn btn-primary">
-            Back to Assets
+            {t('asset.backToAssets')}
           </Link>
         </div>
       </div>
@@ -105,10 +107,10 @@ export default function AssetDetailPage() {
   return (
     <div className="asset-detail-page">
       <div className="page-header">
-        <h1>Asset Details</h1>
+        <h1>{t('asset.details')}</h1>
         <div className="back-link">
           <Link to="/assets" className="btn btn-secondary">
-            ← Back to Assets
+            ← {t('asset.backToAssets')}
           </Link>
         </div>
       </div>
@@ -120,10 +122,10 @@ export default function AssetDetailPage() {
               <h2 className="asset-title">
                 {asset.make} {asset.model}
               </h2>
-              <span className="asset-category">{asset.category || 'Uncategorized'}</span>
+              <span className="asset-category">{asset.category || t('assets.uncategorized')}</span>
             </div>
             <div className="asset-value">
-              <span className="price">£{asset.value.toFixed(2)}</span>
+              <span className="price">{formatCurrency(asset.value)}</span>
             </div>
           </div>
 
@@ -140,7 +142,7 @@ export default function AssetDetailPage() {
                     <button
                       type="button"
                       className="asset-carousel-btn prev"
-                      aria-label="Previous image"
+                      aria-label={t('asset.previousImage')}
                       onClick={goPrev}
                     >
                       ‹
@@ -148,7 +150,7 @@ export default function AssetDetailPage() {
                     <button
                       type="button"
                       className="asset-carousel-btn next"
-                      aria-label="Next image"
+                      aria-label={t('asset.nextImage')}
                       onClick={goNext}
                     >
                       ›
@@ -176,32 +178,32 @@ export default function AssetDetailPage() {
           <div className="asset-info-grid">
 
             <div className="info-item">
-              <label>Serial Number</label>
+              <label>{t('asset.serialNumber')}</label>
               <span>{asset.serialNumber}</span>
             </div>
 
             <div className="info-item full-width">
-              <label>Description</label>
+              <label>{t('asset.description')}</label>
               <span>{asset.description}</span>
             </div>
 
             <div className="info-item">
-              <label>Created</label>
+              <label>{t('asset.created')}</label>
               <span>{new Date(asset.createdAt).toLocaleString()}</span>
             </div>
 
             <div className="info-item">
-              <label>Last Updated</label>
+              <label>{t('asset.lastUpdated')}</label>
               <span>{new Date(asset.updatedAt).toLocaleString()}</span>
             </div>
           </div>
 
           <div className="asset-actions">
             <button onClick={() => setEditing(true)} className="btn btn-secondary">
-              Edit Asset
+              {t('asset.editAsset')}
             </button>
             <button onClick={handleDelete} className="btn btn-danger">
-              Delete Asset
+              {t('asset.deleteAsset')}
             </button>
           </div>
         </div>
@@ -217,7 +219,7 @@ export default function AssetDetailPage() {
           )}
           <div className="form-actions">
             <button onClick={() => setEditing(false)} className="btn btn-secondary">
-              Cancel
+              {t('common.cancel')}
             </button>
           </div>
         </div>

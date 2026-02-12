@@ -1,0 +1,130 @@
+{
+  "common": {
+    "loading": "Laden...",
+    "error": "Fehler",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "back": "Zurück",
+    "close": "Schließen",
+    "confirm": "Bestätigen",
+    "yes": "Ja",
+    "no": "Nein"
+  },
+  "app": {
+    "title": "Vermögensverzeichnis",
+    "titleLine1": "Vermögens",
+    "titleLine2": "verzeichnis"
+  },
+  "menu": {
+    "darkMode": "Dunkler Modus",
+    "language": "Sprache",
+    "login": "Anmelden",
+    "logout": "Abmelden"
+  },
+  "languages": {
+    "en": "Englisch",
+    "fr": "Französisch",
+    "de": "Deutsch",
+    "ja": "Japanisch"
+  },
+  "search": {
+    "placeholder": "Vermögenswerte suchen...",
+    "noResults": "Keine Ergebnisse gefunden"
+  },
+  "assets": {
+    "title": "Vermögenswerte",
+    "addAsset": "Vermögenswert Hinzufügen",
+    "addNewAsset": "+ Vermögenswert Hinzufügen",
+    "updateAsset": "Vermögenswert Aktualisieren",
+    "totalPortfolioValue": "Gesamtwert des Portfolios",
+    "loading": "Vermögenswerte werden geladen...",
+    "noAssets": "Keine Vermögenswerte gefunden",
+    "noAssetsInCategory": "Keine {category} Vermögenswerte gefunden",
+    "startBuilding": "Beginnen Sie mit dem Aufbau Ihrer Sammlung, indem Sie Ihren ersten Vermögenswert hinzufügen.",
+    "all": "Alle",
+    "uncategorized": "Nicht kategorisiert"
+  },
+  "asset": {
+    "details": "Vermögenswert-Details",
+    "backToAssets": "Zurück zu Vermögenswerten",
+    "notFound": "Vermögenswert Nicht Gefunden",
+    "notFoundMessage": "Der gesuchte Vermögenswert existiert nicht.",
+    "editAsset": "Vermögenswert Bearbeiten",
+    "deleteAsset": "Vermögenswert Löschen",
+    "deleteConfirm": "Sind Sie sicher, dass Sie diesen Vermögenswert löschen möchten?",
+    "make": "Marke",
+    "model": "Modell",
+    "serialNumber": "Seriennummer",
+    "category": "Kategorie",
+    "value": "Wert",
+    "estimatedValue": "Geschätzter Wert",
+    "description": "Beschreibung",
+    "created": "Erstellt",
+    "lastUpdated": "Zuletzt Aktualisiert",
+    "added": "Hinzugefügt",
+    "noImage": "Kein Bild",
+    "selectCategory": "Kategorie Auswählen",
+    "makePlaceholder": "z.B. Apple, Rolex, Steinway",
+    "modelPlaceholder": "z.B. iPhone 15, Submariner, Model D",
+    "serialNumberPlaceholder": "Optionale Serien- oder Referenznummer",
+    "descriptionPlaceholder": "Zusätzliche Details zum Vermögenswert...",
+    "valuePlaceholder": "0,00",
+    "previousImage": "Vorheriges Bild",
+    "nextImage": "Nächstes Bild",
+    "deleteAssetAria": "Vermögenswert löschen"
+  },
+  "categories": {
+    "all": "Alle",
+    "electrical": "Elektrisch",
+    "fitness": "Fitness",
+    "furniture": "Möbel",
+    "instrument": "Instrument",
+    "jewellery": "Schmuck",
+    "tools": "Werkzeuge",
+    "transport": "Transport"
+  },
+  "form": {
+    "required": "*",
+    "assetImages": "Vermögenswert-Bilder (bis zu 4)",
+    "maxPhotos": "Maximal 4 Fotos erlaubt",
+    "maxPhotosReached": "Maximum von 4 Fotos erreicht",
+    "photoCount": "{count} von 4 Fotos",
+    "photosTakenMessage": "{count} von 4 Fotos aufgenommen. Tippen Sie, um ein weiteres Foto aufzunehmen.",
+    "removePhoto": "Foto entfernen",
+    "addPhoto": "Foto Hinzufügen",
+    "takePhoto": "Foto Aufnehmen",
+    "uploadPhoto": "Foto Hochladen",
+    "chooseFile": "Datei Auswählen",
+    "noFileChosen": "Keine Datei ausgewählt",
+    "saving": "Speichern...",
+    "creating": "Vermögenswert wird erstellt...",
+    "updating": "Vermögenswert wird aktualisiert...",
+    "uploading": "Bilder werden hochgeladen...",
+    "errorCreating": "Fehler beim Erstellen des Vermögenswerts",
+    "errorUpdating": "Fehler beim Aktualisieren des Vermögenswerts",
+    "errorUploading": "Fehler beim Hochladen der Bilder"
+  },
+  "login": {
+    "title": "Vermögensverzeichnis",
+    "subtitle": "Melden Sie sich an, um Ihre Haushaltsvermögenswerte zu verwalten",
+    "signIn": "Anmelden",
+    "localDevMessage": "Die Authentifizierung ist nur verfügbar, wenn sie auf Azure Static Web Apps bereitgestellt wird.\n\nIn der lokalen Entwicklung können Sie den Mock-Server mit dem Header x-household-id verwenden."
+  },
+  "auth": {
+    "completing": "Authentifizierung wird abgeschlossen...",
+    "notAuthenticated": "Nicht authentifiziert",
+    "failedToLoad": "Laden fehlgeschlagen"
+  },
+  "errors": {
+    "pageNotFound": "Seite Nicht Gefunden",
+    "pageNotFoundMessage": "Die gesuchte Seite existiert nicht.",
+    "goToHome": "Zurück zur Startseite",
+    "failedToLoad": "Laden fehlgeschlagen",
+    "failedToDelete": "Fehler beim Löschen des Vermögenswerts"
+  },
+  "footer": {
+    "copyright": "© 2026 Vermögensverzeichnis. Alle Rechte vorbehalten."
+  }
+}

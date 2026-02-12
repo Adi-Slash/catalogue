@@ -1,0 +1,130 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "close": "Close",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "app": {
+    "title": "Asset Catalogue",
+    "titleLine1": "Asset",
+    "titleLine2": "Catalogue"
+  },
+  "menu": {
+    "darkMode": "Dark Mode",
+    "language": "Language",
+    "login": "Login",
+    "logout": "Logout"
+  },
+  "languages": {
+    "en": "English",
+    "fr": "Français",
+    "de": "Deutsch",
+    "ja": "日本語"
+  },
+  "search": {
+    "placeholder": "Search assets...",
+    "noResults": "No results found"
+  },
+  "assets": {
+    "title": "Assets",
+    "addAsset": "Add Asset",
+    "addNewAsset": "+ Add Asset",
+    "updateAsset": "Update Asset",
+    "totalPortfolioValue": "Total Portfolio Value",
+    "loading": "Loading assets...",
+    "noAssets": "No assets found",
+    "noAssetsInCategory": "No {category} assets found",
+    "startBuilding": "Start building your collection by adding your first asset.",
+    "all": "All",
+    "uncategorized": "Uncategorized"
+  },
+  "asset": {
+    "details": "Asset Details",
+    "backToAssets": "Back to Assets",
+    "notFound": "Asset Not Found",
+    "notFoundMessage": "The asset you're looking for doesn't exist.",
+    "editAsset": "Edit Asset",
+    "deleteAsset": "Delete Asset",
+    "deleteConfirm": "Are you sure you want to delete this asset?",
+    "make": "Make",
+    "model": "Model",
+    "serialNumber": "Serial Number",
+    "category": "Category",
+    "value": "Value",
+    "estimatedValue": "Estimated Value",
+    "description": "Description",
+    "created": "Created",
+    "lastUpdated": "Last Updated",
+    "added": "Added",
+    "noImage": "No Image",
+    "selectCategory": "Select Category",
+    "makePlaceholder": "e.g., Apple, Rolex, Steinway",
+    "modelPlaceholder": "e.g., iPhone 15, Submariner, Model D",
+    "serialNumberPlaceholder": "Optional serial or reference number",
+    "descriptionPlaceholder": "Additional details about the asset...",
+    "valuePlaceholder": "0.00",
+    "previousImage": "Previous image",
+    "nextImage": "Next image",
+    "deleteAssetAria": "Delete asset"
+  },
+  "categories": {
+    "all": "All",
+    "electrical": "Electrical",
+    "fitness": "Fitness",
+    "furniture": "Furniture",
+    "instrument": "Instrument",
+    "jewellery": "Jewellery",
+    "tools": "Tools",
+    "transport": "Transport"
+  },
+  "form": {
+    "required": "*",
+    "assetImages": "Asset Images (up to 4)",
+    "maxPhotos": "Maximum 4 photos allowed",
+    "maxPhotosReached": "Maximum of 4 photos reached",
+    "photoCount": "{count} of 4 photos",
+    "photosTakenMessage": "{count} of 4 photos taken. Tap to take another photo.",
+    "removePhoto": "Remove photo",
+    "addPhoto": "Add Photo",
+    "takePhoto": "Take Photo",
+    "uploadPhoto": "Upload Photo",
+    "chooseFile": "Choose File",
+    "noFileChosen": "No file chosen",
+    "saving": "Saving...",
+    "creating": "Creating asset...",
+    "updating": "Updating asset...",
+    "uploading": "Uploading images...",
+    "errorCreating": "Failed to create asset",
+    "errorUpdating": "Failed to update asset",
+    "errorUploading": "Failed to upload images"
+  },
+  "login": {
+    "title": "Asset Catalogue",
+    "subtitle": "Sign in to manage your household assets",
+    "signIn": "Sign In",
+    "localDevMessage": "Authentication is only available when deployed to Azure Static Web Apps.\n\nIn local development, you can use the mock server with x-household-id header."
+  },
+  "auth": {
+    "completing": "Completing authentication...",
+    "notAuthenticated": "Not authenticated",
+    "failedToLoad": "Failed to load"
+  },
+  "errors": {
+    "pageNotFound": "Page Not Found",
+    "pageNotFoundMessage": "The page you're looking for doesn't exist.",
+    "goToHome": "Go to Home",
+    "failedToLoad": "Failed to load",
+    "failedToDelete": "Failed to delete asset"
+  },
+  "footer": {
+    "copyright": "© 2026 Asset Catalogue. All rights reserved."
+  }
+}

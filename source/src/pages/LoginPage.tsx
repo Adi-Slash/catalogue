@@ -1,11 +1,13 @@
 import { useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 import './LoginPage.css';
 
 export default function LoginPage() {
   const { isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   useEffect(() => {
     // If already authenticated, redirect to assets
@@ -18,7 +20,7 @@ export default function LoginPage() {
     return (
       <div className="login-page">
         <div className="login-container">
-          <div className="loading">Loading...</div>
+          <div className="loading">{t('common.loading')}</div>
         </div>
       </div>
     );
@@ -34,27 +36,25 @@ export default function LoginPage() {
     : `${window.location.origin}/.auth/login/aad?post_login_redirect_uri=${encodeURIComponent(window.location.origin + '/assets')}`;
 
   const handleLocalDevClick = () => {
-    alert(
-      'Authentication is only available when deployed to Azure Static Web Apps.\n\nIn local development, you can use the mock server with x-household-id header.'
-    );
+    alert(t('login.localDevMessage'));
   };
 
   return (
     <div className="login-page">
       <div className="login-container">
-        <h1>Asset Catalogue</h1>
-        <p>Sign in to manage your household assets</p>
+        <h1>{t('login.title')}</h1>
+        <p>{t('login.subtitle')}</p>
         {loginUrl ? (
           <a
             href={loginUrl}
             className="btn btn-primary login-button"
             style={{ textDecoration: 'none', display: 'inline-block' }}
           >
-            Sign In
+            {t('login.signIn')}
           </a>
         ) : (
           <button type="button" onClick={handleLocalDevClick} className="btn btn-primary login-button">
-            Sign In
+            {t('login.signIn')}
           </button>
         )}
       </div>

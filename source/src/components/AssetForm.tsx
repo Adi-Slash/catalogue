@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import type { FormEvent } from 'react';
 import { uploadImage } from '../api/assets';
 import type { NewAsset, Asset } from '../types/asset';
+import { useLanguage } from '../contexts/LanguageContext';
 import './AssetForm.css';
 
 type Props = {
@@ -12,6 +13,7 @@ type Props = {
 };
 
 export default function AssetForm({ householdId, onCreate, onUpdate, initialAsset }: Props) {
+  const { t, currencySymbol } = useLanguage();
   const [make, setMake] = useState('');
   const [model, setModel] = useState('');
   const [serialNumber, setSerialNumber] = useState('');
@@ -26,6 +28,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [fileInputKey, setFileInputKey] = useState(0); // Key to force input reset on mobile
+  const [selectedFileName, setSelectedFileName] = useState<string>(''); // Track selected file name
   const fileInputRef = useRef<HTMLInputElement>(null);
   const processingRef = useRef(false); // Prevent duplicate processing
 
@@ -45,12 +48,14 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       setFiles([]);
       filesRef.current = [];
       processingRef.current = false;
+      setSelectedFileName(''); // Reset file name display
     } else {
       // Reset everything when creating new asset
       setFiles([]);
       filesRef.current = [];
       setImageUrls([]);
       processingRef.current = false;
+      setSelectedFileName(''); // Reset file name display
     }
   }, [initialAsset]);
 
@@ -58,7 +63,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
     e.preventDefault();
     setError(null);
     if (!make || !model || value === '') {
-      setError('Make, model and value are required');
+      setError(t('form.required') + ' ' + t('asset.make') + ', ' + t('asset.model') + ', ' + t('asset.value'));
       return;
     }
 
@@ -144,9 +149,9 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
         finalImageUrls = [...existingUrls, ...uploaded].slice(0, 4);
         console.log('[AssetForm] Final image URLs count:', finalImageUrls.length);
       } catch (err: unknown) {
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        const errorMessage = err instanceof Error ? err.message : t('common.error');
         console.error('[AssetForm] Upload error:', err);
-        setError('Image upload failed: ' + errorMessage);
+        setError(t('form.errorUploading') + ': ' + errorMessage);
         return;
       }
     } else if (blobUrls.length > 0) {
@@ -192,7 +197,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
         setFileInputKey(0);
       }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Save failed';
+      const errorMessage = err instanceof Error ? err.message : (initialAsset ? t('form.errorUpdating') : t('form.errorCreating'));
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -211,8 +216,13 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
     const inputFiles = e.target.files;
     if (!inputFiles || inputFiles.length === 0) {
       console.log('[AssetForm] No files in input');
+      setSelectedFileName('');
       return;
     }
+
+    // Update selected file name for display
+    const fileNames = Array.from(inputFiles).map(f => f.name).join(', ');
+    setSelectedFileName(fileNames);
 
     // Convert FileList to array immediately - this preserves the File objects
     const newFiles = Array.from(inputFiles);
@@ -365,12 +375,12 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       <div className="form-grid">
         <div className="form-group">
           <label htmlFor="make" className="form-label">
-            Make *
+            {t('asset.make')} {t('form.required')}
           </label>
           <input
             id="make"
             type="text"
-            placeholder="e.g., Apple, Rolex, Steinway"
+            placeholder={t('asset.makePlaceholder')}
             value={make}
             onChange={(e) => setMake(e.target.value)}
             className="form-input"
@@ -380,12 +390,12 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
 
         <div className="form-group">
           <label htmlFor="model" className="form-label">
-            Model *
+            {t('asset.model')} {t('form.required')}
           </label>
           <input
             id="model"
             type="text"
-            placeholder="e.g., iPhone 15, Submariner, Model D"
+            placeholder={t('asset.modelPlaceholder')}
             value={model}
             onChange={(e) => setModel(e.target.value)}
             className="form-input"
@@ -395,12 +405,12 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
 
         <div className="form-group">
           <label htmlFor="serialNumber" className="form-label">
-            Serial Number
+            {t('asset.serialNumber')}
           </label>
           <input
             id="serialNumber"
             type="text"
-            placeholder="Optional serial or reference number"
+            placeholder={t('asset.serialNumberPlaceholder')}
             value={serialNumber}
             onChange={(e) => setSerialNumber(e.target.value)}
             className="form-input"
@@ -409,7 +419,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
 
         <div className="form-group">
           <label htmlFor="category" className="form-label">
-            Category
+            {t('asset.category')}
           </label>
           <select
             id="category"
@@ -417,25 +427,25 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
             onChange={(e) => setCategory(e.target.value)}
             className="form-select"
           >
-            <option value="">Select Category</option>
-            <option value="Electrical">Electrical</option>
-            <option value="Fitness">Fitness</option>
-            <option value="Furniture">Furniture</option>
-            <option value="Instrument">Instrument</option>
-            <option value="Jewellery">Jewellery</option>
-            <option value="Tools">Tools</option>
-            <option value="Transport">Transport</option>
+            <option value="">{t('asset.selectCategory')}</option>
+            <option value="Electrical">{t('categories.electrical')}</option>
+            <option value="Fitness">{t('categories.fitness')}</option>
+            <option value="Furniture">{t('categories.furniture')}</option>
+            <option value="Instrument">{t('categories.instrument')}</option>
+            <option value="Jewellery">{t('categories.jewellery')}</option>
+            <option value="Tools">{t('categories.tools')}</option>
+            <option value="Transport">{t('categories.transport')}</option>
           </select>
         </div>
 
         <div className="form-group full-width">
           <label htmlFor="value" className="form-label">
-            Estimated Value (£) *
+            {t('asset.estimatedValue')} ({currencySymbol}) {t('form.required')}
           </label>
           <input
             id="value"
             type="number"
-            placeholder="0.00"
+            placeholder={t('asset.valuePlaceholder')}
             value={value}
             onChange={(e) => setValue(e.target.value === '' ? '' : Number(e.target.value))}
             className="form-input"
@@ -447,11 +457,11 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
 
         <div className="form-group full-width">
           <label htmlFor="description" className="form-label">
-            Description
+            {t('asset.description')}
           </label>
           <textarea
             id="description"
-            placeholder="Additional details about the asset..."
+            placeholder={t('asset.descriptionPlaceholder')}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="form-textarea"
@@ -461,26 +471,34 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
 
         <div className="form-group full-width">
           <label htmlFor="image" className="form-label">
-            Asset Images (up to 4)
+            {t('form.assetImages')}
           </label>
           <div className="camera-controls">
-            <input
-              key={fileInputKey}
-              ref={fileInputRef}
-              id="image"
-              type="file"
-              accept="image/*"
-              capture="environment"
-              onChange={handleFileChange}
-              className="form-file"
-              disabled={imageUrls.length >= 4}
-            />
+            <div className="file-input-wrapper">
+              <input
+                key={fileInputKey}
+                ref={fileInputRef}
+                id="image"
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleFileChange}
+                className="form-file-hidden"
+                disabled={imageUrls.length >= 4}
+              />
+              <label htmlFor="image" className={`custom-file-button ${imageUrls.length >= 4 ? 'disabled' : ''}`}>
+                {t('form.chooseFile')}
+              </label>
+              <span className="file-name-display">
+                {selectedFileName || t('form.noFileChosen')}
+              </span>
+            </div>
             {imageUrls.length >= 4 && (
-              <span className="max-photos-message">Maximum of 4 photos reached</span>
+              <span className="max-photos-message">{t('form.maxPhotosReached')}</span>
             )}
             {imageUrls.length > 0 && imageUrls.length < 4 && (
               <span className="photo-count-message">
-                {imageUrls.length} of 4 photos taken. Tap to take another photo.
+                {t('form.photosTakenMessage', { count: imageUrls.length.toString() })}
               </span>
             )}
           </div>
@@ -492,7 +510,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
                     type="button"
                     className="remove-image-btn"
                     onClick={() => removeImage(index)}
-                    aria-label={`Remove photo ${index + 1}`}
+                    aria-label={t('form.removePhoto') + ` ${index + 1}`}
                   >
                     ×
                   </button>
@@ -508,7 +526,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
 
       <div className="form-actions">
         <button type="submit" disabled={loading} className="btn btn-primary">
-          {loading ? 'Saving...' : initialAsset ? 'Update Asset' : 'Add Asset'}
+          {loading ? t('form.saving') : initialAsset ? t('assets.updateAsset') : t('assets.addAsset')}
         </button>
       </div>
     </form>

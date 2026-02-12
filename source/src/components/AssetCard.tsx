@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Asset as AssetType } from '../types/asset';
+import { useLanguage } from '../contexts/LanguageContext';
 import './AssetCard.css';
 
 type Props = {
@@ -11,6 +12,7 @@ type Props = {
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
 
 export default function AssetCard({ asset, onDelete, onClick }: Props) {
+  const { t, formatCurrency } = useLanguage();
   const rawPaths =
     (asset.imageUrls && asset.imageUrls.length > 0 && asset.imageUrls) ||
     (asset.imageUrl ? [asset.imageUrl] : []);
@@ -43,7 +45,7 @@ export default function AssetCard({ asset, onDelete, onClick }: Props) {
               onDelete(asset.id);
             }
           }}
-          aria-label="Delete asset"
+          aria-label={t('asset.deleteAssetAria')}
         >
           🗑️
         </button>
@@ -57,7 +59,7 @@ export default function AssetCard({ asset, onDelete, onClick }: Props) {
                 <button
                   type="button"
                   className="carousel-btn prev"
-                  aria-label="Previous image"
+                  aria-label={t('asset.previousImage')}
                   onClick={goPrev}
                 >
                   ‹
@@ -65,7 +67,7 @@ export default function AssetCard({ asset, onDelete, onClick }: Props) {
                 <button
                   type="button"
                   className="carousel-btn next"
-                  aria-label="Next image"
+                  aria-label={t('asset.nextImage')}
                   onClick={goNext}
                 >
                   ›
@@ -75,7 +77,7 @@ export default function AssetCard({ asset, onDelete, onClick }: Props) {
           </>
         ) : (
           <div className="no-image">
-            <span>No Image</span>
+            <span>{t('asset.noImage')}</span>
           </div>
         )}
       </div>
@@ -101,33 +103,33 @@ export default function AssetCard({ asset, onDelete, onClick }: Props) {
       <div className="card-content">
         <div className="asset-info">
           <div className="asset-property">
-            <span className="property-label">Make:</span>
+            <span className="property-label">{t('asset.make')}:</span>
             <span className="property-value">{asset.make}</span>
           </div>
           <div className="asset-property">
-            <span className="property-label">Model:</span>
+            <span className="property-label">{t('asset.model')}:</span>
             <span className="property-value">{asset.model}</span>
           </div>
           {asset.serialNumber && (
             <div className="asset-property">
-              <span className="property-label">Serial Number:</span>
+              <span className="property-label">{t('asset.serialNumber')}:</span>
               <span className="property-value">{asset.serialNumber}</span>
             </div>
           )}
           <div className="asset-property">
-            <span className="property-label">Category:</span>
-            <span className="property-value asset-category">{asset.category || 'Uncategorized'}</span>
+            <span className="property-label">{t('asset.category')}:</span>
+            <span className="property-value asset-category">{asset.category || t('assets.uncategorized')}</span>
           </div>
           <div className="asset-property">
-            <span className="property-label">Value:</span>
-            <span className="property-value price">£{asset.value.toFixed(2)}</span>
+            <span className="property-label">{t('asset.value')}:</span>
+            <span className="property-value price">{formatCurrency(asset.value)}</span>
           </div>
         </div>
       </div>
 
       <div className="card-footer">
         <div className="asset-property">
-          <span className="property-label">Added:</span>
+          <span className="property-label">{t('asset.added')}:</span>
           <span className="property-value">{new Date(asset.createdAt).toLocaleDateString()}</span>
         </div>
       </div>
