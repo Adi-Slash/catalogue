@@ -92,6 +92,17 @@ export async function getUserPreferences(userId?: string): Promise<UserPreferenc
     if (res.status === 404) {
       console.error('[UserPreferences] 404 Not Found - Route may not be configured correctly.');
       console.error('[UserPreferences] Verify Static Web Apps is linked to Functions app in Azure Portal.');
+      console.error('[UserPreferences] Returning default preferences.');
+      
+      // Return default preferences instead of throwing error
+      // This allows the app to continue working even if Functions aren't linked
+      return {
+        id: userId || 'unknown',
+        userId: userId || 'unknown',
+        darkMode: false,
+        language: undefined,
+        updatedAt: new Date().toISOString(),
+      };
     }
     
     return handleRes(res);
@@ -104,6 +115,19 @@ export async function getUserPreferences(userId?: string): Promise<UserPreferenc
       url: url,
       method: 'GET'
     });
+    
+    // If it's a 404 error, return default preferences instead of throwing
+    if (error.status === 404) {
+      console.warn('[UserPreferences] 404 error - returning default preferences');
+      return {
+        id: userId || 'unknown',
+        userId: userId || 'unknown',
+        darkMode: false,
+        language: undefined,
+        updatedAt: new Date().toISOString(),
+      };
+    }
+    
     throw error;
   }
 }
