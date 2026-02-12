@@ -58,36 +58,50 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   // Fetch user language preference when user logs in
   useEffect(() => {
     async function loadUserLanguage() {
-      if (!user || loadedUserId === user.userId) return;
+      // Only load if we have a user and haven't loaded preferences for this user yet
+      if (!user) {
+        console.log('[Language] No user, skipping preference load');
+        return;
+      }
+      
+      if (loadedUserId === user.userId) {
+        console.log('[Language] Preferences already loaded for user:', user.userId);
+        return;
+      }
 
+      console.log('[Language] Loading preferences for user:', user.userId, 'previous loadedUserId:', loadedUserId);
       setLoading(true);
       try {
-        console.log('[Language] Loading preferences for user:', user.userId);
         const preferences = await getUserPreferences(user.userId);
-        console.log('[Language] Loaded preferences:', preferences);
+        console.log('[Language] Loaded preferences from API:', preferences);
+        console.log('[Language] Preference language value:', preferences?.language, 'type:', typeof preferences?.language);
         
         // Load language preference from backend if available
         // If language is undefined or null, default to 'en'
         if (preferences && preferences.language) {
           const savedLanguage = preferences.language;
+          console.log('[Language] Found saved language:', savedLanguage);
           if (savedLanguage === 'en' || savedLanguage === 'fr' || savedLanguage === 'de' || savedLanguage === 'ja') {
+            console.log('[Language] Applying saved language:', savedLanguage);
             setLanguageState(savedLanguage as Language);
             localStorage.setItem('language', savedLanguage);
             document.documentElement.lang = savedLanguage;
           } else {
             // Invalid language value, default to 'en'
+            console.warn('[Language] Invalid language value:', savedLanguage, 'defaulting to "en"');
             setLanguageState('en');
             localStorage.setItem('language', 'en');
             document.documentElement.lang = 'en';
           }
         } else {
           // No language preference found, default to 'en' as per requirements
-          console.log('[Language] No language preference found, defaulting to "en"');
+          console.log('[Language] No language preference found in response, defaulting to "en"');
           setLanguageState('en');
           localStorage.setItem('language', 'en');
           document.documentElement.lang = 'en';
         }
         setLoadedUserId(user.userId);
+        console.log('[Language] Successfully loaded and applied preferences for user:', user.userId);
       } catch (error) {
         console.error('[Language] Failed to load user preferences:', error);
         // Default to 'en' as per requirements when preferences can't be loaded
@@ -104,14 +118,25 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     loadUserLanguage();
   }, [user, loadedUserId]);
 
-  // Reset loadedUserId when user logs out
+  // Reset loadedUserId when user logs out or changes
   useEffect(() => {
     if (!user) {
+      console.log('[Language] User logged out, resetting loadedUserId');
       setLoadedUserId(null);
       // Reset to default language when user logs out (or keep current if not authenticated)
       // Don't reset language state - let it persist in localStorage for anonymous users
+    } else {
+      // Check if user changed using functional update to avoid stale closure
+      setLoadedUserId((prevLoadedUserId) => {
+        if (prevLoadedUserId && prevLoadedUserId !== user.userId) {
+          // User changed (different user logged in), reset loadedUserId to force reload
+          console.log('[Language] User changed from', prevLoadedUserId, 'to', user.userId, '- resetting loadedUserId');
+          return null;
+        }
+        return prevLoadedUserId; // Keep current value if same user
+      });
     }
-  }, [user]);
+  }, [user?.userId]); // Only depend on user.userId
 
   const setLanguage = async (lang: Language) => {
     setLanguageState(lang);

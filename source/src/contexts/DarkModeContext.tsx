@@ -25,26 +25,38 @@ export function DarkModeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function loadUserPreferences() {
       // Only load if we have a user and haven't loaded preferences for this user yet
-      if (!user || loadedUserId === user.userId) return;
+      if (!user) {
+        console.log('[DarkMode] No user, skipping preference load');
+        return;
+      }
+      
+      if (loadedUserId === user.userId) {
+        console.log('[DarkMode] Preferences already loaded for user:', user.userId);
+        return;
+      }
 
+      console.log('[DarkMode] Loading preferences for user:', user.userId, 'previous loadedUserId:', loadedUserId);
       setLoading(true);
       try {
-        console.log('[DarkMode] Loading preferences for user:', user.userId);
         const preferences = await getUserPreferences(user.userId);
-        console.log('[DarkMode] Loaded preferences:', preferences);
+        console.log('[DarkMode] Loaded preferences from API:', preferences);
+        console.log('[DarkMode] Preference darkMode value:', preferences?.darkMode, 'type:', typeof preferences?.darkMode);
+        
         if (preferences) {
           // Use darkMode from preferences, defaulting to false if undefined
           const darkModeValue = preferences.darkMode !== undefined ? preferences.darkMode : false;
+          console.log('[DarkMode] Applying darkMode value:', darkModeValue);
           setIsDarkMode(darkModeValue);
           // Also update localStorage as fallback
           localStorage.setItem('darkMode', JSON.stringify(darkModeValue));
         } else {
           // No preferences found, default to false
-          console.log('[DarkMode] No preferences found, defaulting to darkMode=false');
+          console.log('[DarkMode] No preferences found in response, defaulting to darkMode=false');
           setIsDarkMode(false);
           localStorage.setItem('darkMode', JSON.stringify(false));
         }
         setLoadedUserId(user.userId);
+        console.log('[DarkMode] Successfully loaded and applied preferences for user:', user.userId);
       } catch (error: any) {
         console.error('[DarkMode] Failed to load user preferences:', error);
         console.error('[DarkMode] Error status:', error.status);
@@ -55,10 +67,15 @@ export function DarkModeProvider({ children }: { children: ReactNode }) {
           console.warn('[DarkMode] Falling back to localStorage. Preferences will not persist across sessions.');
         }
         
-        // Fallback to localStorage if API fails
+        // Fallback to localStorage if API fails, but still default to false if not found
         const saved = localStorage.getItem('darkMode');
         if (saved) {
+          console.log('[DarkMode] Using localStorage fallback:', saved);
           setIsDarkMode(JSON.parse(saved));
+        } else {
+          console.log('[DarkMode] No localStorage value, defaulting to false');
+          setIsDarkMode(false);
+          localStorage.setItem('darkMode', JSON.stringify(false));
         }
         setLoadedUserId(user.userId); // Still mark as loaded to avoid retrying
       } finally {
@@ -69,12 +86,23 @@ export function DarkModeProvider({ children }: { children: ReactNode }) {
     loadUserPreferences();
   }, [user, loadedUserId]);
 
-  // Reset loadedUserId when user logs out
+  // Reset loadedUserId when user logs out or changes
   useEffect(() => {
     if (!user) {
+      console.log('[DarkMode] User logged out, resetting loadedUserId');
       setLoadedUserId(null);
+    } else {
+      // Check if user changed using functional update to avoid stale closure
+      setLoadedUserId((prevLoadedUserId) => {
+        if (prevLoadedUserId && prevLoadedUserId !== user.userId) {
+          // User changed (different user logged in), reset loadedUserId to force reload
+          console.log('[DarkMode] User changed from', prevLoadedUserId, 'to', user.userId, '- resetting loadedUserId');
+          return null;
+        }
+        return prevLoadedUserId; // Keep current value if same user
+      });
     }
-  }, [user]);
+  }, [user?.userId]); // Only depend on user.userId
 
   // Apply dark mode class to root element
   useEffect(() => {
