@@ -17,7 +17,7 @@ export async function updateUserPreferencesHandler(request: HttpRequest, context
     const userId = principal.userId;
     const body = await request.json() as Partial<UserPreferences>;
 
-    context.log(`[UserPreferences] Updating preferences for userId: ${userId}, darkMode: ${body.darkMode}`);
+    context.log(`[UserPreferences] Updating preferences for userId: ${userId}, darkMode: ${body.darkMode}, language: ${body.language}`);
 
     // Get existing preferences or create new
     const existing = await getUserPreferences(userId);
@@ -27,6 +27,7 @@ export async function updateUserPreferencesHandler(request: HttpRequest, context
       id: userId,
       userId: userId,
       darkMode: body.darkMode !== undefined ? body.darkMode : (existing?.darkMode ?? false),
+      language: body.language !== undefined ? body.language : (existing?.language ?? undefined),
       updatedAt: new Date().toISOString(),
     };
 

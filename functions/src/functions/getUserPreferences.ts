@@ -23,6 +23,7 @@ export async function getUserPreferencesHandler(request: HttpRequest, context: I
       id: userId,
       userId: userId,
       darkMode: false,
+      language: undefined,
       updatedAt: new Date().toISOString(),
     };
 

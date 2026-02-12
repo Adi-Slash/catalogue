@@ -32,6 +32,7 @@ interface LanguageContextType {
   formatCurrency: (amount: number) => string;
   currencySymbol: string;
   currencyCode: string;
+  loading: boolean;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -52,20 +53,50 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     return 'en';
   });
   const [loadedUserId, setLoadedUserId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   // Fetch user language preference when user logs in
   useEffect(() => {
     async function loadUserLanguage() {
       if (!user || loadedUserId === user.userId) return;
 
+      setLoading(true);
       try {
-        // Note: language preference will be added to user preferences later
-        // For now, we'll use localStorage
-        await getUserPreferences(user.userId);
+        console.log('[Language] Loading preferences for user:', user.userId);
+        const preferences = await getUserPreferences(user.userId);
+        console.log('[Language] Loaded preferences:', preferences);
+        
+        // Load language preference from backend if available
+        if (preferences && preferences.language) {
+          const savedLanguage = preferences.language;
+          if (savedLanguage === 'en' || savedLanguage === 'fr' || savedLanguage === 'de' || savedLanguage === 'ja') {
+            setLanguageState(savedLanguage as Language);
+            localStorage.setItem('language', savedLanguage);
+            document.documentElement.lang = savedLanguage;
+          }
+        } else {
+          // Fallback to localStorage or browser language
+          const saved = localStorage.getItem('language');
+          if (saved && (saved === 'en' || saved === 'fr' || saved === 'de' || saved === 'ja')) {
+            setLanguageState(saved as Language);
+          } else {
+            const browserLang = navigator.language.split('-')[0];
+            if (browserLang === 'fr' || browserLang === 'de' || browserLang === 'ja') {
+              setLanguageState(browserLang as Language);
+            }
+          }
+        }
         setLoadedUserId(user.userId);
       } catch (error) {
         console.error('[Language] Failed to load user preferences:', error);
+        // Fallback to localStorage
+        const saved = localStorage.getItem('language');
+        if (saved && (saved === 'en' || saved === 'fr' || saved === 'de' || saved === 'ja')) {
+          setLanguageState(saved as Language);
+        }
         setLoadedUserId(user.userId);
+      } finally {
+        setLoading(false);
       }
     }
 
@@ -76,6 +107,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!user) {
       setLoadedUserId(null);
+      // Reset to default language when user logs out (or keep current if not authenticated)
+      // Don't reset language state - let it persist in localStorage for anonymous users
     }
   }, [user]);
 
@@ -89,11 +122,26 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     // Save to backend if user is authenticated
     if (user) {
       try {
-        // Note: We'll need to add language to user preferences schema
-        // For now, just save to localStorage
-        await updateUserPreferences({}, user.userId);
-      } catch (error) {
+        console.log('[Language] Saving preferences for user:', user.userId, 'language:', lang);
+        const updated = await updateUserPreferences({ language: lang }, user.userId);
+        console.log('[Language] Preferences saved successfully:', updated);
+        
+        // Verify the save was successful
+        if (!updated || updated.language !== lang) {
+          console.warn('[Language] Warning: Saved preferences do not match expected value', {
+            expected: lang,
+            received: updated?.language
+          });
+        }
+      } catch (error: any) {
         console.error('[Language] Failed to save language preference:', error);
+        console.error('[Language] Error details:', {
+          message: error.message,
+          stack: error.stack,
+          userId: user.userId,
+          language: lang
+        });
+        // Don't show alert - language change should still work locally
       }
     }
   };
@@ -180,6 +228,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         formatCurrency,
         currencySymbol,
         currencyCode,
+        loading,
       }}
     >
       {children}

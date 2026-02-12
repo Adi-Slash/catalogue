@@ -24,6 +24,7 @@ interface UserPreferences {
   id: string; // userId
   userId: string;
   darkMode: boolean;
+  language?: string; // Language code: 'en' | 'fr' | 'de' | 'ja'
   updatedAt: string;
 }
 
@@ -182,6 +183,7 @@ app.get('/user/preferences', (req, res) => {
       id: userId,
       userId: userId,
       darkMode: false,
+      language: undefined,
       updatedAt: new Date().toISOString(),
     };
     res.json(defaultPreferences);
@@ -197,10 +199,14 @@ app.put('/user/preferences', (req, res) => {
   db.userPreferences = db.userPreferences || [];
   const existingIdx = db.userPreferences.findIndex((p) => p.userId === userId);
   
+  // Get existing preferences to preserve values not being updated
+  const existing = (db.userPreferences || []).find((p) => p.userId === userId);
+  
   const preferences: UserPreferences = {
     id: userId,
     userId: userId,
-    darkMode: body.darkMode !== undefined ? body.darkMode : false,
+    darkMode: body.darkMode !== undefined ? body.darkMode : (existing?.darkMode ?? false),
+    language: body.language !== undefined ? body.language : (existing?.language ?? undefined),
     updatedAt: new Date().toISOString(),
   };
   
