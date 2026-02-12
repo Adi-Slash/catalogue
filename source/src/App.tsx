@@ -135,11 +135,11 @@ function AppRoutes() {
 
 function App() {
   return (
-    <DarkModeProvider>
-      <AuthProvider>
+    <AuthProvider>
+      <DarkModeProvider>
         <AppRoutes />
-      </AuthProvider>
-    </DarkModeProvider>
+      </DarkModeProvider>
+    </AuthProvider>
   );
 }
 
