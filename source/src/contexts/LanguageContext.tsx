@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import { getUserPreferences, updateUserPreferences } from '../api/userPreferences';
 import enTranslations from '../locales/en.json';
@@ -58,9 +59,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       if (!user || loadedUserId === user.userId) return;
 
       try {
-        const preferences = await getUserPreferences(user.userId);
         // Note: language preference will be added to user preferences later
         // For now, we'll use localStorage
+        await getUserPreferences(user.userId);
         setLoadedUserId(user.userId);
       } catch (error) {
         console.error('[Language] Failed to load user preferences:', error);
