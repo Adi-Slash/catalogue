@@ -67,33 +67,34 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         console.log('[Language] Loaded preferences:', preferences);
         
         // Load language preference from backend if available
+        // If language is undefined or null, default to 'en'
         if (preferences && preferences.language) {
           const savedLanguage = preferences.language;
           if (savedLanguage === 'en' || savedLanguage === 'fr' || savedLanguage === 'de' || savedLanguage === 'ja') {
             setLanguageState(savedLanguage as Language);
             localStorage.setItem('language', savedLanguage);
             document.documentElement.lang = savedLanguage;
+          } else {
+            // Invalid language value, default to 'en'
+            setLanguageState('en');
+            localStorage.setItem('language', 'en');
+            document.documentElement.lang = 'en';
           }
         } else {
-          // Fallback to localStorage or browser language
-          const saved = localStorage.getItem('language');
-          if (saved && (saved === 'en' || saved === 'fr' || saved === 'de' || saved === 'ja')) {
-            setLanguageState(saved as Language);
-          } else {
-            const browserLang = navigator.language.split('-')[0];
-            if (browserLang === 'fr' || browserLang === 'de' || browserLang === 'ja') {
-              setLanguageState(browserLang as Language);
-            }
-          }
+          // No language preference found, default to 'en' as per requirements
+          console.log('[Language] No language preference found, defaulting to "en"');
+          setLanguageState('en');
+          localStorage.setItem('language', 'en');
+          document.documentElement.lang = 'en';
         }
         setLoadedUserId(user.userId);
       } catch (error) {
         console.error('[Language] Failed to load user preferences:', error);
-        // Fallback to localStorage
-        const saved = localStorage.getItem('language');
-        if (saved && (saved === 'en' || saved === 'fr' || saved === 'de' || saved === 'ja')) {
-          setLanguageState(saved as Language);
-        }
+        // Default to 'en' as per requirements when preferences can't be loaded
+        console.log('[Language] Error loading preferences, defaulting to "en"');
+        setLanguageState('en');
+        localStorage.setItem('language', 'en');
+        document.documentElement.lang = 'en';
         setLoadedUserId(user.userId);
       } finally {
         setLoading(false);

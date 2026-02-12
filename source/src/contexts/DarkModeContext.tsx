@@ -32,10 +32,17 @@ export function DarkModeProvider({ children }: { children: ReactNode }) {
         console.log('[DarkMode] Loading preferences for user:', user.userId);
         const preferences = await getUserPreferences(user.userId);
         console.log('[DarkMode] Loaded preferences:', preferences);
-        if (preferences && preferences.darkMode !== undefined) {
-          setIsDarkMode(preferences.darkMode);
+        if (preferences) {
+          // Use darkMode from preferences, defaulting to false if undefined
+          const darkModeValue = preferences.darkMode !== undefined ? preferences.darkMode : false;
+          setIsDarkMode(darkModeValue);
           // Also update localStorage as fallback
-          localStorage.setItem('darkMode', JSON.stringify(preferences.darkMode));
+          localStorage.setItem('darkMode', JSON.stringify(darkModeValue));
+        } else {
+          // No preferences found, default to false
+          console.log('[DarkMode] No preferences found, defaulting to darkMode=false');
+          setIsDarkMode(false);
+          localStorage.setItem('darkMode', JSON.stringify(false));
         }
         setLoadedUserId(user.userId);
       } catch (error: any) {

@@ -25,7 +25,7 @@ export async function getUserPreferencesHandler(request: HttpRequest, context: I
       id: userId,
       userId: userId,
       darkMode: false,
-      language: undefined,
+      language: 'en', // Default to English
       updatedAt: new Date().toISOString(),
     };
 

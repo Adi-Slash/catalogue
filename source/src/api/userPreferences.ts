@@ -102,22 +102,32 @@ export async function getUserPreferences(userId?: string): Promise<UserPreferenc
     console.log('[UserPreferences] Response status:', res.status, res.statusText);
     console.log('[UserPreferences] Response headers:', Object.fromEntries(res.headers.entries()));
     
-    // If proxy returns 404/405, try direct Functions URL as fallback
-    if (tryProxyFirst && (res.status === 404 || res.status === 405)) {
-      console.warn('[UserPreferences] Static Web Apps proxy failed, trying direct Functions URL');
+    // Check if response is HTML (proxy might return HTML 404 page even with 200 status)
+    const contentType = res.headers.get('content-type') || '';
+    const isHtmlResponse = contentType.includes('text/html');
+    
+    // If proxy returns 404/405 or HTML response, try direct Functions URL as fallback
+    if (tryProxyFirst && (res.status === 404 || res.status === 405 || (res.status === 200 && isHtmlResponse))) {
+      console.warn('[UserPreferences] Static Web Apps proxy failed (status:', res.status, 'isHTML:', isHtmlResponse, '), trying direct Functions URL');
       console.log('[UserPreferences] Direct URL:', directUrl);
       console.log('[UserPreferences] Direct headers:', directHeaders);
       
-      res = await fetch(directUrl, {
-        headers: directHeaders,
-        credentials: 'include',
-      });
-      console.log('[UserPreferences] Direct Functions response status:', res.status, res.statusText);
+      try {
+        res = await fetch(directUrl, {
+          headers: directHeaders,
+          credentials: 'include',
+        });
+        console.log('[UserPreferences] Direct Functions response status:', res.status, res.statusText);
+        console.log('[UserPreferences] Direct Functions response headers:', Object.fromEntries(res.headers.entries()));
+      } catch (directError) {
+        console.error('[UserPreferences] Direct Functions call failed:', directError);
+        // Fall through to return default preferences
+      }
     }
     
     // Check for common issues
-    if (res.status === 404) {
-      console.error('[UserPreferences] 404 Not Found - Route may not be configured correctly.');
+    if (res.status === 404 || (res.status === 200 && res.headers.get('content-type')?.includes('text/html'))) {
+      console.error('[UserPreferences] 404 Not Found or HTML response - Route may not be configured correctly.');
       console.error('[UserPreferences] Verify Static Web Apps is linked to Functions app in Azure Portal.');
       console.error('[UserPreferences] Returning default preferences.');
       
@@ -126,7 +136,7 @@ export async function getUserPreferences(userId?: string): Promise<UserPreferenc
         id: userId || 'unknown',
         userId: userId || 'unknown',
         darkMode: false,
-        language: undefined,
+        language: 'en', // Default to English
         updatedAt: new Date().toISOString(),
       };
     }
@@ -165,7 +175,7 @@ export async function getUserPreferences(userId?: string): Promise<UserPreferenc
         id: userId || 'unknown',
         userId: userId || 'unknown',
         darkMode: false,
-        language: undefined,
+        language: 'en', // Default to English
         updatedAt: new Date().toISOString(),
       };
     }
@@ -213,19 +223,29 @@ export async function updateUserPreferences(preferences: Partial<UserPreferences
     console.log('[UserPreferences] Update response status:', res.status, res.statusText);
     console.log('[UserPreferences] Response headers:', Object.fromEntries(res.headers.entries()));
     
-    // If proxy returns 404/405, try direct Functions URL as fallback
-    if (tryProxyFirst && (res.status === 404 || res.status === 405)) {
-      console.warn('[UserPreferences] Static Web Apps proxy failed, trying direct Functions URL');
+    // Check if response is HTML (proxy might return HTML 404 page even with 200 status)
+    const contentType = res.headers.get('content-type') || '';
+    const isHtmlResponse = contentType.includes('text/html');
+    
+    // If proxy returns 404/405 or HTML response, try direct Functions URL as fallback
+    if (tryProxyFirst && (res.status === 404 || res.status === 405 || (res.status === 200 && isHtmlResponse))) {
+      console.warn('[UserPreferences] Static Web Apps proxy failed (status:', res.status, 'isHTML:', isHtmlResponse, '), trying direct Functions URL');
       console.log('[UserPreferences] Direct URL:', directUrl);
       console.log('[UserPreferences] Direct headers:', directHeaders);
       
-      res = await fetch(directUrl, {
-        method: 'PUT',
-        headers: directHeaders,
-        credentials: 'include',
-        body: JSON.stringify(preferences),
-      });
-      console.log('[UserPreferences] Direct Functions response status:', res.status, res.statusText);
+      try {
+        res = await fetch(directUrl, {
+          method: 'PUT',
+          headers: directHeaders,
+          credentials: 'include',
+          body: JSON.stringify(preferences),
+        });
+        console.log('[UserPreferences] Direct Functions response status:', res.status, res.statusText);
+        console.log('[UserPreferences] Direct Functions response headers:', Object.fromEntries(res.headers.entries()));
+      } catch (directError) {
+        console.error('[UserPreferences] Direct Functions call failed:', directError);
+        throw directError; // Re-throw so outer catch can handle it
+      }
     }
     
     // If we get 405, the function likely isn't deployed yet
