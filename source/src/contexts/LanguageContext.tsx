@@ -52,7 +52,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
     return 'en';
   });
-  const [loadedUserId, setLoadedUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   // Ref to track which userId we've loaded for - ensures we always load when user becomes available
   const loadedForUserIdRef = useRef<string | null>(null);
@@ -61,7 +60,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!user) {
       loadedForUserIdRef.current = null;
-      setLoadedUserId(null);
     }
   }, [user]);
 
@@ -96,7 +94,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
           localStorage.setItem('language', 'en');
           document.documentElement.lang = 'en';
         }
-        setLoadedUserId(userId);
       })
       .catch((error) => {
         if (cancelled) return;
@@ -104,7 +101,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         setLanguageState('en');
         localStorage.setItem('language', 'en');
         document.documentElement.lang = 'en';
-        setLoadedUserId(userId);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);

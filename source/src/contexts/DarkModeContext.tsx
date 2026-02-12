@@ -19,7 +19,6 @@ export function DarkModeProvider({ children }: { children: ReactNode }) {
     return saved ? JSON.parse(saved) : false;
   });
   const [loading, setLoading] = useState(false);
-  const [loadedUserId, setLoadedUserId] = useState<string | null>(null);
   // Ref to track which userId we've loaded for - ensures we always load when user becomes available
   const loadedForUserIdRef = useRef<string | null>(null);
 
@@ -27,7 +26,6 @@ export function DarkModeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!user) {
       loadedForUserIdRef.current = null;
-      setLoadedUserId(null);
     }
   }, [user]);
 
@@ -55,7 +53,6 @@ export function DarkModeProvider({ children }: { children: ReactNode }) {
         console.log('[DarkMode] Applying darkMode value:', darkModeValue);
         setIsDarkMode(darkModeValue);
         localStorage.setItem('darkMode', JSON.stringify(darkModeValue));
-        setLoadedUserId(userId);
       })
       .catch((error: any) => {
         if (cancelled) return;
@@ -67,7 +64,6 @@ export function DarkModeProvider({ children }: { children: ReactNode }) {
           setIsDarkMode(false);
           localStorage.setItem('darkMode', JSON.stringify(false));
         }
-        setLoadedUserId(userId);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
