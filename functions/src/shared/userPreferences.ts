@@ -80,5 +80,5 @@ export async function upsertUserPreferences(preferences: UserPreferences): Promi
   if (!resource) {
     throw new Error('Failed to save user preferences');
   }
-  return resource as UserPreferences;
+  return resource as unknown as UserPreferences;
 }
