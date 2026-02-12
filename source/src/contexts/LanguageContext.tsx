@@ -123,6 +123,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     if (user) {
       try {
         console.log('[Language] Saving preferences for user:', user.userId, 'language:', lang);
+        console.log('[Language] User object:', { userId: user.userId, userDetails: user.userDetails });
         const updated = await updateUserPreferences({ language: lang }, user.userId);
         console.log('[Language] Preferences saved successfully:', updated);
         
@@ -137,12 +138,17 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         console.error('[Language] Failed to save language preference:', error);
         console.error('[Language] Error details:', {
           message: error.message,
+          status: error.status,
           stack: error.stack,
           userId: user.userId,
-          language: lang
+          language: lang,
+          errorData: (error as any).errorData
         });
-        // Don't show alert - language change should still work locally
+        // Show error in console but don't block UI - language change still works locally
+        console.warn('[Language] Language preference saved to localStorage only. Backend save failed.');
       }
+    } else {
+      console.warn('[Language] User not authenticated - saving to localStorage only');
     }
   };
 

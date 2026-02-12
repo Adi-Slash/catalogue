@@ -38,8 +38,16 @@ export function DarkModeProvider({ children }: { children: ReactNode }) {
           localStorage.setItem('darkMode', JSON.stringify(preferences.darkMode));
         }
         setLoadedUserId(user.userId);
-      } catch (error) {
+      } catch (error: any) {
         console.error('[DarkMode] Failed to load user preferences:', error);
+        console.error('[DarkMode] Error status:', error.status);
+        
+        // If 404, the Functions might not be deployed or linked
+        if (error.status === 404) {
+          console.warn('[DarkMode] 404 error - Functions may not be deployed or Static Web Apps not linked to Functions app');
+          console.warn('[DarkMode] Falling back to localStorage. Preferences will not persist across sessions.');
+        }
+        
         // Fallback to localStorage if API fails
         const saved = localStorage.getItem('darkMode');
         if (saved) {
@@ -82,6 +90,7 @@ export function DarkModeProvider({ children }: { children: ReactNode }) {
     if (user) {
       try {
         console.log('[DarkMode] Saving preferences for user:', user.userId, 'darkMode:', newValue);
+        console.log('[DarkMode] User object:', { userId: user.userId, userDetails: user.userDetails });
         const updated = await updateUserPreferences({ darkMode: newValue }, user.userId);
         console.log('[DarkMode] Preferences saved successfully:', updated);
         
@@ -96,16 +105,18 @@ export function DarkModeProvider({ children }: { children: ReactNode }) {
         console.error('[DarkMode] Failed to save user preferences:', error);
         console.error('[DarkMode] Error details:', {
           message: error.message,
+          status: error.status,
           stack: error.stack,
           userId: user.userId,
-          darkMode: newValue
+          darkMode: newValue,
+          errorData: (error as any).errorData
         });
         // Show user-friendly error message
-        alert(`Failed to save dark mode preference: ${error.message || 'Unknown error'}. Please try again.`);
+        alert(`Failed to save dark mode preference: ${error.message || 'Unknown error'}. Please check console for details.`);
         // Don't revert - localStorage already saved
       }
     } else {
-      console.warn('[DarkMode] Cannot save preferences - user not authenticated');
+      console.warn('[DarkMode] User not authenticated - saving to localStorage only');
     }
   };
 
