@@ -2,14 +2,15 @@ import type { UserPreferences } from '../types/userPreferences';
 
 // Determine a sensible default API base:
 // - In local development, talk to the mock server on http://localhost:4000
-// - In Azure Static Web Apps, use the same origin to go through SWA proxy (adds x-ms-client-principal header)
+// - In Azure Static Web Apps, try Static Web Apps proxy first, fallback to direct Functions URL
 // - The Static Web App MUST be linked to the Functions app in Azure Portal for proxy to work
 const isLocalDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+const FUNCTIONS_DIRECT_URL = 'https://func-api-ak-aai-003.azurewebsites.net';
 const DEFAULT_API_BASE = isLocalDev
   ? 'http://localhost:4000'
   : typeof window !== 'undefined'
-  ? window.location.origin // Use Static Web Apps proxy
-  : 'https://func-api-ak-aai-003.azurewebsites.net';
+  ? window.location.origin // Use Static Web Apps proxy (will fallback to direct if proxy fails)
+  : FUNCTIONS_DIRECT_URL;
 
 const API_BASE = import.meta.env.VITE_API_BASE || DEFAULT_API_BASE;
 // Azure Functions v4 adds /api prefix to routes, but the local mock server does not
@@ -68,25 +69,51 @@ async function handleRes(res: Response) {
 
 export async function getUserPreferences(userId?: string): Promise<UserPreferences> {
   const isLocalDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-  const headers: HeadersInit = {};
+  const isProduction = !isLocalDev && typeof window !== 'undefined';
+  
+  // Try Static Web Apps proxy first, then fallback to direct Functions URL
+  const tryProxyFirst = isProduction && API_BASE === window.location.origin;
+  
+  let url = `${API_BASE}${API_PREFIX}/user/preferences`;
+  let headers: HeadersInit = {};
   
   // For local dev, send userId as x-household-id header
-  // In production, authentication is handled via Static Web Apps proxy (x-ms-client-principal header)
   if (isLocalDev && userId) {
     headers['x-household-id'] = userId;
   }
   
-  const url = `${API_BASE}${API_PREFIX}/user/preferences`;
-  console.log('[UserPreferences] Fetching preferences from:', url, 'isLocalDev:', isLocalDev, 'userId:', userId);
+  // For production, if we have userId and proxy might not work, prepare direct call headers
+  const directUrl = `${FUNCTIONS_DIRECT_URL}/api/user/preferences`;
+  const directHeaders: HeadersInit = {};
+  
+  // Use x-household-id header for direct Functions call (Functions now accept this as fallback)
+  if (isProduction && userId && !isLocalDev) {
+    directHeaders['x-household-id'] = userId;
+  }
+  
+  console.log('[UserPreferences] Fetching preferences from:', url, 'isLocalDev:', isLocalDev, 'userId:', userId, 'tryProxyFirst:', tryProxyFirst);
   console.log('[UserPreferences] Request headers:', headers);
   
   try {
-    const res = await fetch(url, {
+    let res = await fetch(url, {
       headers,
       credentials: 'include', // Include cookies for authentication (Azure)
     });
     console.log('[UserPreferences] Response status:', res.status, res.statusText);
     console.log('[UserPreferences] Response headers:', Object.fromEntries(res.headers.entries()));
+    
+    // If proxy returns 404/405, try direct Functions URL as fallback
+    if (tryProxyFirst && (res.status === 404 || res.status === 405)) {
+      console.warn('[UserPreferences] Static Web Apps proxy failed, trying direct Functions URL');
+      console.log('[UserPreferences] Direct URL:', directUrl);
+      console.log('[UserPreferences] Direct headers:', directHeaders);
+      
+      res = await fetch(directUrl, {
+        headers: directHeaders,
+        credentials: 'include',
+      });
+      console.log('[UserPreferences] Direct Functions response status:', res.status, res.statusText);
+    }
     
     // Check for common issues
     if (res.status === 404) {
@@ -95,7 +122,6 @@ export async function getUserPreferences(userId?: string): Promise<UserPreferenc
       console.error('[UserPreferences] Returning default preferences.');
       
       // Return default preferences instead of throwing error
-      // This allows the app to continue working even if Functions aren't linked
       return {
         id: userId || 'unknown',
         userId: userId || 'unknown',
@@ -116,6 +142,22 @@ export async function getUserPreferences(userId?: string): Promise<UserPreferenc
       method: 'GET'
     });
     
+    // If proxy failed, try direct Functions URL as fallback
+    if (tryProxyFirst && userId) {
+      try {
+        console.log('[UserPreferences] Trying direct Functions URL as fallback');
+        const res = await fetch(directUrl, {
+          headers: directHeaders,
+          credentials: 'include',
+        });
+        if (res.ok) {
+          return handleRes(res);
+        }
+      } catch (fallbackError) {
+        console.error('[UserPreferences] Direct Functions call also failed:', fallbackError);
+      }
+    }
+    
     // If it's a 404 error, return default preferences instead of throwing
     if (error.status === 404) {
       console.warn('[UserPreferences] 404 error - returning default preferences');
@@ -134,21 +176,34 @@ export async function getUserPreferences(userId?: string): Promise<UserPreferenc
 
 export async function updateUserPreferences(preferences: Partial<UserPreferences>, userId?: string): Promise<UserPreferences> {
   const isLocalDev = typeof window !== 'undefined' && window.location.hostname === 'localhost';
-  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  const isProduction = !isLocalDev && typeof window !== 'undefined';
+  
+  // Try Static Web Apps proxy first, then fallback to direct Functions URL
+  const tryProxyFirst = isProduction && API_BASE === window.location.origin;
+  
+  let url = `${API_BASE}${API_PREFIX}/user/preferences`;
+  let headers: HeadersInit = { 'Content-Type': 'application/json' };
   
   // For local dev, send userId as x-household-id header
-  // In production, authentication is handled via Static Web Apps proxy (x-ms-client-principal header)
   if (isLocalDev && userId) {
     headers['x-household-id'] = userId;
   }
   
-  const url = `${API_BASE}${API_PREFIX}/user/preferences`;
-  console.log('[UserPreferences] Updating preferences:', preferences, 'URL:', url, 'isLocalDev:', isLocalDev, 'userId:', userId);
+  // For production, if we have userId and proxy might not work, prepare direct call headers
+  const directUrl = `${FUNCTIONS_DIRECT_URL}/api/user/preferences`;
+  const directHeaders: HeadersInit = { 'Content-Type': 'application/json' };
+  
+  // Use x-household-id header for direct Functions call (Functions now accept this as fallback)
+  if (isProduction && userId && !isLocalDev) {
+    directHeaders['x-household-id'] = userId;
+  }
+  
+  console.log('[UserPreferences] Updating preferences:', preferences, 'URL:', url, 'isLocalDev:', isLocalDev, 'userId:', userId, 'tryProxyFirst:', tryProxyFirst);
   console.log('[UserPreferences] Request headers:', headers);
   console.log('[UserPreferences] Request body:', JSON.stringify(preferences));
   
   try {
-    const res = await fetch(url, {
+    let res = await fetch(url, {
       method: 'PUT',
       headers,
       credentials: 'include', // Include cookies for authentication (Azure)
@@ -157,6 +212,21 @@ export async function updateUserPreferences(preferences: Partial<UserPreferences
     
     console.log('[UserPreferences] Update response status:', res.status, res.statusText);
     console.log('[UserPreferences] Response headers:', Object.fromEntries(res.headers.entries()));
+    
+    // If proxy returns 404/405, try direct Functions URL as fallback
+    if (tryProxyFirst && (res.status === 404 || res.status === 405)) {
+      console.warn('[UserPreferences] Static Web Apps proxy failed, trying direct Functions URL');
+      console.log('[UserPreferences] Direct URL:', directUrl);
+      console.log('[UserPreferences] Direct headers:', directHeaders);
+      
+      res = await fetch(directUrl, {
+        method: 'PUT',
+        headers: directHeaders,
+        credentials: 'include',
+        body: JSON.stringify(preferences),
+      });
+      console.log('[UserPreferences] Direct Functions response status:', res.status, res.statusText);
+    }
     
     // If we get 405, the function likely isn't deployed yet
     if (res.status === 405) {
@@ -181,6 +251,25 @@ export async function updateUserPreferences(preferences: Partial<UserPreferences
       url: url,
       method: 'PUT'
     });
+    
+    // If proxy failed, try direct Functions URL as fallback
+    if (tryProxyFirst && userId) {
+      try {
+        console.log('[UserPreferences] Trying direct Functions URL as fallback');
+        const res = await fetch(directUrl, {
+          method: 'PUT',
+          headers: directHeaders,
+          credentials: 'include',
+          body: JSON.stringify(preferences),
+        });
+        if (res.ok) {
+          return handleRes(res);
+        }
+      } catch (fallbackError) {
+        console.error('[UserPreferences] Direct Functions call also failed:', fallbackError);
+      }
+    }
+    
     throw error;
   }
 }

@@ -6,14 +6,16 @@ import { getClientPrincipal } from '../shared/auth';
 export async function getUserPreferencesHandler(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
   try {
     const principal = getClientPrincipal(request);
-    if (!principal) {
+    // Fallback to x-household-id header for testing/direct API calls
+    const householdIdHeader = request.headers.get('x-household-id');
+    const userId = principal?.userId || householdIdHeader;
+    
+    if (!userId) {
       return addCorsHeaders({
         status: 401,
-        jsonBody: { error: 'Unauthorized - authentication required' },
+        jsonBody: { error: 'Unauthorized - authentication required. Provide x-ms-client-principal or x-household-id header.' },
       });
     }
-
-    const userId = principal.userId;
     context.log(`[UserPreferences] Getting preferences for userId: ${userId}`);
     const preferences = await getUserPreferences(userId);
     context.log(`[UserPreferences] Retrieved preferences:`, preferences);
