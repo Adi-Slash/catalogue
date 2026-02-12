@@ -1,6 +1,9 @@
 .asset-detail-page {
   max-width: 800px;
+  width: 100%;
   margin: 0 auto;
+  box-sizing: border-box;
+  padding: 0 1rem;
 }
 
 .page-header {
@@ -25,6 +28,9 @@
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .asset-header {
@@ -209,6 +215,10 @@
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   padding: 2rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .form-actions {

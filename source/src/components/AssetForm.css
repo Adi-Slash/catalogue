@@ -1,11 +1,16 @@
 .asset-form {
-  max-width: none;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .form-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.25rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .form-group {
@@ -13,6 +18,10 @@
   flex-direction: column;
   align-items: stretch;
   gap: 0.4rem;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .form-group.full-width {
@@ -41,7 +50,9 @@
   font-family: inherit;
   line-height: 1.2;
   width: 100%;
+  max-width: 100%;
   margin: 0;
+  min-width: 0;
 }
 
 .form-select {
@@ -62,6 +73,8 @@
   height: auto;
   min-height: 100px;
   align-self: start;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .form-group.full-width .form-label {
@@ -125,6 +138,9 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 0.75rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .image-preview {
