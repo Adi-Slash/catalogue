@@ -118,9 +118,9 @@ export function DarkModeProvider({ children }: { children: ReactNode }) {
           darkMode: newValue,
           errorData: (error as any).errorData
         });
-        // Show user-friendly error message
-        alert(`Failed to save dark mode preference: ${error.message || 'Unknown error'}. Please check console for details.`);
-        // Don't revert - localStorage already saved
+        // Show error in console but don't block UI - dark mode change still works locally
+        console.warn('[DarkMode] Dark mode preference saved to localStorage only. Backend save failed.');
+        // Don't revert - localStorage already saved, UI already updated
       }
     } else {
       console.warn('[DarkMode] User not authenticated - saving to localStorage only');

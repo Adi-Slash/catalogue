@@ -211,6 +211,7 @@ export async function updateUserPreferences(preferences: Partial<UserPreferences
   console.log('[UserPreferences] Updating preferences:', preferences, 'URL:', url, 'isLocalDev:', isLocalDev, 'userId:', userId, 'tryProxyFirst:', tryProxyFirst);
   console.log('[UserPreferences] Request headers:', headers);
   console.log('[UserPreferences] Request body:', JSON.stringify(preferences));
+  console.log('[UserPreferences] Request body type check - darkMode:', typeof preferences.darkMode, 'language:', typeof preferences.language);
   
   try {
     let res = await fetch(url, {
@@ -248,19 +249,26 @@ export async function updateUserPreferences(preferences: Partial<UserPreferences
       }
     }
     
-    // If we get 405, the function likely isn't deployed yet
-    if (res.status === 405) {
-      console.error('[UserPreferences] 405 Method Not Allowed - The updateUserPreferences function may not be deployed yet.');
-      console.error('[UserPreferences] Please ensure the Functions app has been redeployed with the latest code.');
-      console.error('[UserPreferences] Also verify that Static Web Apps is linked to Functions app in Azure Portal.');
+    // Check for error status codes before calling handleRes
+    if (!res.ok) {
+      // If we get 405, the function likely isn't deployed yet
+      if (res.status === 405) {
+        console.error('[UserPreferences] 405 Method Not Allowed - The updateUserPreferences function may not be deployed yet.');
+        console.error('[UserPreferences] Please ensure the Functions app has been redeployed with the latest code.');
+        console.error('[UserPreferences] Also verify that Static Web Apps is linked to Functions app in Azure Portal.');
+      }
+      
+      // If we get 404, the route might not be configured correctly
+      if (res.status === 404) {
+        console.error('[UserPreferences] 404 Not Found - The route /api/user/preferences may not be configured correctly.');
+        console.error('[UserPreferences] Check staticwebapp.config.json and ensure Functions app is linked.');
+      }
+      
+      // handleRes will throw an error with details
+      return handleRes(res);
     }
     
-    // If we get 404, the route might not be configured correctly
-    if (res.status === 404) {
-      console.error('[UserPreferences] 404 Not Found - The route /api/user/preferences may not be configured correctly.');
-      console.error('[UserPreferences] Check staticwebapp.config.json and ensure Functions app is linked.');
-    }
-    
+    // Response is OK, parse and return
     return handleRes(res);
   } catch (error: any) {
     console.error('[UserPreferences] Network error during update:', error);

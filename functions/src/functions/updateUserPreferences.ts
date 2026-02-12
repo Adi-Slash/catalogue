@@ -19,21 +19,24 @@ export async function updateUserPreferencesHandler(request: HttpRequest, context
     }
     const body = await request.json() as Partial<UserPreferences>;
 
-    context.log(`[UserPreferences] Updating preferences for userId: ${userId}, darkMode: ${body.darkMode}, language: ${body.language}`);
+    context.log(`[UserPreferences] Updating preferences for userId: ${userId}`);
+    context.log(`[UserPreferences] Request body - darkMode: ${body.darkMode} (type: ${typeof body.darkMode}), language: ${body.language} (type: ${typeof body.language})`);
+    context.log(`[UserPreferences] Full request body:`, JSON.stringify(body));
 
     // Get existing preferences or create new
     const existing = await getUserPreferences(userId);
-    context.log(`[UserPreferences] Existing preferences:`, existing);
+    context.log(`[UserPreferences] Existing preferences:`, existing ? JSON.stringify(existing) : 'null');
     
     const preferences: UserPreferences = {
       id: userId,
       userId: userId,
       darkMode: body.darkMode !== undefined ? body.darkMode : (existing?.darkMode ?? false),
-      language: body.language !== undefined ? body.language : (existing?.language ?? undefined),
+      language: body.language !== undefined ? body.language : (existing?.language ?? 'en'), // Default to 'en' if not provided
       updatedAt: new Date().toISOString(),
     };
 
-    context.log(`[UserPreferences] Saving preferences:`, JSON.stringify(preferences));
+    context.log(`[UserPreferences] Computed preferences to save:`, JSON.stringify(preferences));
+    context.log(`[UserPreferences] darkMode value: ${preferences.darkMode} (type: ${typeof preferences.darkMode})`);
     try {
       const updated = await upsertUserPreferences(preferences);
       context.log(`[UserPreferences] Successfully saved preferences:`, JSON.stringify(updated));
