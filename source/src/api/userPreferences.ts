@@ -80,13 +80,23 @@ export async function updateUserPreferences(preferences: Partial<UserPreferences
     headers['x-household-id'] = userId;
   }
   
-  console.log('[UserPreferences] Updating preferences:', preferences, 'URL:', `${API_BASE}${API_PREFIX}/user/preferences`, 'isLocalDev:', isLocalDev);
-  const res = await fetch(`${API_BASE}${API_PREFIX}/user/preferences`, {
+  const url = `${API_BASE}${API_PREFIX}/user/preferences`;
+  console.log('[UserPreferences] Updating preferences:', preferences, 'URL:', url, 'isLocalDev:', isLocalDev);
+  
+  const res = await fetch(url, {
     method: 'PUT',
     headers,
     credentials: 'include', // Include cookies for authentication (Azure)
     body: JSON.stringify(preferences),
   });
-  console.log('[UserPreferences] Update response status:', res.status);
+  
+  console.log('[UserPreferences] Update response status:', res.status, res.statusText);
+  
+  // If we get 405, the function likely isn't deployed yet
+  if (res.status === 405) {
+    console.error('[UserPreferences] 405 Method Not Allowed - The updateUserPreferences function may not be deployed yet.');
+    console.error('[UserPreferences] Please ensure the Functions app has been redeployed with the latest code.');
+  }
+  
   return handleRes(res);
 }
