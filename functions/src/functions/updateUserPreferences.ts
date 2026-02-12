@@ -17,8 +17,11 @@ export async function updateUserPreferencesHandler(request: HttpRequest, context
     const userId = principal.userId;
     const body = await request.json() as Partial<UserPreferences>;
 
+    context.log(`[UserPreferences] Updating preferences for userId: ${userId}, darkMode: ${body.darkMode}`);
+
     // Get existing preferences or create new
     const existing = await getUserPreferences(userId);
+    context.log(`[UserPreferences] Existing preferences:`, existing);
     
     const preferences: UserPreferences = {
       id: userId,
@@ -27,7 +30,10 @@ export async function updateUserPreferencesHandler(request: HttpRequest, context
       updatedAt: new Date().toISOString(),
     };
 
+    context.log(`[UserPreferences] Saving preferences:`, preferences);
     const updated = await upsertUserPreferences(preferences);
+    context.log(`[UserPreferences] Successfully saved preferences:`, updated);
+    
     return addCorsHeaders({
       status: 200,
       jsonBody: updated,

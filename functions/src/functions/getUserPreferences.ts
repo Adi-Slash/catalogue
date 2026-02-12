@@ -14,7 +14,9 @@ export async function getUserPreferencesHandler(request: HttpRequest, context: I
     }
 
     const userId = principal.userId;
+    context.log(`[UserPreferences] Getting preferences for userId: ${userId}`);
     const preferences = await getUserPreferences(userId);
+    context.log(`[UserPreferences] Retrieved preferences:`, preferences);
 
     // Return default preferences if none exist
     const defaultPreferences = {
@@ -24,9 +26,12 @@ export async function getUserPreferencesHandler(request: HttpRequest, context: I
       updatedAt: new Date().toISOString(),
     };
 
+    const result = preferences || defaultPreferences;
+    context.log(`[UserPreferences] Returning preferences:`, result);
+    
     return addCorsHeaders({
       status: 200,
-      jsonBody: preferences || defaultPreferences,
+      jsonBody: result,
     });
   } catch (error: any) {
     context.error('Error getting user preferences:', error);

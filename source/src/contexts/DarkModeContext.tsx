@@ -19,42 +19,45 @@ export function DarkModeProvider({ children }: { children: ReactNode }) {
     return saved ? JSON.parse(saved) : false;
   });
   const [loading, setLoading] = useState(false);
-  const [hasLoadedUserPrefs, setHasLoadedUserPrefs] = useState(false);
+  const [loadedUserId, setLoadedUserId] = useState<string | null>(null);
 
-  // Fetch user preferences when user logs in
+  // Fetch user preferences when user logs in or userId changes
   useEffect(() => {
     async function loadUserPreferences() {
-      if (!user || hasLoadedUserPrefs) return;
+      // Only load if we have a user and haven't loaded preferences for this user yet
+      if (!user || loadedUserId === user.userId) return;
 
       setLoading(true);
       try {
+        console.log('[DarkMode] Loading preferences for user:', user.userId);
         const preferences = await getUserPreferences(user.userId);
+        console.log('[DarkMode] Loaded preferences:', preferences);
         if (preferences && preferences.darkMode !== undefined) {
           setIsDarkMode(preferences.darkMode);
           // Also update localStorage as fallback
           localStorage.setItem('darkMode', JSON.stringify(preferences.darkMode));
         }
-        setHasLoadedUserPrefs(true);
+        setLoadedUserId(user.userId);
       } catch (error) {
-        console.error('Failed to load user preferences:', error);
+        console.error('[DarkMode] Failed to load user preferences:', error);
         // Fallback to localStorage if API fails
         const saved = localStorage.getItem('darkMode');
         if (saved) {
           setIsDarkMode(JSON.parse(saved));
         }
-        setHasLoadedUserPrefs(true);
+        setLoadedUserId(user.userId); // Still mark as loaded to avoid retrying
       } finally {
         setLoading(false);
       }
     }
 
     loadUserPreferences();
-  }, [user, hasLoadedUserPrefs]);
+  }, [user, loadedUserId]);
 
-  // Reset hasLoadedUserPrefs when user logs out
+  // Reset loadedUserId when user logs out
   useEffect(() => {
     if (!user) {
-      setHasLoadedUserPrefs(false);
+      setLoadedUserId(null);
     }
   }, [user]);
 
@@ -78,9 +81,11 @@ export function DarkModeProvider({ children }: { children: ReactNode }) {
     // Save to backend if user is authenticated
     if (user) {
       try {
-        await updateUserPreferences({ darkMode: newValue }, user.userId);
+        console.log('[DarkMode] Saving preferences for user:', user.userId, 'darkMode:', newValue);
+        const updated = await updateUserPreferences({ darkMode: newValue }, user.userId);
+        console.log('[DarkMode] Preferences saved successfully:', updated);
       } catch (error) {
-        console.error('Failed to save user preferences:', error);
+        console.error('[DarkMode] Failed to save user preferences:', error);
         // Don't revert - localStorage already saved
       }
     }
