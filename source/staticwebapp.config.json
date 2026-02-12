@@ -27,6 +27,7 @@
     "rewrite": "/index.html",
     "exclude": [
       "/.auth/*",
+      "/api/*",
       "/_assets/*",
       "/*.js",
       "/*.css",
