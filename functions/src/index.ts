@@ -7,3 +7,5 @@ import './functions/createAsset';
 import './functions/updateAsset';
 import './functions/deleteAsset';
 import './functions/uploadImage';
+import './functions/getUserPreferences';
+import './functions/updateUserPreferences';

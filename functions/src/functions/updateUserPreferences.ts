@@ -30,19 +30,39 @@ export async function updateUserPreferencesHandler(request: HttpRequest, context
       updatedAt: new Date().toISOString(),
     };
 
-    context.log(`[UserPreferences] Saving preferences:`, preferences);
-    const updated = await upsertUserPreferences(preferences);
-    context.log(`[UserPreferences] Successfully saved preferences:`, updated);
-    
-    return addCorsHeaders({
-      status: 200,
-      jsonBody: updated,
-    });
+    context.log(`[UserPreferences] Saving preferences:`, JSON.stringify(preferences));
+    try {
+      const updated = await upsertUserPreferences(preferences);
+      context.log(`[UserPreferences] Successfully saved preferences:`, JSON.stringify(updated));
+      
+      return addCorsHeaders({
+        status: 200,
+        jsonBody: updated,
+      });
+    } catch (upsertError: any) {
+      context.error('[UserPreferences] Upsert failed:', upsertError);
+      context.error('[UserPreferences] Upsert error details:', {
+        message: upsertError.message,
+        code: upsertError.code,
+        stack: upsertError.stack
+      });
+      throw upsertError; // Re-throw to be caught by outer catch
+    }
   } catch (error: any) {
-    context.error('Error updating user preferences:', error);
+    context.error('[UserPreferences] Error updating user preferences:', error);
+    context.error('[UserPreferences] Full error details:', {
+      message: error.message,
+      code: error.code,
+      stack: error.stack,
+      name: error.name
+    });
     return addCorsHeaders({
       status: 500,
-      jsonBody: { error: 'Internal server error', details: error.message },
+      jsonBody: { 
+        error: 'Internal server error', 
+        details: error.message,
+        code: error.code || 'UNKNOWN'
+      },
     });
   }
 }

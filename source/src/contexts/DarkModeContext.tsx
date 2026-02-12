@@ -84,10 +84,28 @@ export function DarkModeProvider({ children }: { children: ReactNode }) {
         console.log('[DarkMode] Saving preferences for user:', user.userId, 'darkMode:', newValue);
         const updated = await updateUserPreferences({ darkMode: newValue }, user.userId);
         console.log('[DarkMode] Preferences saved successfully:', updated);
-      } catch (error) {
+        
+        // Verify the save was successful
+        if (!updated || updated.darkMode !== newValue) {
+          console.warn('[DarkMode] Warning: Saved preferences do not match expected value', {
+            expected: newValue,
+            received: updated
+          });
+        }
+      } catch (error: any) {
         console.error('[DarkMode] Failed to save user preferences:', error);
+        console.error('[DarkMode] Error details:', {
+          message: error.message,
+          stack: error.stack,
+          userId: user.userId,
+          darkMode: newValue
+        });
+        // Show user-friendly error message
+        alert(`Failed to save dark mode preference: ${error.message || 'Unknown error'}. Please try again.`);
         // Don't revert - localStorage already saved
       }
+    } else {
+      console.warn('[DarkMode] Cannot save preferences - user not authenticated');
     }
   };
 

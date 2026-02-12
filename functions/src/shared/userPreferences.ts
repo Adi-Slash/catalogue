@@ -21,27 +21,41 @@ function getClient(): CosmosClient {
 }
 
 async function ensureDatabaseAndContainer(): Promise<void> {
-  if (initialized) return;
+  if (initialized) {
+    console.log('[UserPreferences] Database and container already initialized');
+    return;
+  }
 
   try {
+    console.log('[UserPreferences] Initializing database and container...');
     const cosmosClient = getClient();
     
     // Create database if it doesn't exist
+    console.log('[UserPreferences] Creating/checking database:', databaseId);
     const { database } = await cosmosClient.databases.createIfNotExists({
       id: databaseId,
     });
+    console.log('[UserPreferences] Database ready');
     
     // Create container if it doesn't exist (partitioned by userId)
-    await database.containers.createIfNotExists({
+    console.log('[UserPreferences] Creating/checking container:', containerId);
+    const containerResult = await database.containers.createIfNotExists({
       id: containerId,
       partitionKey: {
         paths: ['/userId'],
       },
     });
+    console.log('[UserPreferences] Container ready:', containerResult.container.id);
     
     initialized = true;
-  } catch (error) {
-    console.error('Error initializing User Preferences Cosmos DB:', error);
+    console.log('[UserPreferences] Initialization complete');
+  } catch (error: any) {
+    console.error('[UserPreferences] Error initializing Cosmos DB:', error);
+    console.error('[UserPreferences] Error details:', {
+      message: error.message,
+      code: error.code,
+      stack: error.stack
+    });
     throw error;
   }
 }
@@ -75,10 +89,29 @@ export async function getUserPreferences(userId: string): Promise<UserPreference
 }
 
 export async function upsertUserPreferences(preferences: UserPreferences): Promise<UserPreferences> {
-  const container = await getUserPreferencesContainer();
-  const { resource } = await container.items.upsert(preferences);
-  if (!resource) {
-    throw new Error('Failed to save user preferences');
+  try {
+    console.log('[UserPreferences] Starting upsert for userId:', preferences.userId);
+    const container = await getUserPreferencesContainer();
+    console.log('[UserPreferences] Container obtained, performing upsert...');
+    
+    const result = await container.items.upsert(preferences);
+    console.log('[UserPreferences] Upsert result:', result);
+    
+    if (!result.resource) {
+      console.error('[UserPreferences] Upsert returned no resource');
+      throw new Error('Failed to save user preferences - no resource returned');
+    }
+    
+    console.log('[UserPreferences] Successfully saved preferences:', result.resource);
+    return result.resource as unknown as UserPreferences;
+  } catch (error: any) {
+    console.error('[UserPreferences] Error in upsertUserPreferences:', error);
+    console.error('[UserPreferences] Error details:', {
+      message: error.message,
+      code: error.code,
+      stack: error.stack,
+      preferences: preferences
+    });
+    throw error;
   }
-  return resource as unknown as UserPreferences;
 }

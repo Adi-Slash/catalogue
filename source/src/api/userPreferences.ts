@@ -19,18 +19,34 @@ const API_PREFIX = API_BASE.includes('localhost') ? '' : '/api';
 async function handleRes(res: Response) {
   if (!res.ok) {
     let errorMessage = `${res.status} ${res.statusText}`;
+    let errorData: any = null;
     try {
-      const errorData = await res.json();
+      errorData = await res.json();
+      console.error('[UserPreferences] API Error Response:', errorData);
       if (errorData.error) {
         errorMessage = errorData.error;
         if (errorData.details) {
           errorMessage += `: ${errorData.details}`;
         }
+        if (errorData.code) {
+          errorMessage += ` (code: ${errorData.code})`;
+        }
       }
-    } catch {
-      // If response is not JSON, use status text
+    } catch (parseError) {
+      // If response is not JSON, try to get text
+      try {
+        const text = await res.text();
+        console.error('[UserPreferences] API Error Response (text):', text);
+        errorMessage = `${errorMessage}: ${text}`;
+      } catch {
+        // If response is not JSON, use status text
+        console.error('[UserPreferences] API Error - could not parse response');
+      }
     }
-    throw new Error(errorMessage);
+    const error = new Error(errorMessage);
+    (error as any).status = res.status;
+    (error as any).errorData = errorData;
+    throw error;
   }
   return res.json();
 }
