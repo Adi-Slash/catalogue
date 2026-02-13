@@ -33,9 +33,24 @@ export async function deleteAssetHandler(request: HttpRequest, context: Invocati
       });
     }
 
-    // Delete the image from blob storage if it exists
+    // Delete all images from blob storage
+    // Handle legacy imageUrl
     if (existing.imageUrl) {
       await deleteImage(existing.imageUrl);
+    }
+    
+    // Handle imageUrls array (can contain strings or ImageUrls objects)
+    if (existing.imageUrls && Array.isArray(existing.imageUrls)) {
+      await Promise.all(
+        existing.imageUrls.map(async (img) => {
+          if (typeof img === 'string') {
+            await deleteImage(img);
+          } else if (img && typeof img === 'object' && 'high' in img) {
+            // ImageUrls object
+            await deleteImage(img);
+          }
+        })
+      );
     }
 
     // Delete the asset from Cosmos DB

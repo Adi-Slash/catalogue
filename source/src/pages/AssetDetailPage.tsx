@@ -5,6 +5,7 @@ import AssetForm from '../components/AssetForm';
 import type { Asset } from '../types/asset';
 import { useHouseholdId } from '../utils/auth';
 import { useLanguage } from '../contexts/LanguageContext';
+import { getImageUrls } from '../utils/imageUtils';
 import './AssetDetailPage.css';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
@@ -58,10 +59,8 @@ export default function AssetDetailPage() {
     navigate('/assets');
   }
 
-  // Compute image URLs after hooks but before early returns
-  const rawPaths =
-    asset && ((asset.imageUrls && asset.imageUrls.length > 0 && asset.imageUrls) ||
-    (asset.imageUrl ? [asset.imageUrl] : [])) || [];
+  // Use high-resolution images for detail/edit page
+  const rawPaths = asset ? getImageUrls(asset, true) : [];
 
   const imageUrls = rawPaths.map((p) => (p.startsWith('http') ? p : `${API_BASE}${p}`)).slice(0, 4);
   const mainImageUrl = imageUrls[selectedIndex] || undefined;

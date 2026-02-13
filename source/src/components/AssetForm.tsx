@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import type { FormEvent } from 'react';
 import { uploadImage } from '../api/assets';
-import type { NewAsset, Asset } from '../types/asset';
+import type { NewAsset, Asset, ImageUrls } from '../types/asset';
 import { useLanguage } from '../contexts/LanguageContext';
+import { normalizeImageUrls } from '../utils/imageUtils';
 import './AssetForm.css';
 
 type Props = {
@@ -24,7 +25,10 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
   // Use a ref to track files separately to avoid state synchronization issues
   const filesRef = useRef<File[]>([]);
   const [files, setFiles] = useState<File[]>([]);
-  const [imageUrls, setImageUrls] = useState<string[]>([]); // Mix of existing URLs (strings) and blob URLs for new photos
+  // imageUrls can contain:
+  // - ImageUrls objects (for existing uploaded images with dual resolution)
+  // - Blob URLs as strings (for new photos being previewed before upload)
+  const [imageUrls, setImageUrls] = useState<(string | ImageUrls)[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [fileInputKey, setFileInputKey] = useState(0); // Key to force input reset on mobile
@@ -40,10 +44,13 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       setDescription(initialAsset.description || '');
       setCategory(initialAsset.category || '');
       setValue(initialAsset.value);
+      // Load existing images - normalize to ImageUrls objects
       const existing =
         (initialAsset.imageUrls && initialAsset.imageUrls.length > 0 && initialAsset.imageUrls) ||
         (initialAsset.imageUrl ? [initialAsset.imageUrl] : []);
-      setImageUrls(existing);
+      // Normalize to ImageUrls objects (legacy strings become ImageUrls with same URL for high/low)
+      const normalized = normalizeImageUrls(existing);
+      setImageUrls(normalized);
       // Reset files when editing (existing assets don't have new files to upload)
       setFiles([]);
       filesRef.current = [];
@@ -105,7 +112,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
     // Wait a bit longer to ensure all setTimeout callbacks have executed
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    // Separate existing URLs (strings) from new blob URLs (files to upload)
+    // Separate existing ImageUrls objects from new blob URLs (files to upload)
     // Always prefer filesRef.current as it's updated synchronously in handleFileChange
     // The ref should have the latest files even if state hasn't updated yet
     const currentFiles = filesRef.current.length >= files.length ? filesRef.current : files;
@@ -115,7 +122,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
     let currentImageUrls = imageUrls;
     // Force a re-read by checking if we need to wait more
     // If filesRef has more files than imageUrls has blob URLs, wait a bit more
-    const blobUrlsCount = imageUrls.filter((url) => url.startsWith('blob:')).length;
+    const blobUrlsCount = imageUrls.filter((url) => typeof url === 'string' && url.startsWith('blob:')).length;
     if (currentFiles.length > blobUrlsCount && currentFiles.length > 0) {
       console.log('[AssetForm] Waiting for imageUrls state to catch up. Files:', currentFiles.length, 'Blob URLs:', blobUrlsCount);
       // Wait a bit more for state to update
@@ -124,8 +131,9 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       // Actually, we'll just use filesRef.current which has all the files
     }
     
-    const existingUrls = currentImageUrls.filter((url) => !url.startsWith('blob:'));
-    const blobUrls = currentImageUrls.filter((url) => url.startsWith('blob:'));
+    // Separate existing ImageUrls objects from blob URLs (strings starting with 'blob:')
+    const existingUrls = currentImageUrls.filter((url) => typeof url === 'object' || (typeof url === 'string' && !url.startsWith('blob:')));
+    const blobUrls = currentImageUrls.filter((url) => typeof url === 'string' && url.startsWith('blob:'));
     
     console.log('[AssetForm] Submitting. Existing URLs:', existingUrls.length, 'Blob URLs:', blobUrls.length, 'Files (state):', files.length, 'Files (ref):', filesRef.current.length, 'Using files:', currentFiles.length);
     
@@ -155,7 +163,8 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
           console.log('[AssetForm] Uploading file', idx + 1, 'of', filesToUpload.length, '-', f.name, f.size, 'bytes');
           return uploadImage(f, householdId);
         }));
-        console.log('[AssetForm] Uploaded', uploaded.length, 'images. URLs:', uploaded);
+        console.log('[AssetForm] Uploaded', uploaded.length, 'images. ImageUrls:', uploaded);
+        // uploaded is now an array of ImageUrls objects
         finalImageUrls = [...existingUrls, ...uploaded].slice(0, 4);
         console.log('[AssetForm] Final image URLs count:', finalImageUrls.length);
       } catch (err: unknown) {
@@ -169,6 +178,11 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       // We have blob URLs but no files - this shouldn't happen, but log it
       console.warn('[AssetForm] Warning: Have blob URLs but no files to upload. Blob URLs will be lost.');
     }
+    // Extract high-res URL for legacy imageUrl field (backwards compatibility)
+    const firstImageUrl = finalImageUrls.length > 0
+      ? (typeof finalImageUrls[0] === 'string' ? finalImageUrls[0] : finalImageUrls[0].high)
+      : undefined;
+    
     const payload: Partial<NewAsset> = {
       householdId,
       make,
@@ -177,8 +191,8 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       description: description || undefined,
       category: category || undefined,
       value: Number(value),
-      imageUrl: finalImageUrls[0],
-      imageUrls: finalImageUrls,
+      imageUrl: firstImageUrl, // Legacy field - use high-res URL
+      imageUrls: finalImageUrls, // New field - array of ImageUrls objects or strings
     };
     // Loading is already set to true at the start of submit()
     try {
@@ -191,7 +205,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       if (!initialAsset) {
         // Clean up blob URLs before resetting
         imageUrls.forEach((url) => {
-          if (url.startsWith('blob:')) {
+          if (typeof url === 'string' && url.startsWith('blob:')) {
             URL.revokeObjectURL(url);
           }
         });
@@ -330,9 +344,9 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
         // Use setTimeout to ensure it happens after the outer callback returns
         setTimeout(() => {
           setImageUrls((currentUrls) => {
-            // Merge: keep all existing URLs, add new previews
+            // Merge: keep all existing URLs (ImageUrls objects or strings), add new previews (blob URL strings)
             // This ensures we don't lose blob URLs from previous handleFileChange calls
-            const mergedUrls = [...currentUrls, ...newPreviews].slice(0, 4);
+            const mergedUrls: (string | ImageUrls)[] = [...currentUrls, ...newPreviews].slice(0, 4);
             console.log('[AssetForm] Merged image URLs. Previous:', currentUrls.length, 'New previews:', newPreviews.length, 'Merged:', mergedUrls.length);
             return mergedUrls;
           });
@@ -363,11 +377,11 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
     const urlToRemove = imageUrls[index];
     
     // If it's a blob URL (new photo), revoke it and remove from files array
-    if (urlToRemove.startsWith('blob:')) {
+    if (typeof urlToRemove === 'string' && urlToRemove.startsWith('blob:')) {
       URL.revokeObjectURL(urlToRemove);
       // Find which file index this corresponds to (count blob URLs before this index)
       setFiles((prevFiles) => {
-        const blobUrlsBefore = imageUrls.slice(0, index).filter((url) => url.startsWith('blob:')).length;
+        const blobUrlsBefore = imageUrls.slice(0, index).filter((url) => typeof url === 'string' && url.startsWith('blob:')).length;
         const fileIndex = blobUrlsBefore;
         const updatedFiles = prevFiles.filter((_, i) => i !== fileIndex);
         filesRef.current = updatedFiles; // Keep ref in sync
@@ -530,20 +544,24 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
           </div>
           {imageUrls.length > 0 && (
             <div className="image-preview-grid">
-              {imageUrls.slice(0, 4).map((url, index) => (
-                <div className="image-preview" key={index}>
-                  <button
-                    type="button"
-                    className="remove-image-btn"
-                    onClick={() => removeImage(index)}
-                    aria-label={t('form.removePhoto') + ` ${index + 1}`}
-                    disabled={loading}
-                  >
-                    ×
-                  </button>
-                  <img src={url} alt={`Asset preview ${index + 1}`} className="preview-image" />
-                </div>
-              ))}
+              {imageUrls.slice(0, 4).map((url, index) => {
+                // Extract display URL: use blob URL if string, or high-res URL if ImageUrls object
+                const displayUrl = typeof url === 'string' ? url : url.high;
+                return (
+                  <div className="image-preview" key={index}>
+                    <button
+                      type="button"
+                      className="remove-image-btn"
+                      onClick={() => removeImage(index)}
+                      aria-label={t('form.removePhoto') + ` ${index + 1}`}
+                      disabled={loading}
+                    >
+                      ×
+                    </button>
+                    <img src={displayUrl} alt={`Asset preview ${index + 1}`} className="preview-image" />
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

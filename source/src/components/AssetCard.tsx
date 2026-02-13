@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Asset as AssetType } from '../types/asset';
 import { useLanguage } from '../contexts/LanguageContext';
+import { getImageUrls } from '../utils/imageUtils';
 import './AssetCard.css';
 
 type Props = {
@@ -13,9 +14,8 @@ const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
 
 export default function AssetCard({ asset, onDelete, onClick }: Props) {
   const { t, formatCurrency } = useLanguage();
-  const rawPaths =
-    (asset.imageUrls && asset.imageUrls.length > 0 && asset.imageUrls) ||
-    (asset.imageUrl ? [asset.imageUrl] : []);
+  // Use low-resolution images for list page (faster loading)
+  const rawPaths = getImageUrls(asset, false);
 
   const imageUrls = rawPaths.map((p) => (p.startsWith('http') ? p : `${API_BASE}${p}`)).slice(0, 4);
   const [selectedIndex, setSelectedIndex] = useState(0);

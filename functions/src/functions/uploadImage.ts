@@ -31,13 +31,17 @@ export async function uploadImageHandler(request: HttpRequest, context: Invocati
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Upload to blob storage
-    const blobUrl = await uploadImage(buffer, file.type, file.name);
+    // Upload to blob storage - creates both high-res and low-res versions
+    const imageUrls = await uploadImage(buffer, file.type, file.name);
+    context.log(`[UploadImage] Uploaded image - High: ${imageUrls.high.substring(0, 50)}..., Low: ${imageUrls.low.substring(0, 50)}...`);
 
-    // Return the full blob URL
+    // Return both URLs
     return addCorsHeaders({
       status: 200,
-      jsonBody: { imageUrl: blobUrl },
+      jsonBody: {
+        imageUrl: imageUrls.high, // Legacy field - use high-res for backwards compatibility
+        imageUrls: imageUrls, // New field with dual resolution
+      },
     });
   } catch (error: any) {
     context.error('Error uploading image:', error);

@@ -1,4 +1,5 @@
 import type { UserPreferences } from '../types/userPreferences';
+import { getSWALinkingInstructions } from './swaProxyHelper';
 
 // Determine a sensible default API base:
 // - In local development, talk to the mock server on http://localhost:4000
@@ -105,9 +106,10 @@ export async function getUserPreferences(userId?: string): Promise<UserPreferenc
     // Direct calls bypass token validation and are insecure.
     // Return default preferences instead.
     if (tryProxyFirst && (res.status === 404 || res.status === 405 || (res.status === 200 && isHtmlResponse))) {
-      console.error('[UserPreferences] Static Web Apps proxy failed (status:', res.status, 'isHTML:', isHtmlResponse, ')');
-      console.error('[UserPreferences] SECURITY: Cannot fallback to direct Functions URL in production - it bypasses token validation.');
-      console.error('[UserPreferences] Returning default preferences. Check that SWA is linked to Functions app in Azure Portal.');
+      console.error('[UserPreferences] ⚠️ Static Web Apps proxy failed (status:', res.status, 'isHTML:', isHtmlResponse, ')');
+      console.error('[UserPreferences] 🔒 SECURITY: Cannot fallback to direct Functions URL - it bypasses token validation.');
+      console.error(getSWALinkingInstructions());
+      console.error('[UserPreferences] Returning default preferences. App will work but preferences won\'t persist until SWA is linked.');
       
       // Return default preferences instead of making insecure direct call
       return {
@@ -121,9 +123,9 @@ export async function getUserPreferences(userId?: string): Promise<UserPreferenc
     
     // Check for common issues
     if (res.status === 404 || (res.status === 200 && res.headers.get('content-type')?.includes('text/html'))) {
-      console.error('[UserPreferences] 404 Not Found or HTML response - Route may not be configured correctly.');
-      console.error('[UserPreferences] Verify Static Web Apps is linked to Functions app in Azure Portal.');
-      console.error('[UserPreferences] Returning default preferences.');
+      console.error('[UserPreferences] ⚠️ 404 Not Found or HTML response');
+      console.error(getSWALinkingInstructions());
+      console.error('[UserPreferences] Returning default preferences. App will work but preferences won\'t persist until SWA is linked.');
       
       // Return default preferences instead of throwing error
       return {
@@ -209,9 +211,9 @@ export async function updateUserPreferences(preferences: Partial<UserPreferences
     // SECURITY: If proxy fails, don't fallback to direct calls in production.
     // Direct calls bypass token validation and are insecure.
     if (tryProxyFirst && (res.status === 404 || res.status === 405 || (res.status === 200 && isHtmlResponse))) {
-      console.error('[UserPreferences] Static Web Apps proxy failed (status:', res.status, 'isHTML:', isHtmlResponse, ')');
-      console.error('[UserPreferences] SECURITY: Cannot fallback to direct Functions URL in production - it bypasses token validation.');
-      console.error('[UserPreferences] Check that SWA is linked to Functions app in Azure Portal.');
+      console.error('[UserPreferences] ⚠️ Static Web Apps proxy failed (status:', res.status, 'isHTML:', isHtmlResponse, ')');
+      console.error('[UserPreferences] 🔒 SECURITY: Cannot fallback to direct Functions URL - it bypasses token validation.');
+      console.error(getSWALinkingInstructions());
       // Let handleRes throw the error with proper status code
     }
     
@@ -248,8 +250,9 @@ export async function updateUserPreferences(preferences: Partial<UserPreferences
     
     // SECURITY: Don't fallback to direct calls in production - they bypass token validation
     if (tryProxyFirst) {
-      console.error('[UserPreferences] Network error - SWA proxy failed and direct calls are not allowed in production.');
-      console.error('[UserPreferences] Check that SWA is linked to Functions app in Azure Portal.');
+      console.error('[UserPreferences] ⚠️ Network error - SWA proxy failed');
+      console.error('[UserPreferences] 🔒 SECURITY: Direct calls are not allowed in production - they bypass token validation.');
+      console.error(getSWALinkingInstructions());
     }
     
     throw error;

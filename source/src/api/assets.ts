@@ -1,4 +1,5 @@
 import type { Asset, NewAsset } from '../types/asset';
+import { getSWALinkingInstructions } from './swaProxyHelper';
 
 // Determine a sensible default API base:
 // - In local development, talk to the mock server on http://localhost:4000
@@ -17,8 +18,19 @@ const API_BASE = import.meta.env.VITE_API_BASE || DEFAULT_API_BASE;
 // When using Static Web Apps proxy, also use /api prefix
 const API_PREFIX = API_BASE.includes('localhost') ? '' : '/api';
 
-async function handleRes(res: Response) {
+async function handleRes(res: Response, url: string): Promise<any> {
   if (!res.ok) {
+    // Check if this is a 404 from SWA proxy (not linked to Functions)
+    if (res.status === 404 && !isLocalDev) {
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('text/html')) {
+        console.error('[Assets] ⚠️ Static Web Apps proxy returned 404 HTML page');
+        console.error('[Assets] 🔒 This means SWA is not linked to Functions app');
+        console.error(getSWALinkingInstructions());
+        throw new Error('Static Web Apps proxy is not configured. Please link SWA to Functions app in Azure Portal. See console for instructions.');
+      }
+    }
+    
     let errorMessage = `${res.status} ${res.statusText}`;
     try {
       const errorData = await res.json();
@@ -55,7 +67,7 @@ export async function getAssets(householdId: string): Promise<Asset[]> {
       credentials: 'include', // Include cookies for SWA authentication
     });
     console.log('[Assets] Response status:', res.status, res.statusText);
-    return handleRes(res);
+    return handleRes(res, url);
   } catch (error) {
     console.error('[Assets] Fetch error:', error);
     console.error('[Assets] API_BASE:', API_BASE);
@@ -71,11 +83,12 @@ export async function getAsset(id: string, householdId: string): Promise<Asset> 
     headers['x-household-id'] = householdId;
   }
   
-  const res = await fetch(`${API_BASE}${API_PREFIX}/assets/${id}`, {
+  const url = `${API_BASE}${API_PREFIX}/assets/${id}`;
+  const res = await fetch(url, {
     headers,
     credentials: 'include',
   });
-  return handleRes(res);
+  return handleRes(res, url);
 }
 
 export async function createAsset(payload: NewAsset): Promise<Asset> {
@@ -84,13 +97,14 @@ export async function createAsset(payload: NewAsset): Promise<Asset> {
     headers['x-household-id'] = payload.householdId;
   }
   
-  const res = await fetch(`${API_BASE}${API_PREFIX}/assets`, {
+  const url = `${API_BASE}${API_PREFIX}/assets`;
+  const res = await fetch(url, {
     method: 'POST',
     headers,
     credentials: 'include',
     body: JSON.stringify(payload),
   });
-  return handleRes(res);
+  return handleRes(res, url);
 }
 
 export async function updateAsset(
@@ -103,13 +117,14 @@ export async function updateAsset(
     headers['x-household-id'] = householdId;
   }
   
-  const res = await fetch(`${API_BASE}${API_PREFIX}/assets/${id}`, {
+  const url = `${API_BASE}${API_PREFIX}/assets/${id}`;
+  const res = await fetch(url, {
     method: 'PUT',
     headers,
     credentials: 'include',
     body: JSON.stringify(payload),
   });
-  return handleRes(res);
+  return handleRes(res, url);
 }
 
 export async function deleteAsset(id: string, householdId: string): Promise<void> {
@@ -118,15 +133,27 @@ export async function deleteAsset(id: string, householdId: string): Promise<void
     headers['x-household-id'] = householdId;
   }
   
-  const res = await fetch(`${API_BASE}${API_PREFIX}/assets/${id}`, {
+  const url = `${API_BASE}${API_PREFIX}/assets/${id}`;
+  const res = await fetch(url, {
     method: 'DELETE',
     headers,
     credentials: 'include',
   });
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  if (!res.ok) {
+    if (res.status === 404 && !isLocalDev) {
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('text/html')) {
+        console.error('[Assets] ⚠️ Static Web Apps proxy returned 404');
+        console.error(getSWALinkingInstructions());
+      }
+    }
+    throw new Error(`${res.status} ${res.statusText}`);
+  }
 }
 
-export async function uploadImage(file: File, householdId: string): Promise<string> {
+import type { ImageUrls } from '../types/asset';
+
+export async function uploadImage(file: File, householdId: string): Promise<ImageUrls> {
   const formData = new FormData();
   formData.append('image', file);
   
@@ -136,14 +163,30 @@ export async function uploadImage(file: File, householdId: string): Promise<stri
   }
   // Don't set Content-Type for FormData - browser sets it automatically with boundary
   
-  const res = await fetch(`${API_BASE}${API_PREFIX}/upload`, {
+  const url = `${API_BASE}${API_PREFIX}/upload`;
+  const res = await fetch(url, {
     method: 'POST',
     headers,
     credentials: 'include',
     body: formData,
   });
-  const data = await handleRes(res);
-  // If imageUrl is already a full URL (starts with http), use it directly
-  // Otherwise, prepend API_BASE for relative paths (mock server compatibility)
-  return data.imageUrl.startsWith('http') ? data.imageUrl : `${API_BASE}${data.imageUrl}`;
+  const data = await handleRes(res, url);
+  
+  // Handle both new format (imageUrls object) and legacy format (imageUrl string)
+  if (data.imageUrls && typeof data.imageUrls === 'object' && data.imageUrls.high && data.imageUrls.low) {
+    // New format: dual resolution
+    return {
+      high: data.imageUrls.high.startsWith('http') ? data.imageUrls.high : `${API_BASE}${data.imageUrls.high}`,
+      low: data.imageUrls.low.startsWith('http') ? data.imageUrls.low : `${API_BASE}${data.imageUrls.low}`,
+    };
+  } else if (data.imageUrl) {
+    // Legacy format: single URL (treat as high-res, use same for low-res)
+    const url = data.imageUrl.startsWith('http') ? data.imageUrl : `${API_BASE}${data.imageUrl}`;
+    return {
+      high: url,
+      low: url,
+    };
+  } else {
+    throw new Error('Invalid response from upload endpoint: missing imageUrl or imageUrls');
+  }
 }
