@@ -82,15 +82,9 @@ export async function getUserPreferences(userId?: string): Promise<UserPreferenc
     headers['x-household-id'] = userId;
   }
   
-  // For production, if we have userId and proxy might not work, prepare direct call headers
-  const directUrl = `${FUNCTIONS_DIRECT_URL}/api/user/preferences`;
-  const directHeaders: HeadersInit = {};
-  
-  // Use x-household-id header for direct Functions call (Functions accept this as fallback).
-  // Direct cross-origin calls use credentials: 'omit' so CORS works (wildcard Allow-Origin is not allowed with credentials).
-  if (isProduction && userId && !isLocalDev) {
-    directHeaders['x-household-id'] = userId;
-  }
+  // SECURITY: In production, we MUST use SWA proxy which validates tokens.
+  // Direct calls to Functions URL are NOT allowed in production as they bypass token validation.
+  // If proxy fails, we return defaults rather than making insecure direct calls.
   
   console.log('[UserPreferences] Fetching preferences from:', url, 'isLocalDev:', isLocalDev, 'userId:', userId, 'tryProxyFirst:', tryProxyFirst);
   console.log('[UserPreferences] Request headers:', headers);
@@ -107,24 +101,22 @@ export async function getUserPreferences(userId?: string): Promise<UserPreferenc
     const contentType = res.headers.get('content-type') || '';
     const isHtmlResponse = contentType.includes('text/html');
     
-    // If proxy returns 404/405 or HTML response, try direct Functions URL as fallback
+    // SECURITY: If proxy fails, don't fallback to direct calls in production.
+    // Direct calls bypass token validation and are insecure.
+    // Return default preferences instead.
     if (tryProxyFirst && (res.status === 404 || res.status === 405 || (res.status === 200 && isHtmlResponse))) {
-      console.warn('[UserPreferences] Static Web Apps proxy failed (status:', res.status, 'isHTML:', isHtmlResponse, '), trying direct Functions URL');
-      console.log('[UserPreferences] Direct URL:', directUrl);
-      console.log('[UserPreferences] Direct headers:', directHeaders);
+      console.error('[UserPreferences] Static Web Apps proxy failed (status:', res.status, 'isHTML:', isHtmlResponse, ')');
+      console.error('[UserPreferences] SECURITY: Cannot fallback to direct Functions URL in production - it bypasses token validation.');
+      console.error('[UserPreferences] Returning default preferences. Check that SWA is linked to Functions app in Azure Portal.');
       
-      try {
-        // Use credentials: 'omit' for cross-origin direct call so CORS works with backend's Allow-Origin
-        res = await fetch(directUrl, {
-          headers: directHeaders,
-          credentials: 'omit',
-        });
-        console.log('[UserPreferences] Direct Functions response status:', res.status, res.statusText);
-        console.log('[UserPreferences] Direct Functions response headers:', Object.fromEntries(res.headers.entries()));
-      } catch (directError) {
-        console.error('[UserPreferences] Direct Functions call failed:', directError);
-        // Fall through to return default preferences
-      }
+      // Return default preferences instead of making insecure direct call
+      return {
+        id: userId || 'unknown',
+        userId: userId || 'unknown',
+        darkMode: false,
+        language: 'en',
+        updatedAt: new Date().toISOString(),
+      };
     }
     
     // Check for common issues
@@ -154,20 +146,10 @@ export async function getUserPreferences(userId?: string): Promise<UserPreferenc
       method: 'GET'
     });
     
-    // If proxy failed, try direct Functions URL as fallback
-    if (tryProxyFirst && userId) {
-      try {
-        console.log('[UserPreferences] Trying direct Functions URL as fallback');
-        const res = await fetch(directUrl, {
-          headers: directHeaders,
-          credentials: 'omit',
-        });
-        if (res.ok) {
-          return handleRes(res);
-        }
-      } catch (fallbackError) {
-        console.error('[UserPreferences] Direct Functions call also failed:', fallbackError);
-      }
+    // SECURITY: Don't fallback to direct calls in production - they bypass token validation
+    if (tryProxyFirst) {
+      console.error('[UserPreferences] Network error - SWA proxy failed and direct calls are not allowed in production.');
+      console.error('[UserPreferences] Returning default preferences. Check that SWA is linked to Functions app.');
     }
     
     // If it's a 404 error, return default preferences instead of throwing
@@ -201,14 +183,8 @@ export async function updateUserPreferences(preferences: Partial<UserPreferences
     headers['x-household-id'] = userId;
   }
   
-  // For production, if we have userId and proxy might not work, prepare direct call headers
-  const directUrl = `${FUNCTIONS_DIRECT_URL}/api/user/preferences`;
-  const directHeaders: HeadersInit = { 'Content-Type': 'application/json' };
-  
-  // Use x-household-id header for direct Functions call (Functions now accept this as fallback)
-  if (isProduction && userId && !isLocalDev) {
-    directHeaders['x-household-id'] = userId;
-  }
+  // SECURITY: In production, we MUST use SWA proxy which validates tokens.
+  // Direct calls to Functions URL are NOT allowed in production as they bypass token validation.
   
   console.log('[UserPreferences] Updating preferences:', preferences, 'URL:', url, 'isLocalDev:', isLocalDev, 'userId:', userId, 'tryProxyFirst:', tryProxyFirst);
   console.log('[UserPreferences] Request headers:', headers);
@@ -230,25 +206,13 @@ export async function updateUserPreferences(preferences: Partial<UserPreferences
     const contentType = res.headers.get('content-type') || '';
     const isHtmlResponse = contentType.includes('text/html');
     
-    // If proxy returns 404/405 or HTML response, try direct Functions URL as fallback
+    // SECURITY: If proxy fails, don't fallback to direct calls in production.
+    // Direct calls bypass token validation and are insecure.
     if (tryProxyFirst && (res.status === 404 || res.status === 405 || (res.status === 200 && isHtmlResponse))) {
-      console.warn('[UserPreferences] Static Web Apps proxy failed (status:', res.status, 'isHTML:', isHtmlResponse, '), trying direct Functions URL');
-      console.log('[UserPreferences] Direct URL:', directUrl);
-      console.log('[UserPreferences] Direct headers:', directHeaders);
-      
-      try {
-        res = await fetch(directUrl, {
-          method: 'PUT',
-          headers: directHeaders,
-          credentials: 'omit',
-          body: JSON.stringify(preferences),
-        });
-        console.log('[UserPreferences] Direct Functions response status:', res.status, res.statusText);
-        console.log('[UserPreferences] Direct Functions response headers:', Object.fromEntries(res.headers.entries()));
-      } catch (directError) {
-        console.error('[UserPreferences] Direct Functions call failed:', directError);
-        throw directError; // Re-throw so outer catch can handle it
-      }
+      console.error('[UserPreferences] Static Web Apps proxy failed (status:', res.status, 'isHTML:', isHtmlResponse, ')');
+      console.error('[UserPreferences] SECURITY: Cannot fallback to direct Functions URL in production - it bypasses token validation.');
+      console.error('[UserPreferences] Check that SWA is linked to Functions app in Azure Portal.');
+      // Let handleRes throw the error with proper status code
     }
     
     // Check for error status codes before calling handleRes
@@ -282,22 +246,10 @@ export async function updateUserPreferences(preferences: Partial<UserPreferences
       method: 'PUT'
     });
     
-    // If proxy failed, try direct Functions URL as fallback
-    if (tryProxyFirst && userId) {
-      try {
-        console.log('[UserPreferences] Trying direct Functions URL as fallback');
-        const res = await fetch(directUrl, {
-          method: 'PUT',
-          headers: directHeaders,
-          credentials: 'omit',
-          body: JSON.stringify(preferences),
-        });
-        if (res.ok) {
-          return handleRes(res);
-        }
-      } catch (fallbackError) {
-        console.error('[UserPreferences] Direct Functions call also failed:', fallbackError);
-      }
+    // SECURITY: Don't fallback to direct calls in production - they bypass token validation
+    if (tryProxyFirst) {
+      console.error('[UserPreferences] Network error - SWA proxy failed and direct calls are not allowed in production.');
+      console.error('[UserPreferences] Check that SWA is linked to Functions app in Azure Portal.');
     }
     
     throw error;
