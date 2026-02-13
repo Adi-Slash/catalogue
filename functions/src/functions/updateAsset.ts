@@ -2,7 +2,7 @@ import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/fu
 import { getAssetById, updateAsset } from '../shared/cosmos';
 import { addCorsHeaders } from '../shared/cors';
 import { requireAuthentication } from '../shared/auth';
-import type { Asset } from '../shared/types';
+import type { Asset, ImageUrls } from '../shared/types';
 
 export async function updateAssetHandler(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
   try {
@@ -36,13 +36,19 @@ export async function updateAssetHandler(request: HttpRequest, context: Invocati
     const body = await request.json() as Partial<Asset>;
     
     // Handle imageUrls - if provided, ensure imageUrl is also set to the first element
-    let imageUrls: string[] | undefined;
+    let imageUrls: (string | ImageUrls)[] | undefined;
     let imageUrl: string | undefined;
     
     if (Array.isArray(body.imageUrls)) {
       // imageUrls is explicitly provided (could be empty array)
       imageUrls = body.imageUrls;
-      imageUrl = imageUrls.length > 0 ? imageUrls[0] : body.imageUrl || existing.imageUrl || '';
+      // Extract high-res URL from first element (could be string or ImageUrls object)
+      if (imageUrls.length > 0) {
+        const firstImg = imageUrls[0];
+        imageUrl = typeof firstImg === 'string' ? firstImg : firstImg.high;
+      } else {
+        imageUrl = body.imageUrl || existing.imageUrl || '';
+      }
     } else if (body.imageUrl) {
       // Only imageUrl is provided, create imageUrls array from it
       imageUrl = body.imageUrl;

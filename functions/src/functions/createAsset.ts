@@ -3,7 +3,7 @@ import { createAsset } from '../shared/cosmos';
 import { addCorsHeaders } from '../shared/cors';
 import { requireAuthentication } from '../shared/auth';
 import { v4 as uuidv4 } from 'uuid';
-import type { Asset } from '../shared/types';
+import type { Asset, ImageUrls } from '../shared/types';
 
 export async function createAssetHandler(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
   try {
@@ -28,11 +28,16 @@ export async function createAssetHandler(request: HttpRequest, context: Invocati
 
     const now = new Date().toISOString();
     // Handle imageUrls array - if provided, use it; otherwise fall back to imageUrl
-    const bodyImageUrls = Array.isArray(body.imageUrls)
+    const bodyImageUrls: (string | ImageUrls)[] = Array.isArray(body.imageUrls)
       ? body.imageUrls
       : body.imageUrl
       ? [body.imageUrl]
       : [];
+    
+    // Extract high-res URL for legacy imageUrl field
+    const firstImageUrl = bodyImageUrls.length > 0
+      ? (typeof bodyImageUrls[0] === 'string' ? bodyImageUrls[0] : bodyImageUrls[0].high)
+      : body.imageUrl || '';
     
     const asset: Asset = {
       id: uuidv4(),
@@ -43,8 +48,8 @@ export async function createAssetHandler(request: HttpRequest, context: Invocati
       description: body.description || '',
       category: body.category || '',
       value: body.value,
-      imageUrl: bodyImageUrls[0] || body.imageUrl || '',
-      imageUrls: bodyImageUrls,
+      imageUrl: firstImageUrl, // Legacy field - use high-res URL from first image
+      imageUrls: bodyImageUrls, // New field - can contain ImageUrls objects or strings
       createdAt: now,
       updatedAt: now,
     };
