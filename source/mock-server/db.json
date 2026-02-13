@@ -15,6 +15,22 @@
       ],
       "createdAt": "2026-02-12T13:13:06.060Z",
       "updatedAt": "2026-02-12T13:13:06.060Z"
+    },
+    {
+      "id": "89ef0f82-5066-44e9-a487-d16d28d16e04",
+      "householdId": "adrian-test-household",
+      "make": "xxx",
+      "model": "xxxx",
+      "serialNumber": "xxx",
+      "description": "",
+      "category": "Instrument",
+      "value": 100,
+      "imageUrl": "http://localhost:4000/uploads/04ef4eb6-ba46-4c55-b87a-9613cfb0bbf0.jpg",
+      "imageUrls": [
+        "http://localhost:4000/uploads/04ef4eb6-ba46-4c55-b87a-9613cfb0bbf0.jpg"
+      ],
+      "createdAt": "2026-02-13T09:49:01.635Z",
+      "updatedAt": "2026-02-13T09:49:01.635Z"
     }
   ]
 }

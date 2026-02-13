@@ -61,9 +61,19 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    
+    // Prevent multiple submissions - set loading immediately
+    if (loading) {
+      console.log('[AssetForm] Submit already in progress, ignoring duplicate submission');
+      return;
+    }
+    
     setError(null);
+    setLoading(true); // Lock form immediately to prevent multiple submissions
+    
     if (!make || !model || value === '') {
       setError(t('form.required') + ' ' + t('asset.make') + ', ' + t('asset.model') + ', ' + t('asset.value'));
+      setLoading(false);
       return;
     }
 
@@ -152,6 +162,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
         const errorMessage = err instanceof Error ? err.message : t('common.error');
         console.error('[AssetForm] Upload error:', err);
         setError(t('form.errorUploading') + ': ' + errorMessage);
+        setLoading(false); // Unlock form on upload error
         return;
       }
     } else if (blobUrls.length > 0) {
@@ -169,7 +180,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       imageUrl: finalImageUrls[0],
       imageUrls: finalImageUrls,
     };
-    setLoading(true);
+    // Loading is already set to true at the start of submit()
     try {
       if (initialAsset && onUpdate) {
         await onUpdate(payload);
@@ -195,12 +206,15 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
         setImageUrls([]);
         // Reset file input key to allow fresh captures
         setFileInputKey(0);
+        // For create: navigation happens in onCreate, so component unmounts - no need to unlock
+      } else {
+        // For update: unlock form after successful update
+        setLoading(false);
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : (initialAsset ? t('form.errorUpdating') : t('form.errorCreating'));
       setError(errorMessage);
-    } finally {
-      setLoading(false);
+      setLoading(false); // Unlock form on error so user can retry
     }
   }
 
@@ -372,6 +386,12 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
 
   return (
     <form onSubmit={submit} className="asset-form">
+      {loading && (
+        <div className="form-loading-overlay" aria-live="polite" aria-busy="true">
+          <div className="form-loading-spinner"></div>
+          <p>{t('form.saving')}...</p>
+        </div>
+      )}
       <div className="form-grid">
         <div className="form-group">
           <label htmlFor="make" className="form-label">
@@ -385,6 +405,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
             onChange={(e) => setMake(e.target.value)}
             className="form-input"
             required
+            disabled={loading}
           />
         </div>
 
@@ -400,6 +421,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
             onChange={(e) => setModel(e.target.value)}
             className="form-input"
             required
+            disabled={loading}
           />
         </div>
 
@@ -414,6 +436,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
             value={serialNumber}
             onChange={(e) => setSerialNumber(e.target.value)}
             className="form-input"
+            disabled={loading}
           />
         </div>
 
@@ -426,6 +449,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             className="form-select"
+            disabled={loading}
           >
             <option value="">{t('asset.selectCategory')}</option>
             <option value="Electrical">{t('categories.electrical')}</option>
@@ -452,6 +476,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
             min="0"
             step="0.01"
             required
+            disabled={loading}
           />
         </div>
 
@@ -466,6 +491,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
             onChange={(e) => setDescription(e.target.value)}
             className="form-textarea"
             rows={4}
+            disabled={loading}
           />
         </div>
 
@@ -484,9 +510,9 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
                 capture="environment"
                 onChange={handleFileChange}
                 className="form-file-hidden"
-                disabled={imageUrls.length >= 4}
+                disabled={loading || imageUrls.length >= 4}
               />
-              <label htmlFor="image" className={`custom-file-button ${imageUrls.length >= 4 ? 'disabled' : ''}`}>
+              <label htmlFor="image" className={`custom-file-button ${loading || imageUrls.length >= 4 ? 'disabled' : ''}`}>
                 {t('form.chooseFile')}
               </label>
               <span className="file-name-display">
@@ -511,6 +537,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
                     className="remove-image-btn"
                     onClick={() => removeImage(index)}
                     aria-label={t('form.removePhoto') + ` ${index + 1}`}
+                    disabled={loading}
                   >
                     ×
                   </button>
