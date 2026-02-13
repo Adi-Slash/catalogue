@@ -26,6 +26,7 @@ async function handleRes(res: Response, url: string): Promise<any> {
       if (contentType.includes('text/html')) {
         console.error('[Assets] ⚠️ Static Web Apps proxy returned 404 HTML page');
         console.error('[Assets] 🔒 This means SWA is not linked to Functions app');
+        console.error('[Assets] Request URL:', url);
         console.error(getSWALinkingInstructions());
         throw new Error('Static Web Apps proxy is not configured. Please link SWA to Functions app in Azure Portal. See console for instructions.');
       }
@@ -43,6 +44,7 @@ async function handleRes(res: Response, url: string): Promise<any> {
     } catch {
       // If response is not JSON, use status text
     }
+    console.error('[Assets] API error:', errorMessage, 'URL:', url);
     throw new Error(errorMessage);
   }
   return res.json();
