@@ -1,19 +1,18 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { getUserPreferences } from '../shared/userPreferences';
 import { addCorsHeaders } from '../shared/cors';
-import { getClientPrincipal } from '../shared/auth';
+import { requireAuthentication } from '../shared/auth';
 
 export async function getUserPreferencesHandler(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
   try {
-    const principal = getClientPrincipal(request);
-    // Fallback to x-household-id header for testing/direct API calls
-    const householdIdHeader = request.headers.get('x-household-id');
-    const userId = principal?.userId || householdIdHeader;
-    
-    if (!userId) {
+    // Require authentication - validates token via Azure Static Web Apps
+    let userId: string;
+    try {
+      userId = requireAuthentication(request);
+    } catch (authError: any) {
       return addCorsHeaders({
         status: 401,
-        jsonBody: { error: 'Unauthorized - authentication required. Provide x-ms-client-principal or x-household-id header.' },
+        jsonBody: { error: authError.message || 'Unauthorized - authentication required' },
       });
     }
     context.log(`[UserPreferences] Getting preferences for userId: ${userId}`);

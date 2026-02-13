@@ -1,16 +1,19 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from '@azure/functions';
 import { getAssetById, updateAsset } from '../shared/cosmos';
 import { addCorsHeaders } from '../shared/cors';
-import { getHouseholdId } from '../shared/auth';
+import { requireAuthentication } from '../shared/auth';
 import type { Asset } from '../shared/types';
 
 export async function updateAssetHandler(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
   try {
-    const householdId = getHouseholdId(request);
-    if (!householdId) {
+    // Require authentication - validates token via Azure Static Web Apps
+    let householdId: string;
+    try {
+      householdId = requireAuthentication(request);
+    } catch (authError: any) {
       return addCorsHeaders({
         status: 401,
-        jsonBody: { error: 'Unauthorized - authentication required' },
+        jsonBody: { error: authError.message || 'Unauthorized - authentication required' },
       });
     }
 
