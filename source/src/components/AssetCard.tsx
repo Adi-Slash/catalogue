@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Asset as AssetType } from '../types/asset';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getImageUrls } from '../utils/imageUtils';
@@ -19,18 +19,34 @@ export default function AssetCard({ asset, onDelete, onClick }: Props) {
 
   const imageUrls = rawPaths.map((p) => (p.startsWith('http') ? p : `${API_BASE}${p}`)).slice(0, 4);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [imageLoading, setImageLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
   const mainImageUrl = imageUrls[selectedIndex];
   const hasMultiple = imageUrls.length > 1;
+
+  // Reset loading state when image URL changes
+  useEffect(() => {
+    setImageLoading(true);
+    setImageError(false);
+  }, [mainImageUrl]);
+
+  // Reset loading state when image changes (for manual navigation)
+  const handleImageChange = () => {
+    setImageLoading(true);
+    setImageError(false);
+  };
 
   const goPrev = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!hasMultiple) return;
+    handleImageChange();
     setSelectedIndex((prev) => (prev - 1 + imageUrls.length) % imageUrls.length);
   };
 
   const goNext = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!hasMultiple) return;
+    handleImageChange();
     setSelectedIndex((prev) => (prev + 1) % imageUrls.length);
   };
 
@@ -53,7 +69,30 @@ export default function AssetCard({ asset, onDelete, onClick }: Props) {
       <div className="card-image">
         {mainImageUrl ? (
           <>
-            <img src={mainImageUrl} alt={`${asset.make} ${asset.model}`} className="asset-image" />
+            {imageLoading && !imageError && (
+              <div className="image-loading-placeholder">
+                <div className="loading-spinner"></div>
+              </div>
+            )}
+            <img
+              src={mainImageUrl}
+              alt={`${asset.make} ${asset.model}`}
+              className={`asset-image ${imageLoading ? 'loading' : ''}`}
+              loading="lazy"
+              decoding="async"
+              width={220}
+              height={180}
+              onLoad={() => setImageLoading(false)}
+              onError={() => {
+                setImageLoading(false);
+                setImageError(true);
+              }}
+            />
+            {imageError && (
+              <div className="image-error-placeholder">
+                <span>{t('asset.imageLoadError') || 'Failed to load image'}</span>
+              </div>
+            )}
             {hasMultiple && (
               <div className="carousel-nav">
                 <button
@@ -91,10 +130,18 @@ export default function AssetCard({ asset, onDelete, onClick }: Props) {
               className={`thumbnail ${index === selectedIndex ? 'selected' : ''}`}
               onClick={(e) => {
                 e.stopPropagation();
+                handleImageChange();
                 setSelectedIndex(index);
               }}
             >
-              <img src={url} alt={`Thumbnail ${index + 1}`} />
+              <img
+                src={url}
+                alt={`Thumbnail ${index + 1}`}
+                loading="lazy"
+                decoding="async"
+                width={48}
+                height={48}
+              />
             </button>
           ))}
         </div>
