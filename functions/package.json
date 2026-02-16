@@ -12,7 +12,8 @@
     "watch": "tsc -w",
     "prestart": "npm run build",
     "start": "func start",
-    "test": "echo \"No tests yet\""
+    "test": "echo \"No tests yet\"",
+    "postinstall": "npm rebuild sharp --platform=linux --arch=x64 || true"
   },
   "dependencies": {
     "@azure/cosmos": "^4.0.0",

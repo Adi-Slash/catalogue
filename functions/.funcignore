@@ -9,3 +9,6 @@ src
 *.md
 README.md
 !dist
+# Exclude platform-specific binaries that aren't for Linux
+node_modules/sharp/build/Release/*-win32-*
+node_modules/sharp/build/Release/*-darwin-*

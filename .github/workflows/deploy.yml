@@ -54,7 +54,14 @@ jobs:
 
       - name: Install Functions dependencies
         working-directory: functions
-        run: npm install
+        run: |
+          # Clean install to ensure no platform-specific binaries from other systems
+          rm -rf node_modules package-lock.json
+          # Install all dependencies including optional (needed for sharp)
+          # GitHub Actions runs on Linux, so binaries will be Linux-compatible
+          npm install --include=optional
+          # Verify sharp is installed correctly
+          test -d node_modules/sharp || (echo "ERROR: sharp not installed" && exit 1)
 
       - name: Build Functions
         working-directory: functions
@@ -73,14 +80,22 @@ jobs:
 
       - name: Prepare production deployment
         working-directory: functions
+        env:
+          # Ensure Linux binaries are maintained during prune
+          npm_config_platform: linux
+          npm_config_arch: x64
         run: |
-          # Remove devDependencies for production deployment
-          # Keep node_modules but remove dev dependencies
-          npm prune --production || npm install --production
+          # Remove devDependencies but keep production dependencies including optional
+          npm prune --production
           # Verify critical files exist
           test -f dist/index.js || (echo "ERROR: dist/index.js not found" && exit 1)
           test -f host.json || (echo "ERROR: host.json not found" && exit 1)
           test -f package.json || (echo "ERROR: package.json not found" && exit 1)
+          # Verify sharp module exists
+          test -d node_modules/sharp || (echo "ERROR: sharp module not found" && exit 1)
+          # Verify sharp has Linux binaries (check for .node files)
+          echo "Checking sharp installation..."
+          find node_modules/sharp -name "*.node" | head -1 || echo "Warning: No .node files found in sharp"
           echo "✓ All required files present"
 
       - name: Verify deployment package structure
