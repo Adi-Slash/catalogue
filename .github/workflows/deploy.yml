@@ -67,10 +67,32 @@ jobs:
           ls -la dist/ || echo "dist folder not found"
           ls -la dist/index.js || echo "dist/index.js not found"
           ls -la dist/functions/ || echo "dist/functions folder not found"
+          echo "Checking required files..."
+          ls -la host.json || echo "host.json not found"
+          ls -la package.json || echo "package.json not found"
 
-      - name: Install production dependencies only
+      - name: Prepare production deployment
         working-directory: functions
-        run: npm prune --production
+        run: |
+          # Remove devDependencies for production deployment
+          # Keep node_modules but remove dev dependencies
+          npm prune --production || npm install --production
+          # Verify critical files exist
+          test -f dist/index.js || (echo "ERROR: dist/index.js not found" && exit 1)
+          test -f host.json || (echo "ERROR: host.json not found" && exit 1)
+          test -f package.json || (echo "ERROR: package.json not found" && exit 1)
+          echo "✓ All required files present"
+
+      - name: Verify deployment package structure
+        working-directory: functions
+        run: |
+          echo "Final package structure:"
+          echo "Files in functions directory:"
+          ls -la
+          echo "Files in dist directory:"
+          ls -la dist/ || echo "dist not found"
+          echo "Checking node_modules exists:"
+          test -d node_modules && echo "node_modules exists" || echo "node_modules missing"
 
       - name: Deploy Azure Functions
         uses: Azure/functions-action@v1
