@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { getAssets, deleteAsset } from '../api/assets';
 import AssetCard from '../components/AssetCard';
 import type { Asset } from '../types/asset';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useHouseholdId } from '../utils/auth';
 import { useLanguage } from '../contexts/LanguageContext';
 import './AssetListPage.css';
@@ -13,6 +13,7 @@ type Props = {
 
 export default function AssetListPage({ searchTerm }: Props) {
   const navigate = useNavigate();
+  const location = useLocation();
   const householdId = useHouseholdId();
   const { t, formatCurrency } = useLanguage();
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -56,6 +57,13 @@ export default function AssetListPage({ searchTerm }: Props) {
   useEffect(() => {
     load();
   }, [householdId]);
+
+  // Reload assets when navigating back to this page (e.g., from edit page)
+  useEffect(() => {
+    if (location.pathname === '/assets' && householdId) {
+      load();
+    }
+  }, [location.pathname, householdId]);
 
   async function handleDelete(id: string) {
     if (!householdId) return;

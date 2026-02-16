@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { Asset as AssetType } from '../types/asset';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getImageUrls } from '../utils/imageUtils';
@@ -21,14 +21,32 @@ export default function AssetCard({ asset, onDelete, onClick }: Props) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
+  const imgRef = useRef<HTMLImageElement | null>(null);
   const mainImageUrl = imageUrls[selectedIndex];
   const hasMultiple = imageUrls.length > 1;
 
-  // Reset loading state when image URL changes
+  // Reset loading state when asset changes or image URL changes
+  // This ensures images reload when navigating back from edit page
   useEffect(() => {
     setImageLoading(true);
     setImageError(false);
-  }, [mainImageUrl]);
+    setSelectedIndex(0); // Reset to first image when asset changes
+    
+    // Check if image is already cached and loaded (for instant display)
+    if (mainImageUrl) {
+      const img = new Image();
+      img.onload = () => {
+        // Image is cached, set loading to false immediately
+        setImageLoading(false);
+        setImageError(false);
+      };
+      img.onerror = () => {
+        // Don't set error here - let the actual img element handle it
+        // This is just a cache check
+      };
+      img.src = mainImageUrl;
+    }
+  }, [asset.id, mainImageUrl]);
 
   // Reset loading state when image changes (for manual navigation)
   const handleImageChange = () => {
@@ -75,6 +93,8 @@ export default function AssetCard({ asset, onDelete, onClick }: Props) {
               </div>
             )}
             <img
+              ref={imgRef}
+              key={`${asset.id}-${selectedIndex}-${mainImageUrl}`}
               src={mainImageUrl}
               alt={`${asset.make} ${asset.model}`}
               className={`asset-image ${imageLoading ? 'loading' : ''}`}
@@ -82,7 +102,10 @@ export default function AssetCard({ asset, onDelete, onClick }: Props) {
               decoding="async"
               width={220}
               height={180}
-              onLoad={() => setImageLoading(false)}
+              onLoad={() => {
+                setImageLoading(false);
+                setImageError(false);
+              }}
               onError={() => {
                 setImageLoading(false);
                 setImageError(true);

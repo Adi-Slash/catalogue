@@ -40,7 +40,14 @@ declare module 'express-serve-static-core' {
 }
 
 const app = express();
-app.use(cors());
+// Configure CORS to allow specific origin with credentials
+// When credentials: 'include' is used, we cannot use wildcard '*'
+app.use(cors({
+  origin: 'http://localhost:5173', // Vite dev server default port
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'x-household-id'],
+}));
 app.use(express.json());
 
 const DB_PATH = path.join(process.cwd(), 'mock-server', 'db.json');
