@@ -1,6 +1,18 @@
 import { BlobServiceClient, ContainerClient, BlobSASPermissions } from '@azure/storage-blob';
 import { v4 as uuidv4 } from 'uuid';
-import sharp from 'sharp';
+// Lazy load sharp to prevent blocking function registration if it fails
+let sharp: any = null;
+function getSharp() {
+  if (!sharp) {
+    try {
+      sharp = require('sharp');
+    } catch (error) {
+      console.error('Failed to load sharp module:', error);
+      throw new Error('sharp module is not available. Please ensure it is installed correctly.');
+    }
+  }
+  return sharp;
+}
 import type { ImageUrls } from './types';
 
 const containerName = process.env.BLOB_CONTAINER_NAME || 'asset-images';
@@ -65,7 +77,8 @@ export async function uploadImage(file: Buffer, contentType: string, originalNam
   
   try {
     // Process image with sharp to create both resolutions
-    const image = sharp(file);
+    const sharpLib = getSharp();
+    const image = sharpLib(file);
     const metadata = await image.metadata();
     
     // Create high-resolution version (max 1920x1920, quality 90)

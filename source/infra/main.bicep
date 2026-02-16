@@ -145,6 +145,10 @@ resource functionApp 'Microsoft.Web/sites@2023-12-01' = {
           name: 'BLOB_CONTAINER_NAME'
           value: 'asset-images'
         }
+        {
+          name: 'FUNCTIONS_NODE_BLOCK_ON_ENTRY_POINT_ERROR'
+          value: 'true'
+        }
       ]
     }
   }
