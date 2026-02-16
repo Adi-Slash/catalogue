@@ -25,12 +25,18 @@ export default function AssetCard({ asset, onDelete, onClick }: Props) {
   const mainImageUrl = imageUrls[selectedIndex];
   const hasMultiple = imageUrls.length > 1;
 
-  // Reset loading state when asset changes or image URL changes
+  // Reset loading state when asset changes (not when image URL changes)
   // This ensures images reload when navigating back from edit page
   useEffect(() => {
     setImageLoading(true);
     setImageError(false);
     setSelectedIndex(0); // Reset to first image when asset changes
+  }, [asset.id]);
+
+  // Reset loading state when the displayed image URL changes (for navigation)
+  useEffect(() => {
+    setImageLoading(true);
+    setImageError(false);
     
     // Check if image is already cached and loaded (for instant display)
     if (mainImageUrl) {
@@ -46,7 +52,7 @@ export default function AssetCard({ asset, onDelete, onClick }: Props) {
       };
       img.src = mainImageUrl;
     }
-  }, [asset.id, mainImageUrl]);
+  }, [mainImageUrl]);
 
   // Reset loading state when image changes (for manual navigation)
   const handleImageChange = () => {

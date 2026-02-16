@@ -1,53 +1,30 @@
 {
   "assets": [
     {
-      "id": "5cf0fc2f-b0a8-4992-a1e0-0336e5b6e1d8",
+      "id": "c8bc05c2-254c-4349-8215-4c2691973e5a",
       "householdId": "adrian-test-household",
-      "make": "a",
-      "model": "a",
-      "serialNumber": "a",
+      "make": "Sony",
+      "model": "xxxx",
+      "serialNumber": "xxx",
       "description": "",
-      "category": "Electrical",
-      "value": 1,
-      "imageUrl": "http://localhost:4000/uploads/0c725f28-97f3-4f55-ae97-48284b1a0fee.jpg",
-      "imageUrls": [
-        {
-          "high": "http://localhost:4000/uploads/0c725f28-97f3-4f55-ae97-48284b1a0fee.jpg",
-          "low": "http://localhost:4000/uploads/0c725f28-97f3-4f55-ae97-48284b1a0fee.jpg"
-        },
-        {
-          "high": "http://localhost:4000/uploads/4af5dc63-ddd0-40bc-bd48-bce4e7b84a08.jpg",
-          "low": "http://localhost:4000/uploads/4af5dc63-ddd0-40bc-bd48-bce4e7b84a08.jpg"
-        }
-      ],
-      "createdAt": "2026-02-16T14:16:31.017Z",
-      "updatedAt": "2026-02-16T14:17:00.442Z"
-    },
-    {
-      "id": "bc9b80f2-c6d2-454d-915e-c2d26934a968",
-      "householdId": "adrian-test-household",
-      "make": "test",
-      "model": "test",
-      "serialNumber": "test",
-      "description": "",
-      "category": "Electrical",
+      "category": "",
       "value": 100,
       "imageUrl": {
-        "high": "http://localhost:4000/uploads/d1bec8f3-7c57-4706-ab1d-936887bea486.jpg",
-        "low": "http://localhost:4000/uploads/d1bec8f3-7c57-4706-ab1d-936887bea486.jpg"
+        "high": "http://localhost:4000/uploads/8fd00b25-aa1f-4c3f-a845-4fb45f7bce68.jpg",
+        "low": "http://localhost:4000/uploads/8fd00b25-aa1f-4c3f-a845-4fb45f7bce68.jpg"
       },
       "imageUrls": [
         {
-          "high": "http://localhost:4000/uploads/d1bec8f3-7c57-4706-ab1d-936887bea486.jpg",
-          "low": "http://localhost:4000/uploads/d1bec8f3-7c57-4706-ab1d-936887bea486.jpg"
+          "high": "http://localhost:4000/uploads/8fd00b25-aa1f-4c3f-a845-4fb45f7bce68.jpg",
+          "low": "http://localhost:4000/uploads/8fd00b25-aa1f-4c3f-a845-4fb45f7bce68.jpg"
         },
         {
-          "high": "http://localhost:4000/uploads/4a38275a-2a0a-4cae-ab8f-51eb552a1f36.jpg",
-          "low": "http://localhost:4000/uploads/4a38275a-2a0a-4cae-ab8f-51eb552a1f36.jpg"
+          "high": "http://localhost:4000/uploads/64fb1084-b9d1-443e-98b6-d601985031f5.jpg",
+          "low": "http://localhost:4000/uploads/64fb1084-b9d1-443e-98b6-d601985031f5.jpg"
         }
       ],
-      "createdAt": "2026-02-16T14:18:11.318Z",
-      "updatedAt": "2026-02-16T14:18:11.318Z"
+      "createdAt": "2026-02-16T15:50:17.346Z",
+      "updatedAt": "2026-02-16T15:50:17.346Z"
     }
   ]
 }
