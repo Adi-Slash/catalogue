@@ -7,5 +7,6 @@ import './functions/createAsset';
 import './functions/updateAsset';
 import './functions/deleteAsset';
 import './functions/uploadImage';
+import './functions/proxyImage';
 import './functions/getUserPreferences';
 import './functions/updateUserPreferences';

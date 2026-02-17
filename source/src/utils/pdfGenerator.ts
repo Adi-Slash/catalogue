@@ -44,7 +44,30 @@ async function preloadImageIntoDOM(url: string): Promise<HTMLImageElement> {
 }
 
 /**
+ * Checks if a URL is an Azure Blob Storage URL
+ */
+function isAzureBlobStorageUrl(url: string): boolean {
+  return url.includes('.blob.core.windows.net');
+}
+
+/**
+ * Gets the proxy URL for an image
+ */
+function getProxyUrl(imageUrl: string): string {
+  // Determine API base URL
+  const isProduction = !API_BASE.includes('localhost');
+  const apiBase = isProduction 
+    ? window.location.origin // Use same origin in production (SWA proxies to Functions)
+    : API_BASE;
+  
+  // Encode the image URL for the query parameter
+  const encodedUrl = encodeURIComponent(imageUrl);
+  return `${apiBase}/api/proxy-image?url=${encodedUrl}`;
+}
+
+/**
  * Loads an image using fetch API to avoid CORS/tainted canvas issues
+ * Uses proxy endpoint for Azure Blob Storage URLs to bypass CORS
  */
 async function loadImageViaFetch(url: string): Promise<HTMLImageElement> {
   // Handle relative URLs - ensure we have a full URL
@@ -60,11 +83,14 @@ async function loadImageViaFetch(url: string): Promise<HTMLImageElement> {
     }
   }
 
-  console.log(`[PDF] Loading image via fetch: ${fullUrl.substring(0, 80)}...`);
+  // If this is an Azure Blob Storage URL, use proxy endpoint to avoid CORS issues
+  const fetchUrl = isAzureBlobStorageUrl(fullUrl) ? getProxyUrl(fullUrl) : fullUrl;
+
+  console.log(`[PDF] Loading image via ${isAzureBlobStorageUrl(fullUrl) ? 'proxy' : 'direct'} fetch: ${fetchUrl.substring(0, 80)}...`);
 
   try {
     // Use fetch to get the image as a blob (handles CORS properly)
-    const response = await fetch(fullUrl, {
+    const response = await fetch(fetchUrl, {
       method: 'GET',
       credentials: 'include',
       mode: 'cors',
