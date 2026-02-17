@@ -5,12 +5,11 @@ const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
 
 /**
  * Preloads an image into the DOM and returns a promise that resolves when loaded
- * This ensures images are available for canvas conversion without CORS issues
+ * Uses fetch API to avoid CORS/tainted canvas issues
  * Handles both regular URLs and blob URLs
- * Uses fetch as fallback if Image element fails
  */
 async function preloadImageIntoDOM(url: string): Promise<HTMLImageElement> {
-  // Handle blob URLs specially
+  // Handle blob URLs specially - these don't need CORS
   if (url.startsWith('blob:')) {
     return new Promise((resolve, reject) => {
       const img = document.createElement('img');
@@ -19,9 +18,7 @@ async function preloadImageIntoDOM(url: string): Promise<HTMLImageElement> {
       img.style.left = '-9999px';
       
       const timeout = setTimeout(() => {
-        if (img.parentNode) {
-          document.body.removeChild(img);
-        }
+        safeRemoveChild(img);
         reject(new Error('Blob URL load timeout'));
       }, 10000);
 
@@ -32,9 +29,7 @@ async function preloadImageIntoDOM(url: string): Promise<HTMLImageElement> {
 
       img.onerror = () => {
         clearTimeout(timeout);
-        if (img.parentNode) {
-          document.body.removeChild(img);
-        }
+        safeRemoveChild(img);
         reject(new Error('Failed to load blob URL'));
       };
 
@@ -43,87 +38,33 @@ async function preloadImageIntoDOM(url: string): Promise<HTMLImageElement> {
     });
   }
 
-  // Handle regular URLs
-  return new Promise(async (resolve, reject) => {
-    // Check if image already exists in DOM
-    const allImages = Array.from(document.querySelectorAll('img')) as HTMLImageElement[];
-    const existingImg = allImages.find(
-      (img) => {
-        const imgSrc = img.src;
-        const urlToCheck = url.split('?')[0]; // Remove query params for comparison
-        return imgSrc === url || 
-               imgSrc.includes(url.split('/').pop() || '') || 
-               imgSrc.includes(urlToCheck) ||
-               (url.includes('?') && imgSrc.includes(url.split('?')[0]));
-      }
-    );
-    
-    if (existingImg && existingImg.complete && existingImg.naturalWidth > 0) {
-      resolve(existingImg);
-      return;
-    }
-
-    // Handle relative URLs - ensure we have a full URL
-    let fullUrl = url;
-    if (!url.startsWith('http') && !url.startsWith('blob:')) {
-      // Check if it's a relative path
-      if (url.startsWith('/')) {
-        // Absolute path - use current origin
-        fullUrl = `${window.location.origin}${url}`;
-      } else {
-        // Relative path - use API_BASE
-        fullUrl = `${API_BASE}${url.startsWith('/') ? '' : '/'}${url}`;
-      }
-    }
-
-    console.log(`[PDF] Attempting to load image: ${fullUrl.substring(0, 80)}...`);
-
-    // Try Image element first
-    const img = document.createElement('img');
-    img.style.display = 'none';
-    img.style.position = 'absolute';
-    img.style.left = '-9999px';
-    
-    const timeout = setTimeout(() => {
-      if (img.parentNode) {
-        document.body.removeChild(img);
-      }
-      // Try fetch as fallback before rejecting
-      tryFetchFallback(fullUrl, resolve, reject);
-    }, 20000); // Reduced timeout to try fetch sooner
-
-    img.onload = () => {
-      clearTimeout(timeout);
-      resolve(img);
-    };
-
-    img.onerror = async () => {
-      clearTimeout(timeout);
-      if (img.parentNode) {
-        document.body.removeChild(img);
-      }
-      console.warn(`[PDF] Image element failed, trying fetch fallback for: ${fullUrl.substring(0, 80)}...`);
-      // Try fetch as fallback
-      tryFetchFallback(fullUrl, resolve, reject);
-    };
-
-    // Add to DOM before setting src (helps with some mobile browsers)
-    document.body.appendChild(img);
-    img.src = fullUrl;
-  });
+  // For all other URLs, use fetch to avoid CORS/tainted canvas issues
+  // This ensures the image can be drawn to canvas without tainting
+  return await loadImageViaFetch(url);
 }
 
 /**
- * Fallback method using fetch to load image and create Image element from blob
+ * Loads an image using fetch API to avoid CORS/tainted canvas issues
  */
-async function tryFetchFallback(
-  url: string,
-  resolve: (img: HTMLImageElement) => void,
-  reject: (error: Error) => void
-): Promise<void> {
+async function loadImageViaFetch(url: string): Promise<HTMLImageElement> {
+  // Handle relative URLs - ensure we have a full URL
+  let fullUrl = url;
+  if (!url.startsWith('http') && !url.startsWith('blob:')) {
+    // Check if it's a relative path
+    if (url.startsWith('/')) {
+      // Absolute path - use current origin
+      fullUrl = `${window.location.origin}${url}`;
+    } else {
+      // Relative path - use API_BASE
+      fullUrl = `${API_BASE}${url.startsWith('/') ? '' : '/'}${url}`;
+    }
+  }
+
+  console.log(`[PDF] Loading image via fetch: ${fullUrl.substring(0, 80)}...`);
+
   try {
-    console.log(`[PDF] Fetching image via fetch API: ${url.substring(0, 80)}...`);
-    const response = await fetch(url, {
+    // Use fetch to get the image as a blob (handles CORS properly)
+    const response = await fetch(fullUrl, {
       method: 'GET',
       credentials: 'include',
       mode: 'cors',
@@ -136,41 +77,57 @@ async function tryFetchFallback(
     const blob = await response.blob();
     const blobUrl = URL.createObjectURL(blob);
 
-    const img = document.createElement('img');
-    img.style.display = 'none';
-    img.style.position = 'absolute';
-    img.style.left = '-9999px';
+    // Create image from blob URL (no CORS issues since it's a blob)
+    return new Promise((resolve, reject) => {
+      const img = document.createElement('img');
+      img.style.display = 'none';
+      img.style.position = 'absolute';
+      img.style.left = '-9999px';
+      img.crossOrigin = 'anonymous'; // Not needed for blob URLs, but safe to set
 
-    const timeout = setTimeout(() => {
-      URL.revokeObjectURL(blobUrl);
-      if (img.parentNode) {
-        document.body.removeChild(img);
-      }
-      reject(new Error(`Fetch fallback timeout for: ${url.substring(0, 50)}...`));
-    }, 10000);
+      const timeout = setTimeout(() => {
+        URL.revokeObjectURL(blobUrl);
+        safeRemoveChild(img);
+        reject(new Error(`Image load timeout: ${fullUrl.substring(0, 50)}...`));
+      }, 30000);
 
-    img.onload = () => {
-      clearTimeout(timeout);
-      URL.revokeObjectURL(blobUrl); // Clean up blob URL
-      resolve(img);
-    };
+      img.onload = () => {
+        clearTimeout(timeout);
+        // Don't revoke blob URL here - we need it for canvas conversion
+        // It will be cleaned up after canvas conversion
+        resolve(img);
+      };
 
-    img.onerror = () => {
-      clearTimeout(timeout);
-      URL.revokeObjectURL(blobUrl);
-      if (img.parentNode) {
-        document.body.removeChild(img);
-      }
-      reject(new Error(`Failed to load image via fetch fallback: ${url.substring(0, 50)}...`));
-    };
+      img.onerror = () => {
+        clearTimeout(timeout);
+        URL.revokeObjectURL(blobUrl);
+        safeRemoveChild(img);
+        reject(new Error(`Failed to load image: ${fullUrl.substring(0, 50)}...`));
+      };
 
-    document.body.appendChild(img);
-    img.src = blobUrl;
+      document.body.appendChild(img);
+      img.src = blobUrl;
+    });
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    reject(new Error(`Failed to load image. URL may be invalid or inaccessible. ${errorMsg}`));
+    throw new Error(`Failed to fetch image: ${errorMsg}`);
   }
 }
+
+/**
+ * Safely removes a child node if it exists
+ */
+function safeRemoveChild(node: Node | null): void {
+  if (node && node.parentNode) {
+    try {
+      node.parentNode.removeChild(node);
+    } catch (e) {
+      // Ignore errors - node may have already been removed
+      console.warn('[PDF] Could not remove node (may already be removed):', e);
+    }
+  }
+}
+
 
 /**
  * Generates an insurance claim PDF for an asset
@@ -327,6 +284,7 @@ export async function generateInsuranceClaimPDF(
         const img = preloadedImages[i] || await preloadImageIntoDOM(imageUrls[i]);
         
         // Convert to data URL using canvas
+        // Since we loaded via fetch->blob, the canvas won't be tainted
         const canvas = document.createElement('canvas');
         canvas.width = img.naturalWidth || img.width;
         canvas.height = img.naturalHeight || img.height;
@@ -334,8 +292,17 @@ export async function generateInsuranceClaimPDF(
         if (!ctx) {
           throw new Error('Could not get canvas context');
         }
+        
+        // Draw image to canvas (should not be tainted since loaded via blob)
         ctx.drawImage(img, 0, 0);
+        
+        // Convert to data URL (should work now since canvas is not tainted)
         const imageDataUrl = canvas.toDataURL('image/jpeg', 0.95);
+        
+        // Clean up blob URL if it's a blob URL
+        if (img.src.startsWith('blob:')) {
+          URL.revokeObjectURL(img.src);
+        }
         
         // Calculate image dimensions to fit within page width
         const maxImageWidth = contentWidth;
@@ -386,9 +353,12 @@ export async function generateInsuranceClaimPDF(
 
     // Clean up preloaded images
     preloadedImages.forEach((img) => {
-      if (img.parentNode) {
-        document.body.removeChild(img);
+      // Clean up blob URL if present
+      if (img.src.startsWith('blob:')) {
+        URL.revokeObjectURL(img.src);
       }
+      // Safely remove from DOM
+      safeRemoveChild(img);
     });
   }
 
