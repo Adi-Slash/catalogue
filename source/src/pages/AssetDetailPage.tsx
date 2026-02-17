@@ -70,6 +70,8 @@ export default function AssetDetailPage() {
       // Get high-resolution images for the PDF
       const highResImageUrls = getImageUrls(asset, true);
       
+      console.log('[Claim] Asset image URLs:', highResImageUrls);
+      
       if (highResImageUrls.length === 0) {
         alert(t('claim.noImages') || 'This asset has no images. Please add images before generating a claim document.');
         setGeneratingPDF(false);

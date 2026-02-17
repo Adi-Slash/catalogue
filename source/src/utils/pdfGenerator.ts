@@ -7,6 +7,7 @@ const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
  * Preloads an image into the DOM and returns a promise that resolves when loaded
  * This ensures images are available for canvas conversion without CORS issues
  * Handles both regular URLs and blob URLs
+ * Uses fetch as fallback if Image element fails
  */
 async function preloadImageIntoDOM(url: string): Promise<HTMLImageElement> {
   // Handle blob URLs specially
@@ -43,11 +44,18 @@ async function preloadImageIntoDOM(url: string): Promise<HTMLImageElement> {
   }
 
   // Handle regular URLs
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     // Check if image already exists in DOM
     const allImages = Array.from(document.querySelectorAll('img')) as HTMLImageElement[];
     const existingImg = allImages.find(
-      (img) => img.src === url || img.src.includes(url.split('/').pop() || '') || img.src.includes(url.split('?')[0])
+      (img) => {
+        const imgSrc = img.src;
+        const urlToCheck = url.split('?')[0]; // Remove query params for comparison
+        return imgSrc === url || 
+               imgSrc.includes(url.split('/').pop() || '') || 
+               imgSrc.includes(urlToCheck) ||
+               (url.includes('?') && imgSrc.includes(url.split('?')[0]));
+      }
     );
     
     if (existingImg && existingImg.complete && existingImg.naturalWidth > 0) {
@@ -55,42 +63,113 @@ async function preloadImageIntoDOM(url: string): Promise<HTMLImageElement> {
       return;
     }
 
-    // Handle relative URLs
-    const fullUrl = url.startsWith('http') ? url : `${API_BASE}${url}`;
+    // Handle relative URLs - ensure we have a full URL
+    let fullUrl = url;
+    if (!url.startsWith('http') && !url.startsWith('blob:')) {
+      // Check if it's a relative path
+      if (url.startsWith('/')) {
+        // Absolute path - use current origin
+        fullUrl = `${window.location.origin}${url}`;
+      } else {
+        // Relative path - use API_BASE
+        fullUrl = `${API_BASE}${url.startsWith('/') ? '' : '/'}${url}`;
+      }
+    }
 
-    // Create a hidden image element to preload
+    console.log(`[PDF] Attempting to load image: ${fullUrl.substring(0, 80)}...`);
+
+    // Try Image element first
     const img = document.createElement('img');
     img.style.display = 'none';
     img.style.position = 'absolute';
     img.style.left = '-9999px';
     
-    // Don't set crossOrigin initially - let browser handle it naturally
-    // This works better with Azure Blob Storage SAS URLs
-    
     const timeout = setTimeout(() => {
       if (img.parentNode) {
         document.body.removeChild(img);
       }
-      reject(new Error(`Image load timeout: ${fullUrl.substring(0, 50)}...`));
-    }, 30000);
+      // Try fetch as fallback before rejecting
+      tryFetchFallback(fullUrl, resolve, reject);
+    }, 20000); // Reduced timeout to try fetch sooner
 
     img.onload = () => {
       clearTimeout(timeout);
       resolve(img);
     };
 
-    img.onerror = () => {
+    img.onerror = async () => {
       clearTimeout(timeout);
       if (img.parentNode) {
         document.body.removeChild(img);
       }
-      reject(new Error(`Failed to load image: ${fullUrl.substring(0, 50)}...`));
+      console.warn(`[PDF] Image element failed, trying fetch fallback for: ${fullUrl.substring(0, 80)}...`);
+      // Try fetch as fallback
+      tryFetchFallback(fullUrl, resolve, reject);
     };
 
     // Add to DOM before setting src (helps with some mobile browsers)
     document.body.appendChild(img);
     img.src = fullUrl;
   });
+}
+
+/**
+ * Fallback method using fetch to load image and create Image element from blob
+ */
+async function tryFetchFallback(
+  url: string,
+  resolve: (img: HTMLImageElement) => void,
+  reject: (error: Error) => void
+): Promise<void> {
+  try {
+    console.log(`[PDF] Fetching image via fetch API: ${url.substring(0, 80)}...`);
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include',
+      mode: 'cors',
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
+
+    const img = document.createElement('img');
+    img.style.display = 'none';
+    img.style.position = 'absolute';
+    img.style.left = '-9999px';
+
+    const timeout = setTimeout(() => {
+      URL.revokeObjectURL(blobUrl);
+      if (img.parentNode) {
+        document.body.removeChild(img);
+      }
+      reject(new Error(`Fetch fallback timeout for: ${url.substring(0, 50)}...`));
+    }, 10000);
+
+    img.onload = () => {
+      clearTimeout(timeout);
+      URL.revokeObjectURL(blobUrl); // Clean up blob URL
+      resolve(img);
+    };
+
+    img.onerror = () => {
+      clearTimeout(timeout);
+      URL.revokeObjectURL(blobUrl);
+      if (img.parentNode) {
+        document.body.removeChild(img);
+      }
+      reject(new Error(`Failed to load image via fetch fallback: ${url.substring(0, 50)}...`));
+    };
+
+    document.body.appendChild(img);
+    img.src = blobUrl;
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    reject(new Error(`Failed to load image. URL may be invalid or inaccessible. ${errorMsg}`));
+  }
 }
 
 /**
@@ -208,20 +287,27 @@ export async function generateInsuranceClaimPDF(
     yPosition += 10;
 
     // Preload all images first (better for mobile)
-    console.log(`Preloading ${imageUrls.length} images for PDF...`);
+    console.log(`[PDF] Preloading ${imageUrls.length} images for PDF...`);
     const preloadedImages: HTMLImageElement[] = [];
     const failedImages: number[] = [];
 
     for (let i = 0; i < imageUrls.length; i++) {
       try {
-        console.log(`Preloading image ${i + 1}/${imageUrls.length}...`);
-        const img = await preloadImageIntoDOM(imageUrls[i]);
+        const imageUrl = imageUrls[i];
+        console.log(`[PDF] Preloading image ${i + 1}/${imageUrls.length}: ${imageUrl.substring(0, 100)}...`);
+        const img = await preloadImageIntoDOM(imageUrl);
         preloadedImages[i] = img;
-        console.log(`✓ Image ${i + 1} preloaded successfully`);
+        console.log(`[PDF] ✓ Image ${i + 1} preloaded successfully (${img.naturalWidth}x${img.naturalHeight})`);
       } catch (error) {
-        console.error(`✗ Failed to preload image ${i + 1}:`, error);
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        console.error(`[PDF] ✗ Failed to preload image ${i + 1}:`, errorMsg);
+        console.error(`[PDF] Image URL was: ${imageUrls[i]}`);
         failedImages.push(i);
       }
+    }
+
+    if (failedImages.length > 0) {
+      console.warn(`[PDF] ${failedImages.length} of ${imageUrls.length} images failed to load`);
     }
 
     // Load and add images
