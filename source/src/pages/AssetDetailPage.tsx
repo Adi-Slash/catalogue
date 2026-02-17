@@ -6,6 +6,7 @@ import type { Asset } from '../types/asset';
 import { useHouseholdId } from '../utils/auth';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getImageUrls } from '../utils/imageUtils';
+import { generateInsuranceClaimPDF } from '../utils/pdfGenerator';
 import './AssetDetailPage.css';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
@@ -19,6 +20,7 @@ export default function AssetDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
+  const [generatingPDF, setGeneratingPDF] = useState(false);
   // Move useState hook before any conditional returns to avoid hooks violation
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -57,6 +59,42 @@ export default function AssetDetailPage() {
     if (!window.confirm(t('asset.deleteConfirm'))) return;
     await deleteAsset(asset.id, householdId);
     navigate('/assets');
+  }
+
+  async function handleGenerateClaim() {
+    if (!asset) return;
+    
+    try {
+      setGeneratingPDF(true);
+      
+      // Get high-resolution images for the PDF
+      const highResImageUrls = getImageUrls(asset, true);
+      
+      if (highResImageUrls.length === 0) {
+        alert(t('claim.noImages') || 'This asset has no images. Please add images before generating a claim document.');
+        setGeneratingPDF(false);
+        return;
+      }
+
+      // Show confirmation dialog
+      const generating = window.confirm(
+        t('claim.generateConfirm') || 
+        'This will generate an insurance claim PDF document. Continue?'
+      );
+      
+      if (!generating) {
+        setGeneratingPDF(false);
+        return;
+      }
+
+      // Generate the PDF
+      await generateInsuranceClaimPDF(asset, highResImageUrls);
+    } catch (error) {
+      console.error('Error generating claim PDF:', error);
+      alert(t('claim.generateError') || 'Failed to generate claim document. Please try again.');
+    } finally {
+      setGeneratingPDF(false);
+    }
   }
 
   // Use high-resolution images for detail/edit page
@@ -198,10 +236,19 @@ export default function AssetDetailPage() {
           </div>
 
           <div className="asset-actions">
-            <button onClick={() => setEditing(true)} className="btn btn-secondary">
+            <button onClick={() => setEditing(true)} className="btn btn-secondary" disabled={generatingPDF}>
               {t('asset.editAsset')}
             </button>
-            <button onClick={handleDelete} className="btn btn-danger">
+            <button 
+              onClick={handleGenerateClaim} 
+              className="btn btn-primary" 
+              disabled={generatingPDF}
+            >
+              {generatingPDF 
+                ? (t('claim.generating') || 'Generating PDF...') 
+                : (t('claim.generateClaim') || 'Generate Insurance Claim')}
+            </button>
+            <button onClick={handleDelete} className="btn btn-danger" disabled={generatingPDF}>
               {t('asset.deleteAsset')}
             </button>
           </div>

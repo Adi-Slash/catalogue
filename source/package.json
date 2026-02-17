@@ -19,6 +19,8 @@
   "dependencies": {
     "@types/multer": "^2.0.0",
     "@types/react-router-dom": "^5.3.3",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.1.0",
     "multer": "^2.0.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

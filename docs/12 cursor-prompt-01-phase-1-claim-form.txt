@@ -1,0 +1,1 @@
+I need functionality to be added to the asset management form so that an insurance claim can be made in the event of loss or damage. The insurance claim process should be triggered by the user and once started should produce a PDF explaining that a claim needs to be made for the asset selected, the PDF should include photos of the asset. 
