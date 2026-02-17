@@ -55,14 +55,18 @@ function isAzureBlobStorageUrl(url: string): boolean {
  */
 function getProxyUrl(imageUrl: string): string {
   // Determine API base URL
-  const isProduction = !API_BASE.includes('localhost');
+  // In production, use window.location.origin (SWA proxies to Functions)
+  // In local dev, use API_BASE
+  const isProduction = typeof window !== 'undefined' && window.location.hostname !== 'localhost';
   const apiBase = isProduction 
     ? window.location.origin // Use same origin in production (SWA proxies to Functions)
     : API_BASE;
   
   // Encode the image URL for the query parameter
   const encodedUrl = encodeURIComponent(imageUrl);
-  return `${apiBase}/api/proxy-image?url=${encodedUrl}`;
+  const proxyUrl = `${apiBase}/api/proxy-image?url=${encodedUrl}`;
+  console.log(`[PDF] Constructed proxy URL: ${proxyUrl.substring(0, 100)}...`);
+  return proxyUrl;
 }
 
 /**
@@ -84,13 +88,28 @@ async function loadImageViaFetch(url: string): Promise<HTMLImageElement> {
   }
 
   // If this is an Azure Blob Storage URL, use proxy endpoint to avoid CORS issues
-  const fetchUrl = isAzureBlobStorageUrl(fullUrl) ? getProxyUrl(fullUrl) : fullUrl;
+  const isBlobStorage = isAzureBlobStorageUrl(fullUrl);
+  
+  if (isBlobStorage) {
+    // Always use proxy for Azure Blob Storage URLs to avoid CORS
+    const proxyUrl = getProxyUrl(fullUrl);
+    console.log(`[PDF] Azure Blob Storage URL detected, using proxy`);
+    console.log(`[PDF] Original URL: ${fullUrl.substring(0, 80)}...`);
+    console.log(`[PDF] Proxy URL: ${proxyUrl.substring(0, 100)}...`);
+    return await fetchImageViaProxy(proxyUrl);
+  } else {
+    // Direct fetch for non-blob storage URLs
+    console.log(`[PDF] Loading image via direct fetch: ${fullUrl.substring(0, 80)}...`);
+    return await fetchImageDirect(fullUrl);
+  }
+}
 
-  console.log(`[PDF] Loading image via ${isAzureBlobStorageUrl(fullUrl) ? 'proxy' : 'direct'} fetch: ${fetchUrl.substring(0, 80)}...`);
-
+/**
+ * Fetches an image via the proxy endpoint
+ */
+async function fetchImageViaProxy(proxyUrl: string): Promise<HTMLImageElement> {
   try {
-    // Use fetch to get the image as a blob (handles CORS properly)
-    const response = await fetch(fetchUrl, {
+    const response = await fetch(proxyUrl, {
       method: 'GET',
       credentials: 'include',
       mode: 'cors',
@@ -103,41 +122,70 @@ async function loadImageViaFetch(url: string): Promise<HTMLImageElement> {
     const blob = await response.blob();
     const blobUrl = URL.createObjectURL(blob);
 
-    // Create image from blob URL (no CORS issues since it's a blob)
-    return new Promise((resolve, reject) => {
-      const img = document.createElement('img');
-      img.style.display = 'none';
-      img.style.position = 'absolute';
-      img.style.left = '-9999px';
-      img.crossOrigin = 'anonymous'; // Not needed for blob URLs, but safe to set
+    return createImageFromBlobUrl(blobUrl);
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to fetch image via proxy: ${errorMsg}`);
+  }
+}
 
-      const timeout = setTimeout(() => {
-        URL.revokeObjectURL(blobUrl);
-        safeRemoveChild(img);
-        reject(new Error(`Image load timeout: ${fullUrl.substring(0, 50)}...`));
-      }, 30000);
-
-      img.onload = () => {
-        clearTimeout(timeout);
-        // Don't revoke blob URL here - we need it for canvas conversion
-        // It will be cleaned up after canvas conversion
-        resolve(img);
-      };
-
-      img.onerror = () => {
-        clearTimeout(timeout);
-        URL.revokeObjectURL(blobUrl);
-        safeRemoveChild(img);
-        reject(new Error(`Failed to load image: ${fullUrl.substring(0, 50)}...`));
-      };
-
-      document.body.appendChild(img);
-      img.src = blobUrl;
+/**
+ * Fetches an image directly (for non-blob storage URLs)
+ */
+async function fetchImageDirect(fullUrl: string): Promise<HTMLImageElement> {
+  try {
+    const response = await fetch(fullUrl, {
+      method: 'GET',
+      credentials: 'include',
+      mode: 'cors',
     });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const blob = await response.blob();
+    const blobUrl = URL.createObjectURL(blob);
+
+    return createImageFromBlobUrl(blobUrl);
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
     throw new Error(`Failed to fetch image: ${errorMsg}`);
   }
+}
+
+/**
+ * Creates an HTMLImageElement from a blob URL
+ */
+function createImageFromBlobUrl(blobUrl: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = document.createElement('img');
+    img.style.display = 'none';
+    img.style.position = 'absolute';
+    img.style.left = '-9999px';
+    img.crossOrigin = 'anonymous';
+
+    const timeout = setTimeout(() => {
+      URL.revokeObjectURL(blobUrl);
+      safeRemoveChild(img);
+      reject(new Error(`Image load timeout`));
+    }, 30000);
+
+    img.onload = () => {
+      clearTimeout(timeout);
+      resolve(img);
+    };
+
+    img.onerror = () => {
+      clearTimeout(timeout);
+      URL.revokeObjectURL(blobUrl);
+      safeRemoveChild(img);
+      reject(new Error(`Failed to load image from blob URL`));
+    };
+
+    document.body.appendChild(img);
+    img.src = blobUrl;
+  });
 }
 
 /**
