@@ -5,39 +5,180 @@ const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
 
 /**
  * Loads an image from a URL and returns it as a data URL
- * Handles CORS and blob URLs
+ * Uses canvas-based approach for better mobile compatibility and CORS handling
  */
 async function loadImageAsDataUrl(url: string): Promise<string> {
   try {
-    // Handle blob URLs (already data URLs)
+    // Handle blob URLs - convert to data URL using canvas
     if (url.startsWith('blob:')) {
-      return url;
+      return await convertBlobToDataUrl(url);
     }
     
     // Handle relative URLs
     const fullUrl = url.startsWith('http') ? url : `${API_BASE}${url}`;
     
-    // Use fetch with credentials for CORS
-    const response = await fetch(fullUrl, {
-      credentials: 'include',
-      mode: 'cors',
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Failed to load image: ${response.statusText}`);
+    // Method 1: Try fetch first (works for same-origin or CORS-enabled images)
+    try {
+      const response = await fetch(fullUrl, {
+        credentials: 'include',
+        mode: 'cors',
+      });
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      }
+    } catch (fetchError) {
+      console.warn('Fetch failed, trying canvas method:', fetchError);
     }
     
-    const blob = await response.blob();
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
+    // Method 2: Use canvas-based approach (works better on mobile and handles CORS)
+    return await convertImageUrlToDataUrl(fullUrl);
   } catch (error) {
     console.error('Error loading image:', error);
     throw error;
   }
+}
+
+/**
+ * Converts a blob URL to a data URL using canvas
+ */
+async function convertBlobToDataUrl(blobUrl: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Could not get canvas context'));
+          return;
+        }
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL('image/jpeg', 0.95));
+      } catch (error) {
+        reject(error);
+      }
+    };
+    
+    img.onerror = () => {
+      // Fallback: try to fetch the blob URL directly
+      fetch(blobUrl)
+        .then((res) => res.blob())
+        .then((blob) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        })
+        .catch(reject);
+    };
+    
+    img.src = blobUrl;
+  });
+}
+
+/**
+ * Converts an image URL to a data URL using canvas
+ * This method works better on mobile browsers and handles CORS
+ * Tries to use existing DOM images first to avoid CORS issues
+ */
+async function convertImageUrlToDataUrl(url: string): Promise<string> {
+  // First, try to find the image in the DOM (already loaded, no CORS issues)
+  const existingImg = document.querySelector(`img[src="${url}"], img[src*="${url.split('/').pop()}"]`) as HTMLImageElement;
+  if (existingImg && existingImg.complete && existingImg.naturalWidth > 0) {
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = existingImg.naturalWidth;
+      canvas.height = existingImg.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(existingImg, 0, 0);
+        return canvas.toDataURL('image/jpeg', 0.95);
+      }
+    } catch (error) {
+      console.warn('Failed to use existing DOM image, trying load method:', error);
+    }
+  }
+
+  // If not in DOM, load it with canvas method
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    // Set crossOrigin to handle CORS - try anonymous first
+    img.crossOrigin = 'anonymous';
+    
+    // Add timeout for mobile browsers
+    const timeout = setTimeout(() => {
+      reject(new Error(`Image load timeout: ${url}`));
+    }, 30000); // 30 second timeout
+    
+    img.onload = () => {
+      clearTimeout(timeout);
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Could not get canvas context'));
+          return;
+        }
+        ctx.drawImage(img, 0, 0);
+        // Convert to JPEG with high quality
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+        resolve(dataUrl);
+      } catch (error) {
+        reject(error);
+      }
+    };
+    
+    img.onerror = () => {
+      clearTimeout(timeout);
+      // If anonymous fails, try without crossOrigin (for same-origin images)
+      if (img.crossOrigin === 'anonymous') {
+        const imgRetry = new Image();
+        const retryTimeout = setTimeout(() => {
+          reject(new Error(`Image load timeout: ${url}`));
+        }, 30000);
+        
+        imgRetry.onload = () => {
+          clearTimeout(retryTimeout);
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = imgRetry.naturalWidth || imgRetry.width;
+            canvas.height = imgRetry.naturalHeight || imgRetry.height;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+              reject(new Error('Could not get canvas context'));
+              return;
+            }
+            ctx.drawImage(imgRetry, 0, 0);
+            resolve(canvas.toDataURL('image/jpeg', 0.95));
+          } catch (err) {
+            reject(err);
+          }
+        };
+        imgRetry.onerror = () => {
+          clearTimeout(retryTimeout);
+          reject(new Error(`Failed to load image: ${url}`));
+        };
+        imgRetry.src = url;
+      } else {
+        reject(new Error(`Failed to load image: ${url}`));
+      }
+    };
+    
+    img.src = url;
+  });
 }
 
 /**
