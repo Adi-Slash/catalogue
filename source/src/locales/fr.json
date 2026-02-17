@@ -124,6 +124,14 @@
     "failedToLoad": "Échec du chargement",
     "failedToDelete": "Échec de la suppression de l'actif"
   },
+  "claim": {
+    "generateClaim": "Réclamation d'Assurance",
+    "generating": "Génération du PDF...",
+    "noImages": "Cet actif n'a pas d'images. Veuillez ajouter des images avant de générer un document de réclamation.",
+    "generateConfirm": "Cela générera un document PDF de réclamation d'assurance. Continuer ?",
+    "generateSuccess": "PDF de réclamation d'assurance généré avec succès !",
+    "generateError": "Échec de la génération du document de réclamation."
+  },
   "footer": {
     "copyright": "© 2026 Catalogue d'Actifs. Tous droits réservés."
   }

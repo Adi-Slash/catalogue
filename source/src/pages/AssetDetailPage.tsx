@@ -87,11 +87,23 @@ export default function AssetDetailPage() {
         return;
       }
 
+      // Show progress message
+      const progressMsg = t('claim.generating') || 'Generating PDF... This may take a moment.';
+      console.log(progressMsg);
+
       // Generate the PDF
       await generateInsuranceClaimPDF(asset, highResImageUrls);
+      
+      // Success message
+      alert(t('claim.generateSuccess') || 'Insurance claim PDF generated successfully!');
     } catch (error) {
       console.error('Error generating claim PDF:', error);
-      alert(t('claim.generateError') || 'Failed to generate claim document. Please try again.');
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      alert(
+        (t('claim.generateError') || 'Failed to generate claim document.') + 
+        '\n\nError: ' + errorMsg +
+        '\n\nPlease ensure images are accessible and try again.'
+      );
     } finally {
       setGeneratingPDF(false);
     }
@@ -246,7 +258,7 @@ export default function AssetDetailPage() {
             >
               {generatingPDF 
                 ? (t('claim.generating') || 'Generating PDF...') 
-                : (t('claim.generateClaim') || 'Generate Insurance Claim')}
+                : (t('claim.generateClaim') || 'Insurance Claim')}
             </button>
             <button onClick={handleDelete} className="btn btn-danger" disabled={generatingPDF}>
               {t('asset.deleteAsset')}

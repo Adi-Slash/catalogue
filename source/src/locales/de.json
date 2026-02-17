@@ -124,6 +124,14 @@
     "failedToLoad": "Laden fehlgeschlagen",
     "failedToDelete": "Fehler beim Löschen des Vermögenswerts"
   },
+  "claim": {
+    "generateClaim": "Versicherungsanspruch",
+    "generating": "PDF wird generiert...",
+    "noImages": "Dieser Vermögenswert hat keine Bilder. Bitte fügen Sie Bilder hinzu, bevor Sie ein Schadensdokument erstellen.",
+    "generateConfirm": "Dies erstellt ein PDF-Dokument für einen Versicherungsanspruch. Fortfahren?",
+    "generateSuccess": "PDF für Versicherungsanspruch erfolgreich generiert!",
+    "generateError": "Fehler beim Generieren des Schadensdokuments."
+  },
   "footer": {
     "copyright": "© 2026 Vermögensverzeichnis. Alle Rechte vorbehalten."
   }

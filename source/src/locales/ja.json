@@ -124,6 +124,14 @@
     "failedToLoad": "読み込みに失敗しました",
     "failedToDelete": "資産の削除に失敗しました"
   },
+  "claim": {
+    "generateClaim": "保険請求",
+    "generating": "PDFを生成中...",
+    "noImages": "この資産には画像がありません。請求書を生成する前に画像を追加してください。",
+    "generateConfirm": "保険請求PDFドキュメントを生成します。続行しますか？",
+    "generateSuccess": "保険請求PDFが正常に生成されました！",
+    "generateError": "請求書の生成に失敗しました。"
+  },
   "footer": {
     "copyright": "© 2026 資産カタログ。全著作権所有。"
   }

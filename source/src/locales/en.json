@@ -124,6 +124,14 @@
     "failedToLoad": "Failed to load",
     "failedToDelete": "Failed to delete asset"
   },
+  "claim": {
+    "generateClaim": "Insurance Claim",
+    "generating": "Generating PDF...",
+    "noImages": "This asset has no images. Please add images before generating a claim document.",
+    "generateConfirm": "This will generate an insurance claim PDF document. Continue?",
+    "generateSuccess": "Insurance claim PDF generated successfully!",
+    "generateError": "Failed to generate claim document."
+  },
   "footer": {
     "copyright": "© 2026 Asset Catalogue. All rights reserved."
   }

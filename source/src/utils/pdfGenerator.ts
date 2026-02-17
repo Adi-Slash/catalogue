@@ -4,180 +4,92 @@ import type { Asset } from '../types/asset';
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
 
 /**
- * Loads an image from a URL and returns it as a data URL
- * Uses canvas-based approach for better mobile compatibility and CORS handling
+ * Preloads an image into the DOM and returns a promise that resolves when loaded
+ * This ensures images are available for canvas conversion without CORS issues
+ * Handles both regular URLs and blob URLs
  */
-async function loadImageAsDataUrl(url: string): Promise<string> {
-  try {
-    // Handle blob URLs - convert to data URL using canvas
-    if (url.startsWith('blob:')) {
-      return await convertBlobToDataUrl(url);
-    }
+async function preloadImageIntoDOM(url: string): Promise<HTMLImageElement> {
+  // Handle blob URLs specially
+  if (url.startsWith('blob:')) {
+    return new Promise((resolve, reject) => {
+      const img = document.createElement('img');
+      img.style.display = 'none';
+      img.style.position = 'absolute';
+      img.style.left = '-9999px';
+      
+      const timeout = setTimeout(() => {
+        if (img.parentNode) {
+          document.body.removeChild(img);
+        }
+        reject(new Error('Blob URL load timeout'));
+      }, 10000);
+
+      img.onload = () => {
+        clearTimeout(timeout);
+        resolve(img);
+      };
+
+      img.onerror = () => {
+        clearTimeout(timeout);
+        if (img.parentNode) {
+          document.body.removeChild(img);
+        }
+        reject(new Error('Failed to load blob URL'));
+      };
+
+      document.body.appendChild(img);
+      img.src = url;
+    });
+  }
+
+  // Handle regular URLs
+  return new Promise((resolve, reject) => {
+    // Check if image already exists in DOM
+    const allImages = Array.from(document.querySelectorAll('img')) as HTMLImageElement[];
+    const existingImg = allImages.find(
+      (img) => img.src === url || img.src.includes(url.split('/').pop() || '') || img.src.includes(url.split('?')[0])
+    );
     
+    if (existingImg && existingImg.complete && existingImg.naturalWidth > 0) {
+      resolve(existingImg);
+      return;
+    }
+
     // Handle relative URLs
     const fullUrl = url.startsWith('http') ? url : `${API_BASE}${url}`;
-    
-    // Method 1: Try fetch first (works for same-origin or CORS-enabled images)
-    try {
-      const response = await fetch(fullUrl, {
-        credentials: 'include',
-        mode: 'cors',
-      });
-      
-      if (response.ok) {
-        const blob = await response.blob();
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
-      }
-    } catch (fetchError) {
-      console.warn('Fetch failed, trying canvas method:', fetchError);
-    }
-    
-    // Method 2: Use canvas-based approach (works better on mobile and handles CORS)
-    return await convertImageUrlToDataUrl(fullUrl);
-  } catch (error) {
-    console.error('Error loading image:', error);
-    throw error;
-  }
-}
 
-/**
- * Converts a blob URL to a data URL using canvas
- */
-async function convertBlobToDataUrl(blobUrl: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
+    // Create a hidden image element to preload
+    const img = document.createElement('img');
+    img.style.display = 'none';
+    img.style.position = 'absolute';
+    img.style.left = '-9999px';
     
-    img.onload = () => {
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          reject(new Error('Could not get canvas context'));
-          return;
-        }
-        ctx.drawImage(img, 0, 0);
-        resolve(canvas.toDataURL('image/jpeg', 0.95));
-      } catch (error) {
-        reject(error);
-      }
-    };
+    // Don't set crossOrigin initially - let browser handle it naturally
+    // This works better with Azure Blob Storage SAS URLs
     
-    img.onerror = () => {
-      // Fallback: try to fetch the blob URL directly
-      fetch(blobUrl)
-        .then((res) => res.blob())
-        .then((blob) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        })
-        .catch(reject);
-    };
-    
-    img.src = blobUrl;
-  });
-}
-
-/**
- * Converts an image URL to a data URL using canvas
- * This method works better on mobile browsers and handles CORS
- * Tries to use existing DOM images first to avoid CORS issues
- */
-async function convertImageUrlToDataUrl(url: string): Promise<string> {
-  // First, try to find the image in the DOM (already loaded, no CORS issues)
-  const existingImg = document.querySelector(`img[src="${url}"], img[src*="${url.split('/').pop()}"]`) as HTMLImageElement;
-  if (existingImg && existingImg.complete && existingImg.naturalWidth > 0) {
-    try {
-      const canvas = document.createElement('canvas');
-      canvas.width = existingImg.naturalWidth;
-      canvas.height = existingImg.naturalHeight;
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.drawImage(existingImg, 0, 0);
-        return canvas.toDataURL('image/jpeg', 0.95);
-      }
-    } catch (error) {
-      console.warn('Failed to use existing DOM image, trying load method:', error);
-    }
-  }
-
-  // If not in DOM, load it with canvas method
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    // Set crossOrigin to handle CORS - try anonymous first
-    img.crossOrigin = 'anonymous';
-    
-    // Add timeout for mobile browsers
     const timeout = setTimeout(() => {
-      reject(new Error(`Image load timeout: ${url}`));
-    }, 30000); // 30 second timeout
-    
+      if (img.parentNode) {
+        document.body.removeChild(img);
+      }
+      reject(new Error(`Image load timeout: ${fullUrl.substring(0, 50)}...`));
+    }, 30000);
+
     img.onload = () => {
       clearTimeout(timeout);
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth || img.width;
-        canvas.height = img.naturalHeight || img.height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          reject(new Error('Could not get canvas context'));
-          return;
-        }
-        ctx.drawImage(img, 0, 0);
-        // Convert to JPEG with high quality
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
-        resolve(dataUrl);
-      } catch (error) {
-        reject(error);
-      }
+      resolve(img);
     };
-    
+
     img.onerror = () => {
       clearTimeout(timeout);
-      // If anonymous fails, try without crossOrigin (for same-origin images)
-      if (img.crossOrigin === 'anonymous') {
-        const imgRetry = new Image();
-        const retryTimeout = setTimeout(() => {
-          reject(new Error(`Image load timeout: ${url}`));
-        }, 30000);
-        
-        imgRetry.onload = () => {
-          clearTimeout(retryTimeout);
-          try {
-            const canvas = document.createElement('canvas');
-            canvas.width = imgRetry.naturalWidth || imgRetry.width;
-            canvas.height = imgRetry.naturalHeight || imgRetry.height;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) {
-              reject(new Error('Could not get canvas context'));
-              return;
-            }
-            ctx.drawImage(imgRetry, 0, 0);
-            resolve(canvas.toDataURL('image/jpeg', 0.95));
-          } catch (err) {
-            reject(err);
-          }
-        };
-        imgRetry.onerror = () => {
-          clearTimeout(retryTimeout);
-          reject(new Error(`Failed to load image: ${url}`));
-        };
-        imgRetry.src = url;
-      } else {
-        reject(new Error(`Failed to load image: ${url}`));
+      if (img.parentNode) {
+        document.body.removeChild(img);
       }
+      reject(new Error(`Failed to load image: ${fullUrl.substring(0, 50)}...`));
     };
-    
-    img.src = url;
+
+    // Add to DOM before setting src (helps with some mobile browsers)
+    document.body.appendChild(img);
+    img.src = fullUrl;
   });
 }
 
@@ -295,25 +207,56 @@ export async function generateInsuranceClaimPDF(
     doc.text('Asset Photographs', margin, yPosition);
     yPosition += 10;
 
-    // Load and add images
+    // Preload all images first (better for mobile)
+    console.log(`Preloading ${imageUrls.length} images for PDF...`);
+    const preloadedImages: HTMLImageElement[] = [];
+    const failedImages: number[] = [];
+
     for (let i = 0; i < imageUrls.length; i++) {
       try {
-        const imageDataUrl = await loadImageAsDataUrl(imageUrls[i]);
+        console.log(`Preloading image ${i + 1}/${imageUrls.length}...`);
+        const img = await preloadImageIntoDOM(imageUrls[i]);
+        preloadedImages[i] = img;
+        console.log(`✓ Image ${i + 1} preloaded successfully`);
+      } catch (error) {
+        console.error(`✗ Failed to preload image ${i + 1}:`, error);
+        failedImages.push(i);
+      }
+    }
+
+    // Load and add images
+    for (let i = 0; i < imageUrls.length; i++) {
+      if (failedImages.includes(i)) {
+        // Skip failed images
+        checkPageBreak(15);
+        doc.setFontSize(9);
+        doc.setTextColor(200, 0, 0);
+        doc.text(`Photo ${i + 1}: Failed to load`, margin, yPosition);
+        yPosition += 10;
+        continue;
+      }
+
+      try {
+        // Use preloaded image or load fresh
+        const img = preloadedImages[i] || await preloadImageIntoDOM(imageUrls[i]);
+        
+        // Convert to data URL using canvas
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          throw new Error('Could not get canvas context');
+        }
+        ctx.drawImage(img, 0, 0);
+        const imageDataUrl = canvas.toDataURL('image/jpeg', 0.95);
         
         // Calculate image dimensions to fit within page width
         const maxImageWidth = contentWidth;
         const maxImageHeight = 80; // Max height per image
         
-        // Create a temporary image element to get dimensions
-        const img = new Image();
-        await new Promise((resolve, reject) => {
-          img.onload = resolve;
-          img.onerror = reject;
-          img.src = imageDataUrl;
-        });
-
-        let imgWidth = img.width;
-        let imgHeight = img.height;
+        let imgWidth = img.naturalWidth || img.width;
+        let imgHeight = img.naturalHeight || img.height;
         const aspectRatio = imgWidth / imgHeight;
 
         // Scale to fit
@@ -345,15 +288,22 @@ export async function generateInsuranceClaimPDF(
           yPosition = margin;
         }
       } catch (error) {
-        console.error(`Error loading image ${i + 1}:`, error);
+        console.error(`Error processing image ${i + 1}:`, error);
         // Continue with next image even if one fails
         checkPageBreak(15);
         doc.setFontSize(9);
         doc.setTextColor(200, 0, 0);
-        doc.text(`Photo ${i + 1}: Failed to load`, margin, yPosition);
+        doc.text(`Photo ${i + 1}: Failed to process`, margin, yPosition);
         yPosition += 10;
       }
     }
+
+    // Clean up preloaded images
+    preloadedImages.forEach((img) => {
+      if (img.parentNode) {
+        document.body.removeChild(img);
+      }
+    });
   }
 
   // Footer
