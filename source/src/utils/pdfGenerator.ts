@@ -207,10 +207,12 @@ function safeRemoveChild(node: Node | null): void {
  * Generates an insurance claim PDF for an asset
  * @param asset - The asset to generate a claim for
  * @param imageUrls - Array of image URLs to include in the PDF
+ * @param formatCurrency - Function to format currency values according to locale
  */
 export async function generateInsuranceClaimPDF(
   asset: Asset,
-  imageUrls: string[]
+  imageUrls: string[],
+  formatCurrency: (amount: number) => string
 ): Promise<void> {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -280,7 +282,7 @@ export async function generateInsuranceClaimPDF(
     { label: 'Model:', value: asset.model },
     { label: 'Serial Number:', value: asset.serialNumber || 'N/A' },
     { label: 'Category:', value: asset.category || 'Uncategorized' },
-    { label: 'Estimated Value:', value: `$${asset.value.toLocaleString()}` },
+    { label: 'Estimated Value:', value: formatCurrency(asset.value) },
   ];
 
   assetInfo.forEach((info) => {

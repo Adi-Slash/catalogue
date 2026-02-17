@@ -93,8 +93,8 @@ export default function AssetDetailPage() {
       const progressMsg = t('claim.generating') || 'Generating PDF... This may take a moment.';
       console.log(progressMsg);
 
-      // Generate the PDF
-      await generateInsuranceClaimPDF(asset, highResImageUrls);
+      // Generate the PDF with localized currency formatting
+      await generateInsuranceClaimPDF(asset, highResImageUrls, formatCurrency);
       
       // Success message
       alert(t('claim.generateSuccess') || 'Insurance claim PDF generated successfully!');
