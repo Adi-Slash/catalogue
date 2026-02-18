@@ -18,11 +18,14 @@
 }
 
 .stats-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   color: white;
   padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
   display: inline-block;
 }
 
@@ -54,7 +57,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  border-radius: 8px;
+  border-radius: 14px;
   font-weight: 600;
   text-decoration: none;
   transition: all 0.2s ease;
@@ -64,14 +67,28 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  background: linear-gradient(135deg, #a78bfa 0%, #6366f1 100%);
   color: white;
-  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 4px 15px rgba(167, 139, 250, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+  box-shadow: 0 6px 20px rgba(167, 139, 250, 0.4);
+  background: linear-gradient(135deg, #b794f6 0%, #818cf8 100%);
+}
+
+.btn-primary:focus,
+.btn-primary:focus-visible {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.4), 0 6px 20px rgba(167, 139, 250, 0.4);
+  background: linear-gradient(135deg, #b794f6 0%, #818cf8 100%);
+}
+
+.btn-primary:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .category-tabs {
@@ -86,10 +103,12 @@
 
 .tab-button {
   padding: 0.75rem 1.5rem;
-  border: 2px solid #e9ecef;
-  background: white;
-  color: #6c757d;
-  border-radius: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #5b21b6;
+  border-radius: 14px;
   cursor: pointer;
   font-weight: 500;
   transition: all 0.2s ease;
@@ -97,15 +116,29 @@
 }
 
 .tab-button:hover {
-  border-color: #007bff;
-  color: #007bff;
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.5);
+  color: #7c3aed;
+}
+
+.tab-button:focus,
+.tab-button:focus-visible {
+  outline: none;
+  border-color: rgba(167, 139, 250, 0.6);
+  box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.3), 0 4px 12px rgba(167, 139, 250, 0.2);
+  background: rgba(255, 255, 255, 0.6);
 }
 
 .tab-button.active {
-  background: linear-gradient(135deg, #007bff 0%, #6610f2 100%);
+  background: linear-gradient(135deg, #a78bfa 0%, #6366f1 100%);
   color: white;
-  border-color: #007bff;
-  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 15px rgba(167, 139, 250, 0.3);
+}
+
+.tab-button.active:focus,
+.tab-button.active:focus-visible {
+  box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.4), 0 4px 15px rgba(167, 139, 250, 0.3);
 }
 
 .tab-summary {
@@ -150,9 +183,12 @@
 .empty-state {
   text-align: center;
   padding: 4rem 2rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   margin: 2rem 0;
 }
 
@@ -196,14 +232,17 @@
 }
 
 :root.dark-mode .tab-button {
-  background: #2a2a2a;
-  border-color: #444;
+  background: rgba(45, 27, 78, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-color: rgba(255, 255, 255, 0.2);
   color: #e0e0e0;
 }
 
 :root.dark-mode .tab-button:hover {
-  border-color: #667eea;
-  color: #667eea;
+  border-color: rgba(167, 139, 250, 0.5);
+  background: rgba(45, 27, 78, 0.6);
+  color: #c4b5fd;
 }
 
 :root.dark-mode .tab-summary {
@@ -226,8 +265,11 @@
 }
 
 :root.dark-mode .empty-state {
-  background: #1a1a1a;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  background: rgba(45, 27, 78, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 :root.dark-mode .empty-state h3 {

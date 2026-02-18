@@ -1,7 +1,10 @@
 .asset-card {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -10,7 +13,9 @@
 
 .asset-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .card-image {
@@ -126,6 +131,13 @@
   transform: scale(1.1);
 }
 
+.delete-btn:focus,
+.delete-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.4);
+  background: #dc3545;
+}
+
 .card-content {
   padding: 1.5rem;
   display: flex;
@@ -161,12 +173,12 @@
 .property-value.asset-category {
   display: inline-block;
   padding: 0.25rem 0.75rem;
-  background: linear-gradient(135deg, #007bff 0%, #6610f2 100%) !important;
+  background: linear-gradient(135deg, #a78bfa 0%, #6366f1 100%) !important;
   color: white !important;
   font-weight: 600;
   border-radius: 15px;
   font-size: 0.85rem;
-  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(167, 139, 250, 0.3);
   flex: none;
   width: auto;
   min-width: fit-content;
@@ -216,6 +228,13 @@
 .carousel-btn:hover {
   background: rgba(0, 0, 0, 0.6);
   transform: scale(1.05);
+}
+
+.carousel-btn:focus,
+.carousel-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.4);
+  background: rgba(0, 0, 0, 0.7);
 }
 
 .card-thumbnails {
@@ -271,12 +290,17 @@
 
 /* Dark Mode Styles */
 :root.dark-mode .asset-card {
-  background: #1a1a1a;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  background: rgba(45, 27, 78, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 :root.dark-mode .asset-card:hover {
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 12px 40px rgba(167, 139, 250, 0.2);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(45, 27, 78, 0.5);
 }
 
 :root.dark-mode .card-image {

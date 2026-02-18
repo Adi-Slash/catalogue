@@ -1,0 +1,3 @@
+please apply thiese styling requirements to th frontend : Aesthetic is soft SaaS, glassy cards, lavender to blue gradient, subtle blur
+also apply the following : - Typeface Satoshi or similar geometric sans.
+- Buttons soft corners, 14px radius, strong focus states.
