@@ -197,6 +197,7 @@ async function estimateWithGoogleSearch(
  * Uncomment and configure when API key is available
  */
 /*
+
 async function estimateWithSerpAPI(
   searchQuery: string,
   apiKey: string
