@@ -27,6 +27,8 @@
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
   display: inline-block;
+  position: relative;
+  z-index: 1;
 }
 
 .stat {

@@ -2,6 +2,7 @@
   position: relative;
   display: flex;
   align-items: center;
+  z-index: 3000;
 }
 
 .hamburger-button {
@@ -63,7 +64,7 @@
   border-radius: 8px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   min-width: 200px;
-  z-index: 1000;
+  z-index: 3000;
   padding: 0.5rem 0;
   animation: slideDown 0.2s ease;
 }
