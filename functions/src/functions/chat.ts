@@ -94,11 +94,11 @@ Respond concisely but thoroughly. If the question is about a specific asset, ref
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
+    const error: any = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
     throw new Error(`OpenAI API error: ${error.error?.message || response.statusText}`);
   }
 
-  const data = await response.json();
+  const data: any = await response.json();
   return data.choices[0]?.message?.content || 'I apologize, but I could not generate a response.';
 }
 

@@ -1,0 +1,1 @@
+Implement a chatbot capable of giving real world asset insurance advice. The chatbot should run from the main assets page of the application.
