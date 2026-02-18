@@ -23,6 +23,7 @@
   width: 220px;
   height: 180px;
   margin: 0 auto;
+  margin-top: 1.5rem;
   overflow: hidden;
   background: #f8f9fa;
 }
