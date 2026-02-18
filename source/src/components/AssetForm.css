@@ -403,3 +403,30 @@
   color: #ff6b6b;
   border-left-color: #ff5252;
 }
+
+.value-input-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.value-input-group .form-input {
+  flex: 1;
+}
+
+.estimate-btn {
+  white-space: nowrap;
+  min-width: auto;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .value-input-group {
+    flex-direction: column;
+  }
+  
+  .estimate-btn {
+    width: 100%;
+  }
+}

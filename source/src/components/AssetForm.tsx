@@ -4,6 +4,7 @@ import { uploadImage } from '../api/assets';
 import type { NewAsset, Asset, ImageUrls } from '../types/asset';
 import { useLanguage } from '../contexts/LanguageContext';
 import { normalizeImageUrls } from '../utils/imageUtils';
+import { estimateAssetPrice } from '../utils/priceEstimation';
 import './AssetForm.css';
 
 type Props = {
@@ -14,13 +15,15 @@ type Props = {
 };
 
 export default function AssetForm({ householdId, onCreate, onUpdate, initialAsset }: Props) {
-  const { t, currencySymbol } = useLanguage();
+  const { t, currencySymbol, formatCurrency } = useLanguage();
   const [make, setMake] = useState('');
   const [model, setModel] = useState('');
   const [serialNumber, setSerialNumber] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [value, setValue] = useState<number | ''>('');
+  const [datePurchased, setDatePurchased] = useState('');
+  const [estimating, setEstimating] = useState(false);
   // Support up to four images per asset
   // Use a ref to track files separately to avoid state synchronization issues
   const filesRef = useRef<File[]>([]);
@@ -44,6 +47,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       setDescription(initialAsset.description || '');
       setCategory(initialAsset.category || '');
       setValue(initialAsset.value);
+      setDatePurchased(initialAsset.datePurchased || '');
       // Load existing images - normalize to ImageUrls objects
       const existing =
         (initialAsset.imageUrls && initialAsset.imageUrls.length > 0 && initialAsset.imageUrls) ||
@@ -61,6 +65,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       setFiles([]);
       filesRef.current = [];
       setImageUrls([]);
+      setDatePurchased('');
       processingRef.current = false;
       setSelectedFileName(''); // Reset file name display
     }
@@ -191,6 +196,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       description: description || undefined,
       category: category || undefined,
       value: Number(value),
+      datePurchased: datePurchased || undefined,
       imageUrl: firstImageUrl, // Legacy field - use high-res URL
       imageUrls: finalImageUrls, // New field - array of ImageUrls objects or strings
     };
@@ -215,6 +221,7 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
         setDescription('');
         setCategory('');
         setValue('');
+        setDatePurchased('');
         setFiles([]);
         filesRef.current = []; // Reset ref too
         setImageUrls([]);
@@ -229,6 +236,49 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
       const errorMessage = err instanceof Error ? err.message : (initialAsset ? t('form.errorUpdating') : t('form.errorCreating'));
       setError(errorMessage);
       setLoading(false); // Unlock form on error so user can retry
+    }
+  }
+
+  async function handleEstimatePrice() {
+    if (!make || !model) {
+      setError(t('asset.estimateRequired') || 'Make and model are required for price estimation');
+      return;
+    }
+
+    setEstimating(true);
+    setError(null);
+
+    try {
+      const result = await estimateAssetPrice({
+        make,
+        model,
+        category: category || undefined,
+        serialNumber: serialNumber || undefined,
+        description: description || undefined,
+        datePurchased: datePurchased || undefined,
+      });
+
+      // Set the estimated value
+      setValue(Math.round(result.estimatedValue * 100) / 100); // Round to 2 decimal places
+
+      // Show success message with confidence level
+      const confidenceMsg = result.confidence === 'high' 
+        ? t('asset.estimateHighConfidence') || 'High confidence'
+        : result.confidence === 'medium'
+        ? t('asset.estimateMediumConfidence') || 'Medium confidence'
+        : t('asset.estimateLowConfidence') || 'Low confidence';
+      
+      console.log(`[AssetForm] Price estimated: ${formatCurrency(result.estimatedValue)} (${confidenceMsg})`);
+      
+      if (result.notes) {
+        console.log(`[AssetForm] Estimation notes: ${result.notes}`);
+      }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : t('asset.estimateError') || 'Failed to estimate price';
+      setError(errorMessage);
+      console.error('[AssetForm] Price estimation error:', err);
+    } finally {
+      setEstimating(false);
     }
   }
 
@@ -476,22 +526,50 @@ export default function AssetForm({ householdId, onCreate, onUpdate, initialAsse
           </select>
         </div>
 
+        <div className="form-group">
+          <label htmlFor="datePurchased" className="form-label">
+            {t('asset.datePurchased')}
+          </label>
+          <input
+            id="datePurchased"
+            type="date"
+            value={datePurchased}
+            onChange={(e) => setDatePurchased(e.target.value)}
+            className="form-input"
+            max={new Date().toISOString().split('T')[0]} // Can't be in the future
+            disabled={loading}
+          />
+        </div>
+
         <div className="form-group full-width">
           <label htmlFor="value" className="form-label">
             {t('asset.estimatedValue')} ({currencySymbol}) {t('form.required')}
           </label>
-          <input
-            id="value"
-            type="number"
-            placeholder={t('asset.valuePlaceholder')}
-            value={value}
-            onChange={(e) => setValue(e.target.value === '' ? '' : Number(e.target.value))}
-            className="form-input"
-            min="0"
-            step="0.01"
-            required
-            disabled={loading}
-          />
+          <div className="value-input-group">
+            <input
+              id="value"
+              type="number"
+              placeholder={t('asset.valuePlaceholder')}
+              value={value}
+              onChange={(e) => setValue(e.target.value === '' ? '' : Number(e.target.value))}
+              className="form-input"
+              min="0"
+              step="0.01"
+              required
+              disabled={loading || estimating}
+            />
+            {!initialAsset && (
+              <button
+                type="button"
+                onClick={handleEstimatePrice}
+                className="btn btn-secondary estimate-btn"
+                disabled={loading || estimating || !make || !model}
+                title={t('asset.estimatePriceTooltip') || 'Estimate current market value based on make, model, category, and age'}
+              >
+                {estimating ? (t('asset.estimating') || 'Estimating...') : (t('asset.estimatePrice') || 'Estimate Price')}
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="form-group full-width">

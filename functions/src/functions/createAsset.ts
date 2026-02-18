@@ -48,6 +48,7 @@ export async function createAssetHandler(request: HttpRequest, context: Invocati
       description: body.description || '',
       category: body.category || '',
       value: body.value,
+      datePurchased: body.datePurchased || undefined,
       imageUrl: firstImageUrl, // Legacy field - use high-res URL from first image
       imageUrls: bodyImageUrls, // New field - can contain ImageUrls objects or strings
       createdAt: now,

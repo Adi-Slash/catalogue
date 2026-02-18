@@ -238,6 +238,13 @@ export default function AssetDetailPage() {
               <span>{asset.description}</span>
             </div>
 
+            {asset.datePurchased && (
+              <div className="info-item">
+                <label>{t('asset.datePurchased')}</label>
+                <span>{new Date(asset.datePurchased).toLocaleDateString()}</span>
+              </div>
+            )}
+
             <div className="info-item">
               <label>{t('asset.created')}</label>
               <span>{new Date(asset.createdAt).toLocaleString()}</span>

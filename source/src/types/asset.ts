@@ -18,6 +18,11 @@ export interface Asset {
   category?: string;
   value: number;
   /**
+   * Date when the asset was purchased (ISO 8601 format: YYYY-MM-DD)
+   * Used for calculating asset age and price estimation
+   */
+  datePurchased?: string;
+  /**
    * Primary image URL for the asset (kept for backwards compatibility).
    * When multiple images are present, this should be the first entry in imageUrls.
    * @deprecated Use imageUrls with dual-resolution support instead
