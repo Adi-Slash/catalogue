@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getAssets, deleteAsset } from '../api/assets';
 import AssetCard from '../components/AssetCard';
+import InsuranceChatbot from '../components/InsuranceChatbot';
 import type { Asset } from '../types/asset';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useHouseholdId } from '../utils/auth';
@@ -157,6 +158,9 @@ export default function AssetListPage({ searchTerm }: Props) {
           />
         ))}
       </div>
+
+      {/* Insurance Chatbot */}
+      <InsuranceChatbot assets={assets} />
     </div>
   );
 }

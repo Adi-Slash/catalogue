@@ -87,10 +87,10 @@ function writeDb(db: Database) {
   fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2), 'utf-8');
 }
 
-// Simple auth-like middleware: require `x-household-id` header (except for user preferences)
+// Simple auth-like middleware: require `x-household-id` header (except for user preferences and chat)
 app.use((req, res, next) => {
-  // Skip auth for user preferences endpoints
-  if (req.path.startsWith('/user/preferences')) {
+  // Skip auth for user preferences endpoints and chat
+  if (req.path.startsWith('/user/preferences') || req.path === '/chat') {
     return next();
   }
   const householdId = req.header('x-household-id');
@@ -225,6 +225,69 @@ app.put('/user/preferences', (req, res) => {
   
   writeDb(db);
   res.json(preferences);
+});
+
+// Chat endpoint for insurance advice
+app.post('/chat', (req, res) => {
+  const body = req.body;
+  const { message, assets = [] } = body;
+
+  if (!message || typeof message !== 'string') {
+    return res.status(400).json({ error: 'Missing or invalid message' });
+  }
+
+  // Mock insurance advice response
+  const totalValue = assets.reduce((sum: number, a: any) => sum + (a.value || 0), 0);
+  const lowerMessage = message.toLowerCase();
+
+  let response = '';
+
+  if (lowerMessage.includes('coverage') || lowerMessage.includes('cover')) {
+    response = `Based on your ${assets.length} asset(s) totaling $${totalValue.toLocaleString()}, I recommend:
+
+1. **Home Contents Insurance**: Covers most household items including electronics, furniture, and tools. Typically covers theft, fire, and water damage.
+
+2. **Valuable Items Insurance**: For high-value items (usually over $1,000-$2,000), consider scheduling them separately for full replacement value coverage.
+
+3. **Coverage Amount**: Ensure your policy limit covers your total portfolio value ($${totalValue.toLocaleString()}).
+
+Would you like advice on any specific category of assets?`;
+  } else if (lowerMessage.includes('premium') || lowerMessage.includes('cost')) {
+    response = `Insurance premiums vary based on several factors:
+
+1. **Total Coverage Amount**: Your portfolio value of $${totalValue.toLocaleString()} will influence premium costs.
+
+2. **Deductible**: Higher deductibles typically lower premiums but increase out-of-pocket costs.
+
+3. **Item Types**: High-value electronics, jewellery, and instruments may increase premiums.
+
+Average home contents insurance costs $50-$200/month depending on coverage. For specific quotes, contact insurance providers directly.`;
+  } else if (lowerMessage.includes('deductible')) {
+    response = `A deductible is the amount you pay out-of-pocket before insurance coverage kicks in.
+
+**Choosing a Deductible:**
+
+- **Low Deductible ($250-$500)**: Higher premiums, but less out-of-pocket when filing claims.
+
+- **High Deductible ($1,000-$2,500)**: Lower premiums, but more out-of-pocket per claim.
+
+**Recommendation**: For a portfolio worth $${totalValue.toLocaleString()}, consider a $500-$1,000 deductible as a balance between premium cost and coverage accessibility.`;
+  } else {
+    response = `I'm here to help with insurance advice for your assets! 
+
+You currently have ${assets.length} asset(s) in your catalog${totalValue > 0 ? ` worth $${totalValue.toLocaleString()}` : ''}.
+
+I can help with:
+- Coverage recommendations
+- Understanding deductibles
+- Filing claims
+- Premium costs
+- Specific asset categories
+
+What would you like to know?`;
+  }
+
+  res.json({ response });
 });
 
 const PORT = process.env.PORT || 4000;

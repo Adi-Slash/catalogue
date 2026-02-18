@@ -141,6 +141,15 @@
     "generateSuccess": "PDF für Versicherungsanspruch erfolgreich generiert!",
     "generateError": "Fehler beim Generieren des Schadensdokuments."
   },
+  "chatbot": {
+    "title": "Versicherungsberater",
+    "welcome": "Hallo! Ich bin Ihr Versicherungsberater. Ich kann Ihnen bei Fragen zur Versicherung Ihrer Vermögenswerte, Deckungsempfehlungen und allgemeinen Versicherungsberatung helfen. Wie kann ich Ihnen heute helfen?",
+    "toggle": "Versicherungsberater öffnen",
+    "close": "Schließen",
+    "placeholder": "Fragen Sie nach Versicherungsschutz, Empfehlungen...",
+    "send": "Nachricht senden",
+    "error": "Entschuldigung, es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
+  },
   "footer": {
     "copyright": "© 2026 Vermögensverzeichnis. Alle Rechte vorbehalten."
   }

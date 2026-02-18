@@ -141,6 +141,15 @@
     "generateSuccess": "Insurance claim PDF generated successfully!",
     "generateError": "Failed to generate claim document."
   },
+  "chatbot": {
+    "title": "Insurance Advisor",
+    "welcome": "Hello! I'm your insurance advisor. I can help you with questions about insuring your assets, coverage recommendations, and general insurance advice. How can I assist you today?",
+    "toggle": "Open Insurance Advisor",
+    "close": "Close",
+    "placeholder": "Ask about insurance coverage, recommendations...",
+    "send": "Send message",
+    "error": "Sorry, I encountered an error. Please try again."
+  },
   "footer": {
     "copyright": "© 2026 Asset Catalogue. All rights reserved."
   }

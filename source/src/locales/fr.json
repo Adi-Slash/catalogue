@@ -141,6 +141,15 @@
     "generateSuccess": "PDF de réclamation d'assurance généré avec succès !",
     "generateError": "Échec de la génération du document de réclamation."
   },
+  "chatbot": {
+    "title": "Conseiller en Assurance",
+    "welcome": "Bonjour ! Je suis votre conseiller en assurance. Je peux vous aider avec des questions sur l'assurance de vos actifs, des recommandations de couverture et des conseils généraux en assurance. Comment puis-je vous aider aujourd'hui ?",
+    "toggle": "Ouvrir le Conseiller en Assurance",
+    "close": "Fermer",
+    "placeholder": "Posez des questions sur la couverture d'assurance, les recommandations...",
+    "send": "Envoyer le message",
+    "error": "Désolé, une erreur s'est produite. Veuillez réessayer."
+  },
   "footer": {
     "copyright": "© 2026 Catalogue d'Actifs. Tous droits réservés."
   }

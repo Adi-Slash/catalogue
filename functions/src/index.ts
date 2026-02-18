@@ -8,5 +8,6 @@ import './functions/updateAsset';
 import './functions/deleteAsset';
 import './functions/uploadImage';
 import './functions/proxyImage';
+import './functions/chat';
 import './functions/getUserPreferences';
 import './functions/updateUserPreferences';
