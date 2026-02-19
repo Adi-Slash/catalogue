@@ -26,7 +26,7 @@ async function generateInsuranceAdvice(
 ): Promise<string> {
   // Check if OpenAI API key is configured
   const openaiApiKey = process.env.OPENAI_API_KEY;
-  const openaiModel = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+  const openaiModel = process.env.OPENAI_MODEL || 'gpt-4o';
 
   if (openaiApiKey) {
     try {

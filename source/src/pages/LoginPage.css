@@ -3,41 +3,69 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  max-height: 100vh;
+  height: 100vh;
+  width: 100vw;
+  max-width: 100vw;
+  overflow: hidden;
+  padding: 1rem;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, #e0d5f7 0%, #c5d5f5 50%, #a8c5f0 100%);
+  background-attachment: fixed;
+  position: fixed;
+  top: 0;
+  left: 0;
 }
 
 .login-container {
-  background: white;
-  padding: 3rem;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   text-align: center;
   max-width: 400px;
-  width: 90%;
+  width: 100%;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .login-container h1 {
   margin: 0 0 1rem 0;
   color: #333;
   font-size: 2rem;
+  font-weight: 600;
 }
 
 .login-container p {
   margin: 0 0 2rem 0;
   color: #666;
   font-size: 1rem;
+  line-height: 1.5;
 }
 
 .login-button {
   width: 100%;
   padding: 1rem;
   font-size: 1.1rem;
+  border-radius: 14px;
 }
 
 /* Dark Mode Styles */
+:root.dark-mode .login-page {
+  background: linear-gradient(135deg, #2d1b4e 0%, #1e3a5f 50%, #0f4c75 100%);
+  background-attachment: fixed;
+}
+
 :root.dark-mode .login-container {
-  background: #1a1a1a;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  background: rgba(45, 27, 78, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 :root.dark-mode .login-container h1 {
@@ -46,4 +74,40 @@
 
 :root.dark-mode .login-container p {
   color: #aaa;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .login-page {
+    padding: 0.75rem;
+  }
+
+  .login-container {
+    padding: 2rem 1.5rem;
+    max-height: calc(100vh - 1.5rem);
+  }
+
+  .login-container h1 {
+    font-size: 1.75rem;
+  }
+
+  .login-container p {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-height: 600px) {
+  .login-container {
+    padding: 1.5rem;
+  }
+
+  .login-container h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .login-container p {
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+  }
 }
