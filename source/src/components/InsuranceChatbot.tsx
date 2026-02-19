@@ -16,7 +16,7 @@ interface ChatMessage {
 }
 
 export default function InsuranceChatbot({ assets }: Props) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -30,6 +30,23 @@ export default function InsuranceChatbot({ assets }: Props) {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Update welcome message when language changes
+  useEffect(() => {
+    setMessages((prev) => {
+      const welcomeMessage = prev.find((m) => m.id === '1');
+      if (welcomeMessage) {
+        return [
+          {
+            ...welcomeMessage,
+            content: t('chatbot.welcome') || 'Hello! I\'m your insurance advisor. I can help you with questions about insuring your assets, coverage recommendations, and general insurance advice. How can I assist you today?',
+          },
+          ...prev.filter((m) => m.id !== '1'),
+        ];
+      }
+      return prev;
+    });
+  }, [language, t]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -60,7 +77,7 @@ export default function InsuranceChatbot({ assets }: Props) {
     setLoading(true);
 
     try {
-      const response = await sendChatMessage(input.trim(), assets);
+      const response = await sendChatMessage(input.trim(), assets, language);
       
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),

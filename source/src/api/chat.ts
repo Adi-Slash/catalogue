@@ -14,6 +14,7 @@ const API_PREFIX = API_BASE.includes('localhost') ? '' : '/api';
 export interface ChatRequest {
   message: string;
   assets: Asset[];
+  language?: string;
 }
 
 export interface ChatResponse {
@@ -23,7 +24,7 @@ export interface ChatResponse {
 /**
  * Sends a chat message to the insurance advisor chatbot
  */
-export async function sendChatMessage(message: string, assets: Asset[]): Promise<string> {
+export async function sendChatMessage(message: string, assets: Asset[], language: string = 'en'): Promise<string> {
   const url = `${API_BASE}${API_PREFIX}/chat`;
   
   const response = await fetch(url, {
@@ -42,6 +43,7 @@ export async function sendChatMessage(message: string, assets: Asset[]): Promise
         value: asset.value,
         datePurchased: asset.datePurchased,
       })),
+      language,
     }),
   });
 

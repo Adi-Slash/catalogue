@@ -230,7 +230,7 @@ app.put('/user/preferences', (req, res) => {
 // Chat endpoint for insurance advice
 app.post('/chat', (req, res) => {
   const body = req.body;
-  const { message, assets = [] } = body;
+  const { message, assets = [], language = 'en' } = body;
 
   if (!message || typeof message !== 'string') {
     return res.status(400).json({ error: 'Missing or invalid message' });
@@ -240,40 +240,10 @@ app.post('/chat', (req, res) => {
   const totalValue = assets.reduce((sum: number, a: any) => sum + (a.value || 0), 0);
   const lowerMessage = message.toLowerCase();
 
-  let response = '';
-
-  if (lowerMessage.includes('coverage') || lowerMessage.includes('cover')) {
-    response = `Based on your ${assets.length} asset(s) totaling $${totalValue.toLocaleString()}, I recommend:
-
-1. **Home Contents Insurance**: Covers most household items including electronics, furniture, and tools. Typically covers theft, fire, and water damage.
-
-2. **Valuable Items Insurance**: For high-value items (usually over $1,000-$2,000), consider scheduling them separately for full replacement value coverage.
-
-3. **Coverage Amount**: Ensure your policy limit covers your total portfolio value ($${totalValue.toLocaleString()}).
-
-Would you like advice on any specific category of assets?`;
-  } else if (lowerMessage.includes('premium') || lowerMessage.includes('cost')) {
-    response = `Insurance premiums vary based on several factors:
-
-1. **Total Coverage Amount**: Your portfolio value of $${totalValue.toLocaleString()} will influence premium costs.
-
-2. **Deductible**: Higher deductibles typically lower premiums but increase out-of-pocket costs.
-
-3. **Item Types**: High-value electronics, jewellery, and instruments may increase premiums.
-
-Average home contents insurance costs $50-$200/month depending on coverage. For specific quotes, contact insurance providers directly.`;
-  } else if (lowerMessage.includes('deductible')) {
-    response = `A deductible is the amount you pay out-of-pocket before insurance coverage kicks in.
-
-**Choosing a Deductible:**
-
-- **Low Deductible ($250-$500)**: Higher premiums, but less out-of-pocket when filing claims.
-
-- **High Deductible ($1,000-$2,500)**: Lower premiums, but more out-of-pocket per claim.
-
-**Recommendation**: For a portfolio worth $${totalValue.toLocaleString()}, consider a $500-$1,000 deductible as a balance between premium cost and coverage accessibility.`;
-  } else {
-    response = `I'm here to help with insurance advice for your assets! 
+  // Localized responses for mock server (simplified - OpenAI handles full localization)
+  const localizedResponses: Record<string, Record<string, string>> = {
+    en: {
+      default: `I'm here to help with insurance advice for your assets! 
 
 You currently have ${assets.length} asset(s) in your catalog${totalValue > 0 ? ` worth $${totalValue.toLocaleString()}` : ''}.
 
@@ -284,7 +254,171 @@ I can help with:
 - Premium costs
 - Specific asset categories
 
-What would you like to know?`;
+What would you like to know?`,
+      coverage: `Based on your ${assets.length} asset(s) totaling $${totalValue.toLocaleString()}, I recommend:
+
+1. **Home Contents Insurance**: Covers most household items including electronics, furniture, and tools. Typically covers theft, fire, and water damage.
+
+2. **Valuable Items Insurance**: For high-value items (usually over $1,000-$2,000), consider scheduling them separately for full replacement value coverage.
+
+3. **Coverage Amount**: Ensure your policy limit covers your total portfolio value ($${totalValue.toLocaleString()}).
+
+Would you like advice on any specific category of assets?`,
+      premium: `Insurance premiums vary based on several factors:
+
+1. **Total Coverage Amount**: Your portfolio value of $${totalValue.toLocaleString()} will influence premium costs.
+
+2. **Deductible**: Higher deductibles typically lower premiums but increase out-of-pocket costs.
+
+3. **Item Types**: High-value electronics, jewellery, and instruments may increase premiums.
+
+Average home contents insurance costs $50-$200/month depending on coverage. For specific quotes, contact insurance providers directly.`,
+      deductible: `A deductible is the amount you pay out-of-pocket before insurance coverage kicks in.
+
+**Choosing a Deductible:**
+
+- **Low Deductible ($250-$500)**: Higher premiums, but less out-of-pocket when filing claims.
+
+- **High Deductible ($1,000-$2,500)**: Lower premiums, but more out-of-pocket per claim.
+
+**Recommendation**: For a portfolio worth $${totalValue.toLocaleString()}, consider a $500-$1,000 deductible as a balance between premium cost and coverage accessibility.`,
+    },
+    fr: {
+      default: `Je suis là pour vous aider avec des conseils d'assurance pour vos actifs !
+
+Vous avez actuellement ${assets.length} actif(s) dans votre catalogue${totalValue > 0 ? ` d'une valeur de ${totalValue.toLocaleString()} $` : ''}.
+
+Je peux aider avec :
+- Recommandations de couverture
+- Comprendre les franchises
+- Déposer des réclamations
+- Coûts des primes
+- Catégories d'actifs spécifiques
+
+Que souhaitez-vous savoir ?`,
+      coverage: `Sur la base de vos ${assets.length} actif(s) totalisant ${totalValue.toLocaleString()} $, je recommande :
+
+1. **Assurance Contenu Ménager** : Couvre la plupart des articles ménagers, y compris l'électronique, les meubles et les outils. Couvre généralement le vol, l'incendie et les dégâts des eaux.
+
+2. **Assurance Articles de Valeur** : Pour les articles de grande valeur (généralement plus de 1 000 $ à 2 000 $), envisagez de les programmer séparément pour une couverture de valeur de remplacement complète.
+
+3. **Montant de Couverture** : Assurez-vous que la limite de votre police couvre la valeur totale de votre portefeuille (${totalValue.toLocaleString()} $).
+
+Souhaitez-vous des conseils sur une catégorie spécifique d'actifs ?`,
+      premium: `Les primes d'assurance varient selon plusieurs facteurs :
+
+1. **Montant Total de Couverture** : La valeur de votre portefeuille de ${totalValue.toLocaleString()} $ influencera les coûts des primes.
+
+2. **Franchise** : Des franchises plus élevées réduisent généralement les primes mais augmentent les coûts à votre charge.
+
+3. **Types d'Articles** : L'électronique, les bijoux et les instruments de grande valeur peuvent augmenter les primes.
+
+L'assurance contenu ménager coûte en moyenne 50 $ à 200 $/mois selon la couverture. Pour des devis spécifiques, contactez directement les assureurs.`,
+      deductible: `Une franchise est le montant que vous payez de votre poche avant que la couverture d'assurance ne s'applique.
+
+**Choisir une Franchise :**
+
+- **Franchise Faible (250 $ à 500 $)** : Primes plus élevées, mais moins de frais à votre charge lors du dépôt de réclamations.
+
+- **Franchise Élevée (1 000 $ à 2 500 $)** : Primes plus faibles, mais plus de frais à votre charge par réclamation.
+
+**Recommandation** : Pour un portefeuille d'une valeur de ${totalValue.toLocaleString()} $, envisagez une franchise de 500 $ à 1 000 $ comme équilibre entre le coût de la prime et l'accessibilité de la couverture.`,
+    },
+    de: {
+      default: `Ich bin hier, um Ihnen bei Versicherungsberatung für Ihre Vermögenswerte zu helfen!
+
+Sie haben derzeit ${assets.length} Vermögenswert(e) in Ihrem Katalog${totalValue > 0 ? ` im Wert von ${totalValue.toLocaleString()} $` : ''}.
+
+Ich kann helfen bei:
+- Deckungsempfehlungen
+- Verständnis von Selbstbehalten
+- Schadensmeldungen
+- Prämienkosten
+- Spezifischen Vermögenswertkategorien
+
+Was möchten Sie wissen?`,
+      coverage: `Basierend auf Ihren ${assets.length} Vermögenswert(en) im Gesamtwert von ${totalValue.toLocaleString()} $ empfehle ich:
+
+1. **Hausratversicherung** : Deckt die meisten Haushaltsgegenstände einschließlich Elektronik, Möbel und Werkzeuge. Deckt typischerweise Diebstahl, Feuer und Wasserschäden ab.
+
+2. **Wertgegenstände-Versicherung** : Für hochwertige Gegenstände (normalerweise über 1.000 $ bis 2.000 $) sollten Sie diese separat planen, um eine vollständige Neuwertdeckung zu erhalten.
+
+3. **Deckungsbetrag** : Stellen Sie sicher, dass Ihre Policengrenze den Gesamtwert Ihres Portfolios (${totalValue.toLocaleString()} $) abdeckt.
+
+Möchten Sie Ratschläge zu einer bestimmten Kategorie von Vermögenswerten?`,
+      premium: `Versicherungsprämien variieren je nach mehreren Faktoren:
+
+1. **Gesamtdeckungsbetrag** : Ihr Portfoliowert von ${totalValue.toLocaleString()} $ wird die Prämienkosten beeinflussen.
+
+2. **Selbstbehalt** : Höhere Selbstbehalte senken normalerweise die Prämien, erhöhen aber die Kosten aus eigener Tasche.
+
+3. **Artikeltypen** : Hochwertige Elektronik, Schmuck und Instrumente können die Prämien erhöhen.
+
+Die durchschnittlichen Kosten für Hausratversicherungen liegen je nach Deckung bei 50 $ bis 200 $/Monat. Für spezifische Angebote kontaktieren Sie Versicherungsanbieter direkt.`,
+      deductible: `Ein Selbstbehalt ist der Betrag, den Sie aus eigener Tasche zahlen, bevor die Versicherungsdeckung greift.
+
+**Selbstbehalt Wählen:**
+
+- **Niedriger Selbstbehalt (250 $ bis 500 $)** : Höhere Prämien, aber weniger Kosten aus eigener Tasche bei Schadensmeldungen.
+
+- **Hoher Selbstbehalt (1.000 $ bis 2.500 $)** : Niedrigere Prämien, aber mehr Kosten aus eigener Tasche pro Schadensfall.
+
+**Empfehlung** : Für ein Portfolio im Wert von ${totalValue.toLocaleString()} $ sollten Sie einen Selbstbehalt von 500 $ bis 1.000 $ als Balance zwischen Prämienkosten und Deckungszugänglichkeit in Betracht ziehen.`,
+    },
+    ja: {
+      default: `資産の保険に関するアドバイスをお手伝いします！
+
+現在、カタログに ${assets.length} 件の資産があります${totalValue > 0 ? `（総額 ${totalValue.toLocaleString()} $）` : ''}。
+
+以下のことについてお手伝いできます：
+- カバレッジの推奨事項
+- 免責金額の理解
+- 請求の提出
+- 保険料のコスト
+- 特定の資産カテゴリ
+
+何について知りたいですか？`,
+      coverage: `合計 ${totalValue.toLocaleString()} $ の ${assets.length} 件の資産に基づいて、以下をお勧めします：
+
+1. **家庭用品保険**：電子機器、家具、工具を含むほとんどの家庭用品をカバーします。通常、盗難、火災、水害をカバーします。
+
+2. **高価品保険**：高価なアイテム（通常 $1,000 ～ $2,000 以上）については、完全な交換価値カバレッジのために個別にスケジュールすることを検討してください。
+
+3. **カバレッジ金額**：ポリシーの制限がポートフォリオの総額（${totalValue.toLocaleString()} $）をカバーしていることを確認してください。
+
+特定の資産カテゴリについてアドバイスが必要ですか？`,
+      premium: `保険料はいくつかの要因によって異なります：
+
+1. **総カバレッジ金額**：${totalValue.toLocaleString()} $ のポートフォリオ価値が保険料のコストに影響します。
+
+2. **免責金額**：免責金額が高いほど、通常は保険料が下がりますが、自己負担額が増加します。
+
+3. **アイテムタイプ**：高価な電子機器、宝石、楽器は保険料を増加させる可能性があります。
+
+家庭用品保険の平均コストは、カバレッジに応じて月額 $50 ～ $200 です。具体的な見積もりについては、保険会社に直接お問い合わせください。`,
+      deductible: `免責金額は、保険カバレッジが適用される前に自己負担で支払う金額です。
+
+**免責金額の選択：**
+
+- **低い免責金額（$250 ～ $500）**：保険料は高くなりますが、請求時の自己負担額は少なくなります。
+
+- **高い免責金額（$1,000 ～ $2,500）**：保険料は低くなりますが、請求ごとの自己負担額は多くなります。
+
+**推奨事項**：${totalValue.toLocaleString()} $ の価値のあるポートフォリオの場合、保険料コストとカバレッジのアクセシビリティのバランスとして、$500 ～ $1,000 の免責金額を検討してください。`,
+    },
+  };
+
+  const responses = localizedResponses[language] || localizedResponses.en;
+  let response = '';
+
+  if (lowerMessage.includes('coverage') || lowerMessage.includes('cover') || lowerMessage.includes('couverture') || lowerMessage.includes('deckung') || lowerMessage.includes('カバレッジ')) {
+    response = responses.coverage || responses.default;
+  } else if (lowerMessage.includes('premium') || lowerMessage.includes('cost') || lowerMessage.includes('primes') || lowerMessage.includes('prämien') || lowerMessage.includes('保険料')) {
+    response = responses.premium || responses.default;
+  } else if (lowerMessage.includes('deductible') || lowerMessage.includes('franchise') || lowerMessage.includes('selbstbehalt') || lowerMessage.includes('免責')) {
+    response = responses.deductible || responses.default;
+  } else {
+    response = responses.default;
   }
 
   res.json({ response });

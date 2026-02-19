@@ -12,6 +12,7 @@ interface ChatRequest {
     value: number;
     datePurchased?: string;
   }>;
+  language?: string;
 }
 
 /**
@@ -20,6 +21,7 @@ interface ChatRequest {
 async function generateInsuranceAdvice(
   message: string,
   assets: ChatRequest['assets'],
+  language: string,
   context: InvocationContext
 ): Promise<string> {
   // Check if OpenAI API key is configured
@@ -28,7 +30,7 @@ async function generateInsuranceAdvice(
 
   if (openaiApiKey) {
     try {
-      return await generateWithOpenAI(message, assets, openaiApiKey, openaiModel, context);
+      return await generateWithOpenAI(message, assets, language, openaiApiKey, openaiModel, context);
     } catch (error: any) {
       context.warn('OpenAI API error, falling back to rule-based response:', error.message);
       // Fall through to rule-based response
@@ -36,7 +38,7 @@ async function generateInsuranceAdvice(
   }
 
   // Fallback to rule-based insurance advice
-  return generateRuleBasedAdvice(message, assets, context);
+  return generateRuleBasedAdvice(message, assets, language, context);
 }
 
 /**
@@ -45,10 +47,20 @@ async function generateInsuranceAdvice(
 async function generateWithOpenAI(
   message: string,
   assets: ChatRequest['assets'],
+  language: string,
   apiKey: string,
   model: string,
   context: InvocationContext
 ): Promise<string> {
+  // Map language codes to full language names for better AI understanding
+  const languageMap: Record<string, string> = {
+    en: 'English',
+    fr: 'French',
+    de: 'German',
+    ja: 'Japanese',
+  };
+  const languageName = languageMap[language] || 'English';
+
   // Build context about user's assets
   const assetsSummary = assets.length > 0
     ? `The user has ${assets.length} asset(s) in their catalog:\n${assets
@@ -61,6 +73,8 @@ async function generateWithOpenAI(
 
   const systemPrompt = `You are a professional insurance advisor specializing in asset insurance. Your role is to provide helpful, accurate, and practical advice about insuring personal assets.
 
+IMPORTANT: You must respond in ${languageName} (${language}). All your responses should be in ${languageName} language.
+
 Key guidelines:
 - Provide clear, actionable advice
 - Consider the user's specific assets when relevant
@@ -70,11 +84,12 @@ Key guidelines:
 - Be professional but friendly
 - If asked about specific assets, reference the user's catalog when relevant
 - Always emphasize the importance of reading policy documents carefully
+- Respond entirely in ${languageName} language
 
 User's asset catalog:
 ${assetsSummary}
 
-Respond concisely but thoroughly. If the question is about a specific asset, reference it from the catalog if available.`;
+Respond concisely but thoroughly in ${languageName}. If the question is about a specific asset, reference it from the catalog if available.`;
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -108,8 +123,25 @@ Respond concisely but thoroughly. If the question is about a specific asset, ref
 function generateRuleBasedAdvice(
   message: string,
   assets: ChatRequest['assets'],
+  language: string,
   context: InvocationContext
 ): string {
+  // For rule-based responses, we'll return English for now
+  // In a production system, you'd want to add translations here
+  // For now, we'll let OpenAI handle localization when available
+  const isLocalized = language !== 'en';
+  
+  if (isLocalized) {
+    // Return a message indicating that localized responses require OpenAI API
+    const localizedMessages: Record<string, string> = {
+      fr: 'Pour des réponses en français, veuillez configurer la clé API OpenAI. En attendant, voici des conseils généraux en anglais.',
+      de: 'Für Antworten auf Deutsch konfigurieren Sie bitte den OpenAI API-Schlüssel. Hier sind vorerst allgemeine Ratschläge auf Englisch.',
+      ja: '日本語での回答には、OpenAI APIキーの設定が必要です。当面は、英語での一般的なアドバイスを提供します。',
+    };
+    return localizedMessages[language] || 'For localized responses, please configure the OpenAI API key.';
+  }
+
+  // Continue with English rule-based responses below
   const lowerMessage = message.toLowerCase();
 
   // Calculate total portfolio value
@@ -247,9 +279,10 @@ export async function chatHandler(
     }
 
     const assets = body.assets || [];
+    const language = body.language || 'en';
 
     // Generate insurance advice
-    const response = await generateInsuranceAdvice(body.message, assets, context);
+    const response = await generateInsuranceAdvice(body.message, assets, language, context);
 
     return addCorsHeaders({
       status: 200,
