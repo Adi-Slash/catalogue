@@ -40,12 +40,15 @@
 
 .chatbot-window {
   position: fixed;
-  top: 80px;
+  top: 100px;
+  bottom: 20px;
   right: 20px;
+  left: auto;
   width: 400px;
   max-width: calc(100vw - 40px);
-  height: calc(100vh - 100px);
-  max-height: 600px;
+  min-width: 0;
+  height: auto;
+  max-height: calc(100vh - 120px);
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -54,9 +57,26 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
-  z-index: 2500;
+  z-index: 1999;
   overflow: hidden;
   box-sizing: border-box;
+}
+
+@media (min-width: 460px) {
+  .chatbot-window {
+    left: max(20px, calc(100vw - 420px));
+    right: 20px;
+    width: 400px;
+  }
+}
+
+@media (max-width: 440px) {
+  .chatbot-window {
+    width: calc(100vw - 40px);
+    max-width: calc(100vw - 40px);
+    right: 20px;
+    left: 20px;
+  }
 }
 
 :root.dark-mode .chatbot-window {
@@ -286,13 +306,15 @@
 
 @media (max-width: 768px) {
   .chatbot-window {
-    width: calc(100vw - 20px);
-    height: calc(100vh - 100px);
-    top: 80px;
-    right: 10px;
-    left: 10px;
-    max-height: calc(100vh - 100px);
-    max-width: calc(100vw - 20px);
+    width: calc(100vw - 40px);
+    max-width: calc(100vw - 40px);
+    top: 100px;
+    bottom: 20px;
+    right: 20px;
+    left: 20px;
+    height: auto;
+    max-height: none;
+    margin-left: 0;
   }
 
   .chatbot-toggle {
@@ -305,13 +327,15 @@
 
 @media (max-width: 480px) {
   .chatbot-window {
-    width: 100vw;
-    max-width: 100vw;
-    right: 0;
-    left: 0;
-    top: 0;
-    height: 100vh;
-    max-height: 100vh;
-    border-radius: 0;
+    width: calc(100vw - 40px);
+    max-width: calc(100vw - 40px);
+    right: 20px;
+    left: 20px;
+    top: 100px;
+    bottom: 20px;
+    height: auto;
+    max-height: none;
+    border-radius: 16px;
+    margin-left: 0;
   }
 }
