@@ -142,11 +142,11 @@
     "generateError": "Échec de la génération du document de réclamation."
   },
   "chatbot": {
-    "title": "Conseiller en Assurance",
-    "welcome": "Bonjour ! Je suis votre conseiller en assurance. Je peux vous aider avec des questions sur l'assurance de vos actifs, des recommandations de couverture et des conseils généraux en assurance. Comment puis-je vous aider aujourd'hui ?",
-    "toggle": "Ouvrir le Conseiller en Assurance",
+    "title": "Support Assurance Habitation",
+    "welcome": "Bonjour ! Je suis votre assistant IA pour l'assurance habitation. Je me spécialise dans les polices pour propriétaires, locataires, copropriétés, propriétaires-bailleurs et incendie. Je peux vous aider à comprendre la couverture, les processus de réclamation, les franchises, les termes de la police et fournir des conseils généraux sur l'atténuation des risques. Comment puis-je vous aider aujourd'hui ?",
+    "toggle": "Ouvrir le Support Assurance Habitation",
     "close": "Fermer",
-    "placeholder": "Posez des questions sur la couverture d'assurance, les recommandations...",
+    "placeholder": "Posez des questions sur la couverture, les réclamations, les franchises...",
     "send": "Envoyer le message",
     "error": "Désolé, une erreur s'est produite. Veuillez réessayer."
   },

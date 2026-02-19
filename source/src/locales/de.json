@@ -142,11 +142,11 @@
     "generateError": "Fehler beim Generieren des Schadensdokuments."
   },
   "chatbot": {
-    "title": "Versicherungsberater",
-    "welcome": "Hallo! Ich bin Ihr Versicherungsberater. Ich kann Ihnen bei Fragen zur Versicherung Ihrer Vermögenswerte, Deckungsempfehlungen und allgemeinen Versicherungsberatung helfen. Wie kann ich Ihnen heute helfen?",
-    "toggle": "Versicherungsberater öffnen",
+    "title": "Hausratversicherung Support",
+    "welcome": "Hallo! Ich bin Ihr Hausratversicherung Support KI. Ich spezialisiere mich auf Policen für Eigenheimbesitzer, Mieter, Eigentumswohnungen, Vermieter und Feuerversicherungen. Ich kann Ihnen helfen, Deckung, Schadensprozesse, Selbstbehalte, Policenbedingungen zu verstehen und allgemeine Ratschläge zur Risikominderung zu geben. Wie kann ich Ihnen heute helfen?",
+    "toggle": "Hausratversicherung Support öffnen",
     "close": "Schließen",
-    "placeholder": "Fragen Sie nach Versicherungsschutz, Empfehlungen...",
+    "placeholder": "Fragen Sie nach Deckung, Schäden, Selbstbehalten...",
     "send": "Nachricht senden",
     "error": "Entschuldigung, es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
   },

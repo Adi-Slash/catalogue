@@ -142,11 +142,11 @@
     "generateError": "Failed to generate claim document."
   },
   "chatbot": {
-    "title": "Insurance Advisor",
-    "welcome": "Hello! I'm your insurance advisor. I can help you with questions about insuring your assets, coverage recommendations, and general insurance advice. How can I assist you today?",
-    "toggle": "Open Insurance Advisor",
+    "title": "Home Insurance Support",
+    "welcome": "Hello! I'm your Home Insurance Support AI. I specialize in homeowners, renters, condo, landlord, and dwelling fire policies. I can help you understand coverage, claims processes, deductibles, policy terms, and provide general risk mitigation advice. How can I assist you today?",
+    "toggle": "Open Home Insurance Support",
     "close": "Close",
-    "placeholder": "Ask about insurance coverage, recommendations...",
+    "placeholder": "Ask about coverage, claims, deductibles, policy terms...",
     "send": "Send message",
     "error": "Sorry, I encountered an error. Please try again."
   },
