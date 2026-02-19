@@ -40,12 +40,12 @@
 
 .chatbot-window {
   position: fixed;
-  bottom: 90px;
+  top: 80px;
   right: 20px;
   width: 400px;
   max-width: calc(100vw - 40px);
-  height: 600px;
-  max-height: calc(100vh - 120px);
+  height: calc(100vh - 100px);
+  max-height: 600px;
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -54,7 +54,7 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
-  z-index: 1001;
+  z-index: 2500;
   overflow: hidden;
 }
 
@@ -287,9 +287,10 @@
   .chatbot-window {
     width: calc(100vw - 20px);
     height: calc(100vh - 100px);
-    bottom: 80px;
+    top: 80px;
     right: 10px;
     left: 10px;
+    max-height: calc(100vh - 100px);
   }
 
   .chatbot-toggle {
