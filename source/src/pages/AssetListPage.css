@@ -1,6 +1,10 @@
 .asset-list-page {
   max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .asset-list-page .page-header {

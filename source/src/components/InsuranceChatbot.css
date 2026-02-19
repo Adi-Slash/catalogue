@@ -56,6 +56,7 @@
   flex-direction: column;
   z-index: 2500;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 :root.dark-mode .chatbot-window {
@@ -291,6 +292,7 @@
     right: 10px;
     left: 10px;
     max-height: calc(100vh - 100px);
+    max-width: calc(100vw - 20px);
   }
 
   .chatbot-toggle {
@@ -298,5 +300,18 @@
     right: 15px;
     width: 56px;
     height: 56px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chatbot-window {
+    width: 100vw;
+    max-width: 100vw;
+    right: 0;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
   }
 }

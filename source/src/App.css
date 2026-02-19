@@ -1,7 +1,11 @@
 #root {
   min-height: 100vh;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .app-container {
@@ -114,6 +118,10 @@
 .main-content {
   padding: 2rem 0;
   flex: 1;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .footer {
