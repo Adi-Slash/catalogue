@@ -2,10 +2,12 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useDarkMode } from '../contexts/DarkModeContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import HelpAbout from './HelpAbout';
 import './HamburgerMenu.css';
 
 export default function HamburgerMenu() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isHelpAboutOpen, setIsHelpAboutOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { user, logout, loading } = useAuth();
   const { isDarkMode, toggleDarkMode } = useDarkMode();
@@ -44,6 +46,11 @@ export default function HamburgerMenu() {
 
   const handleLogout = () => {
     logout();
+    setIsOpen(false);
+  };
+
+  const handleHelpAbout = () => {
+    setIsHelpAboutOpen(true);
     setIsOpen(false);
   };
 
@@ -95,6 +102,9 @@ export default function HamburgerMenu() {
               ))}
             </select>
           </div>
+          <button onClick={handleHelpAbout} className="menu-item menu-help-about">
+            {t('menu.helpAbout')}
+          </button>
           {user ? (
             <button onClick={handleLogout} className="menu-item menu-logout">
               {t('menu.logout')}
@@ -106,6 +116,7 @@ export default function HamburgerMenu() {
           )}
         </div>
       )}
+      <HelpAbout isOpen={isHelpAboutOpen} onClose={() => setIsHelpAboutOpen(false)} />
     </div>
   );
 }

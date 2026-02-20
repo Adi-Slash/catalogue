@@ -21,7 +21,8 @@
     "darkMode": "Mode Sombre",
     "language": "Langue",
     "login": "Connexion",
-    "logout": "Déconnexion"
+    "logout": "Déconnexion",
+    "helpAbout": "Aide et À Propos"
   },
   "languages": {
     "en": "Anglais",
@@ -152,5 +153,33 @@
   },
   "footer": {
     "copyright": "© 2026 Catalogue d'Actifs. Tous droits réservés."
+  },
+  "helpAbout": {
+    "title": "Aide et À Propos",
+    "whatIsIt": "Qu'est-ce que le Catalogue d'Actifs ?",
+    "whatIsItDescription": "Le Catalogue d'Actifs est un système complet de gestion d'inventaire numérique conçu pour vous aider à suivre, organiser et gérer vos actifs ménagers. Que vous cataloguiez des appareils électroniques, des meubles, des bijoux, des instruments ou tout autre objet de valeur, cette application fournit une plateforme sécurisée et conviviale pour maintenir un registre détaillé de vos biens.",
+    "howToUse": "Comment Utiliser",
+    "step1Title": "Ajouter Vos Actifs",
+    "step1Description": "Cliquez sur le bouton 'Ajouter un Actif' pour commencer à cataloguer vos articles. Remplissez les détails comme la marque, le modèle, le numéro de série, la catégorie, la valeur et la date d'achat. Vous pouvez télécharger jusqu'à 4 photos pour chaque actif pour aider à identifier et documenter vos articles.",
+    "step2Title": "Organiser par Catégorie",
+    "step2Description": "Utilisez les onglets de catégorie pour filtrer et organiser vos actifs. Les catégories incluent Électrique, Fitness, Mobilier, Instruments, Bijoux, Outils et Transport. Cela facilite la recherche rapide d'articles spécifiques.",
+    "step3Title": "Voir et Modifier les Détails",
+    "step3Description": "Cliquez sur n'importe quelle carte d'actif pour voir les détails complets. À partir de la page de détails, vous pouvez modifier les informations, mettre à jour les valeurs, ajouter ou supprimer des photos, et gérer tous les aspects de vos enregistrements d'actifs.",
+    "step4Title": "Générer des Réclamations d'Assurance",
+    "step4Description": "En cas de perte ou de dommage, utilisez le bouton 'Réclamation d'Assurance' sur n'importe quelle page de détails d'actif pour générer un document PDF professionnel. Ce document comprend tous les détails et photos de l'actif, facilitant et rendant plus efficaces les réclamations d'assurance.",
+    "step5Title": "Obtenir des Conseils d'Assurance",
+    "step5Description": "Utilisez le chatbot de Support Assurance Habitation (disponible sur la page principale des actifs) pour obtenir des conseils en temps réel sur la couverture, les processus de réclamation, les franchises, les termes de la police et les stratégies d'atténuation des risques.",
+    "features": "Fonctionnalités Clés",
+    "feature1": "Stockage sécurisé basé sur le cloud pour votre inventaire d'actifs",
+    "feature2": "Support multi-photos (jusqu'à 4 images par actif)",
+    "feature3": "Estimation de prix basée sur la marque, le modèle, la catégorie et l'âge",
+    "feature4": "Génération de PDF de réclamation d'assurance",
+    "feature5": "Chatbot de conseils d'assurance alimenté par l'IA",
+    "feature6": "Support multi-langues (Anglais, Français, Allemand, Japonais)",
+    "tips": "Conseils pour de Meilleurs Résultats",
+    "tip1": "Prenez des photos claires et bien éclairées de vos actifs sous plusieurs angles",
+    "tip2": "Incluez les numéros de série et les dates d'achat pour un suivi précis",
+    "tip3": "Mettez régulièrement à jour les valeurs des actifs pour maintenir une couverture d'assurance précise",
+    "tip4": "Utilisez la fonction de recherche pour trouver rapidement des actifs spécifiques"
   }
 }

@@ -21,7 +21,8 @@
     "darkMode": "Dunkler Modus",
     "language": "Sprache",
     "login": "Anmelden",
-    "logout": "Abmelden"
+    "logout": "Abmelden",
+    "helpAbout": "Hilfe & Über"
   },
   "languages": {
     "en": "Englisch",
@@ -152,5 +153,33 @@
   },
   "footer": {
     "copyright": "© 2026 Vermögensverzeichnis. Alle Rechte vorbehalten."
+  },
+  "helpAbout": {
+    "title": "Hilfe & Über",
+    "whatIsIt": "Was ist das Vermögensverzeichnis?",
+    "whatIsItDescription": "Das Vermögensverzeichnis ist ein umfassendes digitales Inventarverwaltungssystem, das Ihnen hilft, Ihre Haushaltsvermögenswerte zu verfolgen, zu organisieren und zu verwalten. Egal, ob Sie Elektronik, Möbel, Schmuck, Instrumente oder andere wertvolle Gegenstände katalogisieren, diese Anwendung bietet eine sichere und benutzerfreundliche Plattform, um eine detaillierte Aufzeichnung Ihrer Besitztümer zu führen.",
+    "howToUse": "Wie man verwendet",
+    "step1Title": "Vermögenswerte Hinzufügen",
+    "step1Description": "Klicken Sie auf die Schaltfläche 'Vermögenswert Hinzufügen', um mit der Katalogisierung Ihrer Artikel zu beginnen. Füllen Sie Details wie Marke, Modell, Seriennummer, Kategorie, Wert und Kaufdatum aus. Sie können bis zu 4 Fotos für jeden Vermögenswert hochladen, um Ihre Artikel zu identifizieren und zu dokumentieren.",
+    "step2Title": "Nach Kategorie Organisieren",
+    "step2Description": "Verwenden Sie die Kategorie-Registerkarten, um Ihre Vermögenswerte zu filtern und zu organisieren. Kategorien umfassen Elektrisch, Fitness, Möbel, Instrumente, Schmuck, Werkzeuge und Transport. Dies erleichtert das schnelle Finden bestimmter Artikel.",
+    "step3Title": "Details Anzeigen und Bearbeiten",
+    "step3Description": "Klicken Sie auf eine beliebige Vermögenswert-Karte, um vollständige Details anzuzeigen. Von der Detailseite aus können Sie Informationen bearbeiten, Werte aktualisieren, Fotos hinzufügen oder entfernen und alle Aspekte Ihrer Vermögenswert-Aufzeichnungen verwalten.",
+    "step4Title": "Versicherungsansprüche Generieren",
+    "step4Description": "Im Falle von Verlust oder Schaden verwenden Sie die Schaltfläche 'Versicherungsanspruch' auf einer beliebigen Vermögenswert-Detailseite, um ein professionelles PDF-Dokument zu generieren. Dieses Dokument enthält alle Vermögenswert-Details und Fotos und macht Versicherungsansprüche einfacher und effizienter.",
+    "step5Title": "Versicherungsberatung Erhalten",
+    "step5Description": "Verwenden Sie den Hausratversicherung Support-Chatbot (verfügbar auf der Hauptseite der Vermögenswerte), um Echtzeitberatung zu Deckung, Schadensprozessen, Selbstbehalten, Policenbedingungen und Risikominderungsstrategien zu erhalten.",
+    "features": "Hauptfunktionen",
+    "feature1": "Sichere cloudbasierte Speicherung für Ihr Vermögenswert-Inventar",
+    "feature2": "Multi-Foto-Unterstützung (bis zu 4 Bilder pro Vermögenswert)",
+    "feature3": "Preisschätzung basierend auf Marke, Modell, Kategorie und Alter",
+    "feature4": "PDF-Generierung für Versicherungsansprüche",
+    "feature5": "KI-gestützter Versicherungsberatungs-Chatbot",
+    "feature6": "Mehrsprachige Unterstützung (Englisch, Französisch, Deutsch, Japanisch)",
+    "tips": "Tipps für Beste Ergebnisse",
+    "tip1": "Machen Sie klare, gut beleuchtete Fotos Ihrer Vermögenswerte aus mehreren Blickwinkeln",
+    "tip2": "Fügen Sie Seriennummern und Kaufdaten für eine genaue Verfolgung hinzu",
+    "tip3": "Aktualisieren Sie regelmäßig die Vermögenswerte, um eine genaue Versicherungsdeckung aufrechtzuerhalten",
+    "tip4": "Verwenden Sie die Suchfunktion, um schnell bestimmte Vermögenswerte zu finden"
   }
 }

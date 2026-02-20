@@ -1,0 +1,1 @@
+Implement a useful help about function accessed via a help about hamburger menu item that describes what the asset catalogue product is and how to use it.

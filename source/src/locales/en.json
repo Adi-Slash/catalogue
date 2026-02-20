@@ -21,7 +21,8 @@
     "darkMode": "Dark Mode",
     "language": "Language",
     "login": "Login",
-    "logout": "Logout"
+    "logout": "Logout",
+    "helpAbout": "Help & About"
   },
   "languages": {
     "en": "English",
@@ -152,5 +153,33 @@
   },
   "footer": {
     "copyright": "© 2026 Asset Catalogue. All rights reserved."
+  },
+  "helpAbout": {
+    "title": "Help & About",
+    "whatIsIt": "What is Asset Catalogue?",
+    "whatIsItDescription": "Asset Catalogue is a comprehensive digital inventory management system designed to help you track, organize, and manage your household assets. Whether you're cataloging electronics, furniture, jewelry, instruments, or any valuable items, this application provides a secure and user-friendly platform to maintain a detailed record of your possessions.",
+    "howToUse": "How to Use",
+    "step1Title": "Add Your Assets",
+    "step1Description": "Click the 'Add Asset' button to start cataloging your items. Fill in details like make, model, serial number, category, value, and purchase date. You can upload up to 4 photos for each asset to help identify and document your items.",
+    "step2Title": "Organize by Category",
+    "step2Description": "Use the category tabs to filter and organize your assets. Categories include Electrical, Fitness, Furniture, Instruments, Jewellery, Tools, and Transport. This makes it easy to find specific items quickly.",
+    "step3Title": "View and Edit Details",
+    "step3Description": "Click on any asset card to view full details. From the detail page, you can edit information, update values, add or remove photos, and manage all aspects of your asset records.",
+    "step4Title": "Generate Insurance Claims",
+    "step4Description": "In the event of loss or damage, use the 'Insurance Claim' button on any asset detail page to generate a professional PDF document. This document includes all asset details and photos, making insurance claims easier and more efficient.",
+    "step5Title": "Get Insurance Advice",
+    "step5Description": "Use the Home Insurance Support chatbot (available on the main assets page) to get real-time advice about coverage, claims processes, deductibles, policy terms, and risk mitigation strategies.",
+    "features": "Key Features",
+    "feature1": "Secure cloud-based storage for your asset inventory",
+    "feature2": "Multi-photo support (up to 4 images per asset)",
+    "feature3": "Price estimation based on make, model, category, and age",
+    "feature4": "Insurance claim PDF generation",
+    "feature5": "AI-powered insurance advice chatbot",
+    "feature6": "Multi-language support (English, French, German, Japanese)",
+    "tips": "Tips for Best Results",
+    "tip1": "Take clear, well-lit photos of your assets from multiple angles",
+    "tip2": "Include serial numbers and purchase dates for accurate tracking",
+    "tip3": "Regularly update asset values to maintain accurate insurance coverage",
+    "tip4": "Use the search function to quickly find specific assets"
   }
 }
