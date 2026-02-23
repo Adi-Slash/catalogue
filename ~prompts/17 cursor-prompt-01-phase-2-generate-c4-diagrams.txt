@@ -1,0 +1,65 @@
+Outputs to be stored in the ~architecture directory.
+
+Act as a senior cloud architect and C4 modeling expert.
+Generate C4 diagrams (Context, Container, Component, and optional Deployment) for the following Azure-based application.
+
+1. System Overview
+Application name: Assets Catalogue
+Business purpose: An application used to store information about household assets. To be used for insurance purposes.
+Primary users (roles/personas): Home owner
+External systems: None
+
+2. Functional Requirements
+  -  The applicion is multi-tenant, each user has maintains their own asset list.
+  -  Assets are added together with upto 4 photographs. Each asset is categorised and an estimated value assigned.
+  -  An insurance claim pdf can be produced detailing asset data, together with photographs of the asset.
+  -  A chatbot is included to provide guidance on all things insurance.
+  -  The user interface support localisation in english, french, german and japanese.
+  -  The user interface supports light and dark presentation modes.
+
+3. Non-Functional Requirements
+Only authenticated users can access the application apis.
+
+Scalability needs:
+  -  None.
+
+Availability requirements:
+  -  99.9
+
+Security/compliance requirements:
+ -  None.
+
+Performance constraints:
+  -  None.
+
+4. Azure Services to Use (if predefined)
+Azure Entra Id, Azure Functions, Cosmos DB, Application Insights, Azure AI Foundry, Azure Storage, Static Web Apps
+
+Output Requirements
+For Each C4 Level:
+1. Context Diagram
+Show system boundary
+Identify users and external systems
+Describe relationships
+
+2. Container Diagram
+Break down into Azure services
+Include databases, messaging, identity, networking
+Specify technology choices
+
+3. Component Diagram
+Break down a key container (e.g., API or backend)
+Show major components, responsibilities, and interactions
+
+4. Deployment Diagram (Optional but preferred for Azure)
+Map containers to Azure infrastructure
+Include regions, VNets, subnets, scaling units
+Show PaaS/SaaS boundaries
+Formatting Instructions
+Use Mermaid C4 syntax
+Clearly label Azure services
+Add brief explanation below each diagram
+Follow official C4 modeling conventions
+
+Keep architecture production-ready and realistic
+If any details are missing, make reasonable Azure-native assumptions and document them clearly.
