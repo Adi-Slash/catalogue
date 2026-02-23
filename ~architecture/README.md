@@ -20,6 +20,7 @@ This folder contains C4 model diagrams (Context, Container, Component, Deploymen
 | **Component** | [03-c4-component.md](03-c4-component.md) | Internal structure of the API (Azure Functions). |
 | **Deployment** | [04-c4-deployment.md](04-c4-deployment.md) | Azure infrastructure, regions, and PaaS boundaries. |
 | **Sequence diagrams** | [05-sequence-diagrams.md](05-sequence-diagrams.md) | Mermaid sequence diagrams for each user interaction (sign-in, asset list, add/edit/delete asset, claim PDF, chatbot, preferences). |
+| **Technical stories (Gherkin)** | [technical-stories/](technical-stories/) | BDD feature files in Gherkin for SpecFlow/Playwright/Cypress: authentication, assets CRUD, image upload/proxy, user preferences, chat, insurance claim PDF, errors/security, PWA/offline. |
 
 ## Assumptions and Conventions
 

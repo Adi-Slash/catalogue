@@ -1,0 +1,45 @@
+You are a senior QA engineer and BDD specialist.
+
+Using your knowledge of the application, generate a comprehensive set of technical user stories in the ~architecture\technical-stories folder written in valid Gherkin format (Feature / Background / Scenario / Scenario Outline / Given / When / Then / And).
+
+Constraints and expectations:
+
+Stories must:
+Be technically precise and implementation-aware.
+Reflect frontend/backend interaction.
+Include API calls, HTTP status codes, validation rules, and error handling.
+Cover authentication and authorization scenarios.
+Include edge cases and failure paths.
+Consider offline behavior relevant to a PWA.
+Include Azure-specific considerations where relevant (deployment slots, configuration, etc.).
+
+Structure:
+One top-level Feature.
+Include a Background section when appropriate.
+
+Provide:
+Happy path scenarios
+Validation scenarios
+Security scenarios
+Concurrency scenarios (if applicable)
+Error and retry scenarios
+Performance-related acceptance criteria where relevant
+Use Scenario Outline with Examples tables when appropriate.
+
+Be explicit about:
+API endpoint being called (e.g., POST /api/orders)
+Expected request payload shape (high-level JSON structure)
+Expected response shape (high-level JSON structure)
+Expected HTTP status codes
+State changes in the frontend
+Persistence behavior in the backend
+Write in strict Gherkin syntax only.
+No explanations outside the Gherkin.
+
+No commentary.
+No markdown.
+Only valid Gherkin content.
+
+Assume the reader is a developer implementing automated tests using SpecFlow (C#) and possibly Playwright or Cypress for frontend E2E tests.
+
+Generate a complete and thorough set of scenarios suitable for direct implementation.
