@@ -1,0 +1,3 @@
+You are a senior software architect.
+
+Using your knowledge of what has been built for this application, for each user user interaction, create in the ~architecture folder, a mermaid sequence diagrams to represent the interactions between the key components of the application.

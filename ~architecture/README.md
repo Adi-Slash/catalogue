@@ -1,6 +1,6 @@
 # Assets Catalogue – C4 Architecture
 
-This folder contains C4 model diagrams (Context, Container, Component, Deployment) for the **Assets Catalogue** Azure-based application, in Mermaid C4 syntax.
+This folder contains C4 model diagrams (Context, Container, Component, Deployment) and **sequence diagrams** for the **Assets Catalogue** Azure-based application, in Mermaid syntax.
 
 ## Application Summary
 
@@ -19,6 +19,7 @@ This folder contains C4 model diagrams (Context, Container, Component, Deploymen
 | **Container** | [02-c4-container.md](02-c4-container.md) | Breakdown into Azure services (SWA, Functions, Cosmos DB, Storage, etc.). |
 | **Component** | [03-c4-component.md](03-c4-component.md) | Internal structure of the API (Azure Functions). |
 | **Deployment** | [04-c4-deployment.md](04-c4-deployment.md) | Azure infrastructure, regions, and PaaS boundaries. |
+| **Sequence diagrams** | [05-sequence-diagrams.md](05-sequence-diagrams.md) | Mermaid sequence diagrams for each user interaction (sign-in, asset list, add/edit/delete asset, claim PDF, chatbot, preferences). |
 
 ## Assumptions and Conventions
 
@@ -32,7 +33,7 @@ This folder contains C4 model diagrams (Context, Container, Component, Deploymen
 ## How to View Diagrams
 
 - Paste the Mermaid code blocks from each `.md` file into [Mermaid Live Editor](https://mermaid.live) or any editor/CI that supports Mermaid (e.g. GitHub, Azure DevOps, VS Code with a Mermaid extension).
-- C4 diagram types used: `C4Context`, `C4Container`, `C4Component`, `C4Deployment`.
+- C4 diagram types used: `C4Context`, `C4Container`, `C4Component`, `C4Deployment`. Sequence diagrams use Mermaid `sequenceDiagram`.
 
 ## References
 
